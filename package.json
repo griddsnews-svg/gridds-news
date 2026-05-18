@@ -1,0 +1,8 @@
+{
+  "name": "gridds-news",
+  "version": "1.0.0",
+  "description": "GRIDDS.NEWS — all the world, distilled daily",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18.x" }
+}
