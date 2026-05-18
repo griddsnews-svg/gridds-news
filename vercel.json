@@ -1,19 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/edition.js", "use": "@vercel/node" },
-    { "src": "api/rss-fetch.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/api/edition", "dest": "/api/edition.js" },
-    { "src": "/api/rss-fetch", "dest": "/api/rss-fetch.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
   "crons": [
     {
       "path": "/api/rss-fetch",
-      "schedule": "30 1 * * * *"
+      "schedule": "30 1 * * *"
     }
   ]
 }
