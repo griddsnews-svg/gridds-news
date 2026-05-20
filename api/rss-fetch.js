@@ -10,11 +10,11 @@
 //     If OPENAI_API_KEY env var is set, each story gets a fresh summary.
 //     If unset, falls back to RSS description.
 // ═══════════════════════════════════════════════════════════════════════════
- 
+
 const WEBHOOK_URL = process.env.INBOX_WEBHOOK_URL;
 const TOKEN       = process.env.INBOX_TOKEN;
 const OPENAI_KEY  = process.env.OPENAI_API_KEY;
- 
+
 // ─── FEED LIST: section → array of RSS URLs ──────────────────────────────
 const FEEDS = {
   Headlines: [
@@ -51,6 +51,10 @@ const FEEDS = {
     'https://www.espncricinfo.com/rss/content/story/feeds/0.xml',
     'https://www.sportskeeda.com/feed/cricket',
     'https://timesofindia.indiatimes.com/rssfeeds/4719161.cms',
+    'https://feeds.feedburner.com/ndtvsports-cricket',
+    'https://www.hindustantimes.com/feeds/rss/sports/cricket/index.xml',
+    'https://indianexpress.com/section/sports/ipl/feed/',
+    'https://www.thehindu.com/sport/cricket/feeder/default.rss',
   ],
   'GRIDD Loves': [
     'https://vogue.in/feed/rss',
@@ -114,24 +118,24 @@ const FEEDS = {
     'https://mausam.imd.gov.in/responsive/rss/weather.xml',
   ],
 };
- 
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────
- 
+
 function extractTag(xml, tag) {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
   const m = xml.match(re);
   if (!m) return '';
   return stripCDATA(m[1]).trim();
 }
- 
+
 function stripCDATA(s) {
   return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
 }
- 
+
 function stripTags(s) {
   return s.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
- 
+
 function decodeEntities(s) {
   return s
     .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -140,7 +144,7 @@ function decodeEntities(s) {
     .replace(/&#8220;/g, '"').replace(/&#8221;/g, '"')
     .replace(/&#8211;/g, '–').replace(/&#8212;/g, '—');
 }
- 
+
 function extractImage(itemXml) {
   let m = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i);
   if (m) return m[1];
@@ -159,16 +163,16 @@ function extractImage(itemXml) {
   if (m) return m[1];
   return '';
 }
- 
+
 function parseRSS(xml, sourceName, sectionName) {
   const stories = [];
   const itemPattern = /<item[\s>][\s\S]*?<\/item>|<entry[\s>][\s\S]*?<\/entry>/gi;
   const items = xml.match(itemPattern) || [];
- 
+
   for (const itemXml of items) {
     const title = decodeEntities(stripTags(extractTag(itemXml, 'title')));
     if (!title) continue;
- 
+
     let url = '';
     let linkMatch = itemXml.match(/<link[^>]*href=["']([^"']+)["']/i);
     if (linkMatch) {
@@ -179,14 +183,14 @@ function parseRSS(xml, sourceName, sectionName) {
     if (!url) url = extractTag(itemXml, 'guid');
     url = decodeEntities(url.trim());
     if (!url || !url.startsWith('http')) continue;
- 
+
     let description = extractTag(itemXml, 'description') || extractTag(itemXml, 'content:encoded') || extractTag(itemXml, 'summary');
     description = decodeEntities(stripTags(description));
     const rawSummary = description.split(/\s+/).slice(0, 200).join(' ');
- 
+
     const pubDate = extractTag(itemXml, 'pubDate') || extractTag(itemXml, 'published') || extractTag(itemXml, 'updated') || '';
     const image = extractImage(itemXml);
- 
+
     stories.push({
       headline:    title.slice(0, 300),
       rawSummary:  rawSummary,
@@ -198,10 +202,10 @@ function parseRSS(xml, sourceName, sectionName) {
       published:   pubDate,
     });
   }
- 
+
   return stories;
 }
- 
+
 function deriveSourceName(feedUrl) {
   try {
     const host = new URL(feedUrl).hostname.replace(/^www\./, '');
@@ -257,7 +261,7 @@ function deriveSourceName(feedUrl) {
     return 'Unknown';
   }
 }
- 
+
 async function fetchFeed(feedUrl, sectionName) {
   try {
     const res = await fetch(feedUrl, {
@@ -279,13 +283,13 @@ async function fetchFeed(feedUrl, sectionName) {
     return [];
   }
 }
- 
+
 // ─── OPENAI SUMMARY GENERATION ────────────────────────────────────────────
- 
+
 async function summariseWithOpenAI(story) {
   if (!OPENAI_KEY) return null;
-  const userPrompt = `Headline: ${story.headline}\n\nArticle excerpt: ${story.rawSummary}\n\nWrite a tight, factual summary in 60-90 words in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
- 
+  const userPrompt = `Headline: ${story.headline}\n\nArticle excerpt: ${story.rawSummary}\n\nWrite a tight, factual summary in 60-75 words MAXIMUM (never exceed 75 words) in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
+
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -296,10 +300,10 @@ async function summariseWithOpenAI(story) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an editor writing crisp, factual 60-90 word news summaries in the style of Inshorts. Indian English. No opinion, no hype, no padding.' },
+          { role: 'system', content: 'You are an editor writing crisp, factual news summaries in 60-75 words MAXIMUM (never more than 75 words). Style of Inshorts. Indian English. No opinion, no hype, no padding.' },
           { role: 'user',   content: userPrompt },
         ],
-        max_tokens: 200,
+        max_tokens: 150,
         temperature: 0.5,
       }),
       signal: AbortSignal.timeout(20000),
@@ -317,7 +321,7 @@ async function summariseWithOpenAI(story) {
     return null;
   }
 }
- 
+
 async function addSummaries(stories) {
   if (!OPENAI_KEY) {
     stories.forEach(s => {
@@ -326,7 +330,7 @@ async function addSummaries(stories) {
     });
     return;
   }
- 
+
   const CONCURRENCY = 5;
   let idx = 0;
   async function worker() {
@@ -346,18 +350,18 @@ async function addSummaries(stories) {
   for (let i = 0; i < CONCURRENCY; i++) workers.push(worker());
   await Promise.all(workers);
 }
- 
+
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────
- 
+
 export default async function handler(req, res) {
   if (!WEBHOOK_URL || !TOKEN) {
     return res.status(500).json({ error: 'INBOX_WEBHOOK_URL or INBOX_TOKEN not set' });
   }
- 
+
   const startedAt = Date.now();
   const allStories = [];
   const fetchPromises = [];
- 
+
   for (const [section, feeds] of Object.entries(FEEDS)) {
     for (const feedUrl of feeds) {
       fetchPromises.push(
@@ -367,17 +371,17 @@ export default async function handler(req, res) {
       );
     }
   }
- 
+
   await Promise.allSettled(fetchPromises);
- 
+
   if (allStories.length === 0) {
     return res.status(200).json({ ok: true, fetched: 0, sent: 0, message: 'No stories found' });
   }
- 
+
   const aiStart = Date.now();
   await addSummaries(allStories);
   const aiDuration = Date.now() - aiStart;
- 
+
   try {
     const webhookRes = await fetch(WEBHOOK_URL, {
       method: 'POST',
@@ -388,7 +392,7 @@ export default async function handler(req, res) {
     const data = await webhookRes.text();
     let parsed;
     try { parsed = JSON.parse(data); } catch (e) { parsed = { raw: data.slice(0, 300) }; }
- 
+
     return res.status(200).json({
       ok: true,
       fetched: allStories.length,
@@ -401,7 +405,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: 'Webhook POST failed', detail: err.message });
   }
 }
- 
+
 export const config = {
   maxDuration: 300,
 };
