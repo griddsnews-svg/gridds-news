@@ -8,39 +8,35 @@
 const SHEET_ID = '1c91ctKwDGJUkWnicAycilNyg_B0-lCqj1zrSYNhe2Zo';
  
 // Section key (used in GRIDDS app) → Sheet tab name → display label & colour
+// NB: sheet tab names kept as-is for backward compatibility; only display labels updated.
 const SECTIONS = [
   { key: 'headlines',     tab: 'Headlines',     label: 'Headlines',          color: '#E8520A' },
-  { key: 'finance',       tab: 'Finance',       label: 'Finance',            color: '#1B5E20' },
-  { key: 'health',        tab: 'Health',        label: 'Health',             color: '#6A1B9A' },
   { key: 'politics',      tab: 'Politics',      label: 'Politics',           color: '#8B1538' },
+  { key: 'wellness',      tab: 'Health',        label: 'Wellness',           color: '#6A1B9A' },
+  { key: 'opinions',      tab: 'Auto',          label: 'Opinions',           color: '#455A64' },
   { key: 'ipl',           tab: 'IPL',           label: 'IPL 2026',           color: '#FFA000' },
   { key: 'loves',         tab: 'GRIDD Loves',   label: '✶ GRIDD Loves',      color: '#B39DDB' },
-  { key: 'cityNews',      tab: 'City News',     label: 'City News',          color: '#37474F' },
-  { key: 'science',       tab: 'Science',       label: 'Science',            color: '#00ACC1' },
-  { key: 'entertainment', tab: 'Entertainment', label: 'Entertainment',      color: '#C2185B' },
+  { key: 'worldNews',     tab: 'Science',       label: 'World News',         color: '#00ACC1' },
+  { key: 'thisAndThat',   tab: 'Education',     label: 'This & That',        color: '#00695C' },
+  { key: 'finance',       tab: 'Finance',       label: 'Finance',            color: '#1B5E20' },
   { key: 'tech',          tab: 'Tech',          label: 'Tech',               color: '#1976D2' },
-  { key: 'auto',          tab: 'Auto',          label: 'Auto',               color: '#455A64' },
+  { key: 'cityNews',      tab: 'City News',     label: 'City News',          color: '#37474F' },
   { key: 'longreads',     tab: 'Long Reads',    label: 'Long Reads',         color: '#5D4037' },
-  { key: 'education',     tab: 'Education',     label: 'Education',          color: '#00695C' },
-  { key: 'weather',       tab: 'Weather',       label: 'Weather',            color: '#90CAF9' },
+  { key: 'lifestyle',     tab: 'Weather',       label: 'Lifestyle',          color: '#90CAF9' },
+  { key: 'entertainment', tab: 'Entertainment', label: 'Entertainment',      color: '#C2185B' },
 ];
  
-// Column index map (matches Editorial Master template)
 const COL = { ID: 0, HEADLINE: 1, SUMMARY: 2, SOURCE: 3, URL: 4, IMAGE: 5, ORDER: 6, STATUS: 7, PUBLISHED_AT: 8 };
  
-// Wraps publisher image URLs through our /api/img proxy to bypass hotlink protection
 function wrapImageForProxy(rawUrl) {
   if (!rawUrl) return '';
   const trimmed = rawUrl.trim();
   if (!trimmed) return '';
-  // If already a relative URL or already proxied, leave it
   if (trimmed.startsWith('/api/img') || trimmed.startsWith('data:')) return trimmed;
   if (!/^https?:\/\//i.test(trimmed)) return trimmed;
   return '/api/img?url=' + encodeURIComponent(trimmed);
 }
  
- 
-// ─── Fetch one tab via gviz endpoint ─────────────────────────────────────
 async function fetchTab(tabName) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
   try {
@@ -52,7 +48,6 @@ async function fetchTab(tabName) {
       return [];
     }
     const text = await res.text();
-    // gviz wraps: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
     const start = text.indexOf('{');
     const end = text.lastIndexOf('}');
     if (start < 0 || end <= start) return [];
@@ -60,25 +55,16 @@ async function fetchTab(tabName) {
     const data = JSON.parse(text.slice(start, end + 1));
     if (!data.table || !data.table.rows) return [];
  
-    // Find header row — first non-empty row that has "Headline" or similar
-    // Our template puts the section title in row 1 (merged), subtitle in row 2,
-    // headers in row 4, data starts at row 5.
-    // gviz with headers=0 returns all rows; we'll filter manually.
- 
     const stories = [];
-    data.table.rows.forEach((row, idx) => {
+    data.table.rows.forEach((row) => {
       if (!row.c) return;
       const cells = row.c.map(c => (c && c.v !== null && c.v !== undefined) ? String(c.v).trim() : '');
  
-      // Skip header/title rows — only accept rows where col 1 (Headline) is filled
-      // AND status (col 7) is LIVE
       const headline = cells[COL.HEADLINE];
       const status   = (cells[COL.STATUS] || '').toUpperCase();
  
       if (!headline) return;
       if (status !== 'LIVE') return;
- 
-      // Skip placeholder rows like "[Paste headline EXACTLY..." or "[Your headline here]"
       if (headline.startsWith('[')) return;
  
       stories.push({
@@ -92,9 +78,7 @@ async function fetchTab(tabName) {
       });
     });
  
-    // Sort by order column (lowest first)
     stories.sort((a, b) => a.order - b.order);
- 
     return stories;
   } catch (err) {
     console.error(`Error fetching tab "${tabName}":`, err.message);
@@ -102,7 +86,6 @@ async function fetchTab(tabName) {
   }
 }
  
-// ─── Fetch Edition Control tab for metadata ──────────────────────────────
 async function fetchControl() {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Edition Control')}`;
   try {
@@ -128,15 +111,12 @@ async function fetchControl() {
   }
 }
  
-// ─── Main handler ────────────────────────────────────────────────────────
 export default async function handler(req, res) {
-  // 5-minute cache (300 seconds)
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
  
   try {
-    // Fetch all section tabs in parallel
     const tabPromises = SECTIONS.map(s => fetchTab(s.tab));
     const controlPromise = fetchControl();
  
@@ -145,7 +125,6 @@ export default async function handler(req, res) {
       controlPromise,
     ]);
  
-    // Build edition object — preserves GRIDDS app's expected SECS shape
     const edition = {
       meta: {
         editionNumber: control ? (control['Edition Number'] || 1) : 1,
@@ -166,7 +145,6 @@ export default async function handler(req, res) {
       };
     });
  
-    // If edition is unpublished, return a marker so app can show "edition coming soon"
     if (!edition.meta.published) {
       return res.status(200).json({
         meta: edition.meta,
@@ -181,3 +159,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to build edition', detail: err.message });
   }
 }
+ 
