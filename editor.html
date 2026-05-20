@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>GRIDDS Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { background:#0d0d12; color:#F5F0E8; font-family:'DM Sans',sans-serif; min-height:100vh; }
+  body { padding:24px 20px 80px; max-width:540px; margin:0 auto; }
+
+  .logo {
+    text-align:center; margin-bottom:8px;
+    font-family:'Libre Baskerville',Georgia,serif; font-weight:700; letter-spacing:2px;
+  }
+  .logo .gridds { font-size:28px; color:#F5F0E8; }
+  .logo .dot { font-size:24px; color:#E8520A; }
+  .logo .news { font-size:14px; color:#BEB5A8; }
+
+  .tag {
+    text-align:center; font-size:10px; letter-spacing:3px; text-transform:uppercase;
+    color:rgba(255,255,255,0.35); margin-bottom:28px;
+  }
+
+  h1 {
+    font-family:'Libre Baskerville',serif; font-weight:700; font-size:22px;
+    margin-bottom:6px;
+  }
+  .sub {
+    font-size:13px; color:rgba(255,255,255,0.55); margin-bottom:24px;
+  }
+
+  label {
+    display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase;
+    color:rgba(255,255,255,0.5); margin-bottom:6px; margin-top:16px;
+  }
+  input[type=text], input[type=password], input[type=url], select, textarea {
+    width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+    color:#F5F0E8; font-family:'DM Sans',sans-serif; font-size:14px;
+    padding:12px 14px; border-radius:8px; outline:none;
+    -webkit-appearance:none;
+  }
+  textarea { resize:vertical; min-height:120px; line-height:1.6; }
+  input:focus, select:focus, textarea:focus {
+    border-color:#E8520A; background:rgba(255,255,255,0.08);
+  }
+
+  .btn {
+    width:100%; background:#E8520A; color:#fff; border:none;
+    padding:14px; border-radius:8px; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+    letter-spacing:1.5px; text-transform:uppercase;
+    margin-top:20px;
+  }
+  .btn:hover { background:#FF6020; }
+  .btn:disabled { background:rgba(255,255,255,0.12); cursor:not-allowed; }
+  .btn.secondary { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#F5F0E8; }
+
+  .preview {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+    border-radius:10px; padding:18px; margin-top:24px;
+  }
+  .preview img {
+    width:100%; max-height:200px; object-fit:cover; border-radius:6px; margin-bottom:14px;
+  }
+  .preview .headline {
+    font-family:'Libre Baskerville',serif; font-size:18px; line-height:1.35;
+    color:#F5F0E8; margin-bottom:10px;
+  }
+  .preview .meta {
+    font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:14px;
+  }
+  .preview .summary {
+    font-size:14px; line-height:1.6; color:rgba(255,255,255,0.85);
+  }
+  .edit-link {
+    display:inline-block; font-size:11px; color:#E8520A;
+    text-decoration:underline; cursor:pointer; margin-top:8px;
+  }
+
+  .status {
+    padding:12px 14px; border-radius:8px; font-size:13px; margin-top:16px;
+    display:none;
+  }
+  .status.show { display:block; }
+  .status.success { background:rgba(76,175,80,0.12); color:#81C784; border:1px solid rgba(76,175,80,0.3); }
+  .status.error   { background:rgba(244,67,54,0.12); color:#EF9A9A; border:1px solid rgba(244,67,54,0.3); }
+  .status.loading { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); }
+
+  .hidden { display:none !important; }
+
+  .footer-note {
+    margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);
+    font-size:11px; color:rgba(255,255,255,0.3); text-align:center; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo">
+  <span class="gridds">GRIDDS</span><span class="dot">.</span><span class="news">EDITOR</span>
+</div>
+<div class="tag">Editorial submission</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <h1>Editor access</h1>
+  <div class="sub">Sign in to add a story to your edition.</div>
+
+  <label>Password</label>
+  <input type="password" id="pwd-input" placeholder="Editor password" autocomplete="current-password">
+
+  <button class="btn" id="login-btn">Sign in</button>
+
+  <div class="status error" id="login-error"></div>
+</div>
+
+<!-- SUBMIT FORM -->
+<div id="submit-screen" class="hidden">
+  <h1>Add a story</h1>
+  <div class="sub">Paste any article URL. I'll fetch, summarise, and queue it as a draft in your sheet.</div>
+
+  <label>Article URL</label>
+  <input type="url" id="url-input" placeholder="https://...">
+
+  <label>Section</label>
+  <select id="section-input">
+    <option value="Headlines">Headlines</option>
+    <option value="Finance">Finance</option>
+    <option value="Health">Health</option>
+    <option value="Politics">Politics</option>
+    <option value="IPL">IPL</option>
+    <option value="GRIDD Loves">GRIDD Loves</option>
+    <option value="City News">City News</option>
+    <option value="Science">Science</option>
+    <option value="Entertainment">Entertainment</option>
+    <option value="Tech">Tech</option>
+    <option value="Auto">Auto</option>
+    <option value="Long Reads">Long Reads</option>
+    <option value="Education">Education</option>
+    <option value="Weather">Weather</option>
+  </select>
+
+  <button class="btn" id="preview-btn">Preview &#8594;</button>
+
+  <div class="status loading" id="preview-status"></div>
+
+  <!-- PREVIEW BLOCK -->
+  <div class="preview hidden" id="preview-block">
+    <img id="pv-image" alt="" style="display:none">
+    <div class="headline" id="pv-headline" contenteditable="false"></div>
+    <div class="meta"><span id="pv-source"></span> &middot; <span id="pv-section"></span></div>
+    <div class="summary" id="pv-summary" contenteditable="false"></div>
+    <span class="edit-link" id="edit-toggle">Edit headline/summary</span>
+
+    <button class="btn" id="publish-btn" style="margin-top:18px">Add to sheet</button>
+    <button class="btn secondary" id="reset-btn">Cancel</button>
+
+    <div class="status" id="publish-status"></div>
+  </div>
+
+  <div class="footer-note">
+    Stories land as DRAFT in your sheet. Flip to LIVE there when ready.<br>
+    Signed in for 30 days. <a href="#" id="signout-link" style="color:#E8520A">Sign out</a>
+  </div>
+</div>
+
+<script>
+  var PWD_STORAGE_KEY = 'gridds_editor_pwd';
+  var pwd = '';
+
+  function getStoredPwd() {
+    try { return sessionStorage.getItem(PWD_STORAGE_KEY) || localStorage.getItem(PWD_STORAGE_KEY) || ''; } catch(e) { return ''; }
+  }
+  function setStoredPwd(p) {
+    try {
+      localStorage.setItem(PWD_STORAGE_KEY, p);
+      sessionStorage.setItem(PWD_STORAGE_KEY, p);
+    } catch(e) {}
+  }
+  function clearStoredPwd() {
+    try {
+      localStorage.removeItem(PWD_STORAGE_KEY);
+      sessionStorage.removeItem(PWD_STORAGE_KEY);
+    } catch(e) {}
+  }
+
+  function showSubmitScreen() {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('submit-screen').classList.remove('hidden');
+  }
+  function showLoginScreen() {
+    document.getElementById('submit-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+
+  // On load — check if we already have a stored password
+  pwd = getStoredPwd();
+  if (pwd) showSubmitScreen();
+
+  // ─── LOGIN ──────────────────────────────────────────────────────────
+  document.getElementById('login-btn').addEventListener('click', async function() {
+    var input = document.getElementById('pwd-input').value;
+    var errEl = document.getElementById('login-error');
+    errEl.classList.remove('show');
+
+    if (!input) {
+      errEl.textContent = 'Enter the password.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    // Test the password by making a preview call with a sentinel URL
+    // Since the API will reject bad passwords with 401, we use that as the auth check
+    document.getElementById('login-btn').disabled = true;
+    document.getElementById('login-btn').textContent = 'Checking…';
+    try {
+      var res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': input },
+        body: JSON.stringify({ action: 'preview', url: 'https://example.com', section: 'Headlines' }),
+      });
+      if (res.status === 401) {
+        errEl.textContent = 'Wrong password.';
+        errEl.classList.add('show');
+      } else {
+        // Any other response (200, 422, etc) means auth passed
+        pwd = input;
+        setStoredPwd(pwd);
+        showSubmitScreen();
+        document.getElementById('pwd-input').value = '';
+      }
+    } catch (e) {
+      errEl.textContent = 'Network error. Try again.';
+      errEl.classList.add('show');
+    } finally {
+      document.getElementById('login-btn').disabled = false;
+      document.getElementById('login-btn').textContent = 'Sign in';
+    }
+  });
+
+  document.getElementById('pwd-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') document.getElementById('login-btn').click();
+  });
+
+  // ─── SIGN OUT ────────────────────────────────────────────────────────
+  document.getElementById('signout-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    pwd = '';
+    clearStoredPwd();
+    showLoginScreen();
+  });
+
+  // ─── PREVIEW ─────────────────────────────────────────────────────────
+  var previewBtn   = document.getElementById('preview-btn');
+  var previewStatus = document.getElementById('preview-status');
+  var previewBlock  = document.getElementById('preview-block');
+
+  previewBtn.addEventListener('click', async function() {
+    var url     = document.getElementById('url-input').value.trim();
+    var section = document.getElementById('section-input').value;
+    previewStatus.className = 'status loading';
+    previewStatus.textContent = '';
+    previewBlock.classList.add('hidden');
+
+    if (!/^https?:\/\//i.test(url)) {
+      previewStatus.className = 'status error show';
+      previewStatus.textContent = 'Paste a valid URL starting with http or https.';
+      return;
+    }
+
+    previewStatus.classList.add('show');
+    previewStatus.textContent = 'Fetching article and writing summary…';
+    previewBtn.disabled = true;
+
+    try {
+      var res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': pwd },
+        body: JSON.stringify({ action: 'preview', url: url, section: section }),
+      });
+      if (res.status === 401) {
+        // Password rejected — return to login
+        clearStoredPwd();
+        showLoginScreen();
+        document.getElementById('login-error').textContent = 'Session expired. Sign in again.';
+        document.getElementById('login-error').classList.add('show');
+        return;
+      }
+      var data = await res.json();
+      if (!res.ok || !data.ok) {
+        previewStatus.className = 'status error show';
+        previewStatus.textContent = data.error || 'Could not fetch the article.';
+        return;
+      }
+
+      previewStatus.classList.remove('show');
+
+      var pvImg = document.getElementById('pv-image');
+      if (data.image) {
+        pvImg.src = data.image;
+        pvImg.style.display = 'block';
+        pvImg.onerror = function() { pvImg.style.display = 'none'; };
+      } else {
+        pvImg.style.display = 'none';
+      }
+      document.getElementById('pv-headline').textContent = data.headline;
+      document.getElementById('pv-summary').textContent  = data.summary;
+      document.getElementById('pv-source').textContent   = data.source;
+      document.getElementById('pv-section').textContent  = data.section;
+      previewBlock.classList.remove('hidden');
+
+      // Store for publish step
+      window._previewData = data;
+    } catch (e) {
+      previewStatus.className = 'status error show';
+      previewStatus.textContent = 'Network error: ' + e.message;
+    } finally {
+      previewBtn.disabled = false;
+    }
+  });
+
+  // ─── EDIT TOGGLE ─────────────────────────────────────────────────────
+  document.getElementById('edit-toggle').addEventListener('click', function() {
+    var hl = document.getElementById('pv-headline');
+    var sm = document.getElementById('pv-summary');
+    var isEditing = hl.contentEditable === 'true';
+    if (isEditing) {
+      hl.contentEditable = 'false';
+      sm.contentEditable = 'false';
+      this.textContent = 'Edit headline/summary';
+    } else {
+      hl.contentEditable = 'true';
+      sm.contentEditable = 'true';
+      this.textContent = 'Done editing';
+      hl.focus();
+    }
+  });
+
+  // ─── PUBLISH ────────────────────────────────────────────────────────
+  var publishBtn    = document.getElementById('publish-btn');
+  var publishStatus = document.getElementById('publish-status');
+
+  publishBtn.addEventListener('click', async function() {
+    var data = window._previewData;
+    if (!data) return;
+
+    var editedHl   = document.getElementById('pv-headline').textContent.trim();
+    var editedSm   = document.getElementById('pv-summary').textContent.trim();
+
+    publishStatus.className = 'status loading show';
+    publishStatus.textContent = 'Adding to your sheet…';
+    publishBtn.disabled = true;
+
+    try {
+      var res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': pwd },
+        body: JSON.stringify({
+          action: 'publish',
+          url: data.url,
+          section: data.section,
+          editedHeadline: editedHl,
+          editedSummary: editedSm,
+          editedImage: data.image,
+        }),
+      });
+      var json = await res.json();
+      if (!res.ok || !json.ok) {
+        publishStatus.className = 'status error show';
+        publishStatus.textContent = json.error || 'Could not add to sheet.';
+        return;
+      }
+      publishStatus.className = 'status success show';
+      publishStatus.textContent = '✓ Added to ' + data.section + ' tab as DRAFT.';
+
+      // Reset form after a moment
+      setTimeout(function() {
+        document.getElementById('url-input').value = '';
+        previewBlock.classList.add('hidden');
+        publishStatus.classList.remove('show');
+        window._previewData = null;
+      }, 2200);
+    } catch (e) {
+      publishStatus.className = 'status error show';
+      publishStatus.textContent = 'Network error: ' + e.message;
+    } finally {
+      publishBtn.disabled = false;
+    }
+  });
+
+  // ─── RESET ──────────────────────────────────────────────────────────
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    previewBlock.classList.add('hidden');
+    publishStatus.classList.remove('show');
+    window._previewData = null;
+  });
+</script>
+
+</body>
+</html>
