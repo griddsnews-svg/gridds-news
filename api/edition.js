@@ -2,7 +2,7 @@
 // GRIDDS.NEWS — Edition API
 // Fetches all section tabs from the Editorial Master sheet,
 // filters LIVE stories, returns clean JSON for the GRIDDS app.
-// Cache: 5 minutes
+// Cache: 30 seconds (was 5 min + 10 min stale)
 // ─────────────────────────────────────────────────────────────────────────
  
 const SHEET_ID = '1c91ctKwDGJUkWnicAycilNyg_B0-lCqj1zrSYNhe2Zo';
@@ -38,7 +38,8 @@ function wrapImageForProxy(rawUrl) {
 }
  
 async function fetchTab(tabName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  // &t= busts Google's server-side cache so edits show up immediately
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}&t=${Date.now()}`;
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS)' },
@@ -87,7 +88,8 @@ async function fetchTab(tabName) {
 }
  
 async function fetchControl() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Edition Control')}`;
+  // &t= busts Google's server-side cache so edition control updates immediately
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Edition Control')}&t=${Date.now()}`;
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS)' } });
     if (!res.ok) return null;
@@ -112,7 +114,8 @@ async function fetchControl() {
 }
  
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  // 30s CDN cache, no stale-while-revalidate — was s-maxage=300, stale-while-revalidate=600
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=0');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
  
