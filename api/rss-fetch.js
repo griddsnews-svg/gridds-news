@@ -1,125 +1,203 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// GRIDDS.NEWS — RSS Fetcher v2
+// GRIDDS.NEWS — RSS Fetcher v3.1
+// Rebuilt from verified working feeds (May 2026).
 // Runs daily via Vercel Cron, or anytime via manual URL trigger.
-//
-// New in v2:
-//   - Expanded RSS sources (lifestyle heavy: GQ India, Elle, HT Brunch, Homegrown,
-//     LBB, Curly Tales, Outlook Traveller, MissMalini, iDiva, Architectural Digest,
-//     plus more news: Moneycontrol, FirstPost, The Print, Scroll, etc.)
-//   - OpenAI GPT-4o-mini integration for 60-90 word Inshorts-style summaries.
-//     If OPENAI_API_KEY env var is set, each story gets a fresh summary.
-//     If unset, falls back to RSS description.
 // ═══════════════════════════════════════════════════════════════════════════
 
 const WEBHOOK_URL = process.env.INBOX_WEBHOOK_URL;
 const TOKEN       = process.env.INBOX_TOKEN;
 const OPENAI_KEY  = process.env.OPENAI_API_KEY;
 
-// ─── FEED LIST: section → array of RSS URLs ──────────────────────────────
+// ─── FEED LIST ────────────────────────────────────────────────────────────
 const FEEDS = {
+
   Headlines: [
     'https://feeds.feedburner.com/ndtvnews-top-stories',
-    'https://www.hindustantimes.com/feeds/rss/india-news/index.xml',
-    'https://indianexpress.com/section/india/feed/',
     'https://www.thehindu.com/news/national/feeder/default.rss',
+    'https://indianexpress.com/section/india/feed/',
     'https://www.indiatoday.in/rss/1206578',
     'https://www.firstpost.com/commonfeeds/v1/mfp/rss/india.xml',
-    'https://theprint.in/feed/',
+    'https://www.news18.com/rss/india.xml',
+    'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
+    'https://www.business-standard.com/rss/latest.rss',
+    'https://www.livemint.com/rss/news',
+    'https://www.newslaundry.com/feed',
   ],
+
   Finance: [
-    'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
-    'https://www.livemint.com/rss/markets',
-    'https://www.business-standard.com/rss/markets-106.rss',
-    'https://www.financialexpress.com/market/feed/',
+    'https://www.livemint.com/rss/economy',
+    'https://www.livemint.com/rss/money',
+    'https://economictimes.indiatimes.com/news/economy/rssfeeds/1373380680.cms',
+    'https://www.thehindubusinessline.com/economy/feeder/default.rss',
+    'https://www.business-standard.com/rss/economy-policy-106.rss',
     'https://www.moneycontrol.com/rss/business.xml',
-    'https://www.thehindubusinessline.com/markets/feeder/default.rss',
   ],
-  Health: [
-    'https://www.hindustantimes.com/feeds/rss/lifestyle/health/rssfeed.xml',
+
+  Wellness: [
     'https://indianexpress.com/section/health-wellness/feed/',
     'https://www.thehindu.com/sci-tech/health/feeder/default.rss',
-    'https://www.healthshots.com/feed/',
+    'https://vogue.in/feed/rss',
+    'https://www.hindustantimes.com/feeds/rss/lifestyle/health/rssfeed.xml',
   ],
+
   Politics: [
-    'https://www.hindustantimes.com/feeds/rss/india-news/index.xml',
     'https://www.thehindu.com/news/national/feeder/default.rss',
     'https://indianexpress.com/section/political-pulse/feed/',
-    'https://thewire.in/feed/',
+    'https://theprint.in/category/politics/feed/',
+    'https://feeds.feedburner.com/ndtvnews-india-news',
+    'https://economictimes.indiatimes.com/news/politics-and-nation/rssfeeds/1052732854.cms',
   ],
+
   IPL: [
-    'https://www.cricbuzz.com/cbz-news.xml',
     'https://www.espncricinfo.com/rss/content/story/feeds/0.xml',
-    'https://www.sportskeeda.com/feed/cricket',
-    'https://timesofindia.indiatimes.com/rssfeeds/4719161.cms',
     'https://feeds.feedburner.com/ndtvsports-cricket',
-    'https://www.hindustantimes.com/feeds/rss/sports/cricket/index.xml',
-    'https://indianexpress.com/section/sports/ipl/feed/',
-    'https://www.thehindu.com/sport/cricket/feeder/default.rss',
+    'https://www.sportskeeda.com/feed/cricket',
+    'https://rss.app/r/feed/1dh3dHc5Z4Q2qhU9',              // BBC Cricket (custom)
   ],
+
   'GRIDD Loves': [
     'https://vogue.in/feed/rss',
-    'https://www.cntraveller.in/feed/rss',
     'https://www.gqindia.com/feed/rss',
-    'https://www.architecturaldigest.in/feed/rss',
-    'https://www.elle.in/feed/',
-    'https://www.harpersbazaar.in/feed',
-    'https://www.grazia.co.in/feed/',
-    'https://www.femina.in/rss.cms',
-    'https://homegrown.co.in/rss',
-    'https://www.idiva.com/rss/all',
-    'https://www.missmalini.com/feed',
+    'https://www.cntraveller.in/feed/rss',
     'https://www.hindustantimes.com/feeds/rss/htbrunch/rssfeed.xml',
-    'https://www.thehindu.com/life-and-style/feeder/default.rss',
-    'https://www.outlooktraveller.com/rssfeeds/55',
-    'https://www.livemint.com/rss/lounge',
+    'https://the-ken.com/feed/',
   ],
+
   'City News': [
-    'https://timesofindia.indiatimes.com/rssfeeds/-2128839596.cms',
     'https://www.hindustantimes.com/feeds/rss/cities/delhi-news/rssfeed.xml',
     'https://indianexpress.com/section/cities/delhi/feed/',
-    'https://www.curlytales.com/feed/',
-    'https://www.whatshot.in/rss',
+    'https://timesofindia.indiatimes.com/rssfeeds/-2128839596.cms',
+    'https://www.thehindu.com/news/cities/Delhi/feeder/default.rss',
+    'https://www.livemint.com/rss/news',
   ],
-  Science: [
-    'https://www.thehindu.com/sci-tech/science/feeder/default.rss',
-    'https://indianexpress.com/section/technology/science/feed/',
-    'https://www.livescience.com/feeds/all',
+
+  'World News': [
+    'https://feeds.bbci.co.uk/news/world/rss.xml',
+    'https://www.thehindu.com/news/international/feeder/default.rss',
+    'https://indianexpress.com/section/world/feed/',
+    'https://feeds.feedburner.com/ndtvnews-world-news',
+    'https://www.aljazeera.com/xml/rss/all.xml',
+    'https://theprint.in/category/world/feed/',
+    'https://foreignpolicy.com/feed/',
   ],
+
   Entertainment: [
-    'https://variety.com/v/film/feed/',
     'https://www.pinkvilla.com/rss.xml',
-    'https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml',
     'https://indianexpress.com/section/entertainment/feed/',
+    'https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml',
+    'https://variety.com/v/film/feed/',
+    'https://www.thehindu.com/entertainment/feeder/default.rss',
+    'https://www.koimoi.com/feed/',
   ],
+
   Tech: [
-    'https://9to5mac.com/feed/',
-    'https://techcrunch.com/feed/',
     'https://www.theverge.com/rss/index.xml',
+    'https://techcrunch.com/feed/',
+    'https://www.wired.com/feed/rss',
+    'https://feeds.arstechnica.com/arstechnica/index',
     'https://indianexpress.com/section/technology/feed/',
     'https://www.thehindu.com/sci-tech/technology/feeder/default.rss',
+    'https://gadgets.ndtv.com/feeds/rss/all/stories',
+    'https://9to5mac.com/feed/',
+    'https://www.technologyreview.com/feed/',
   ],
-  Auto: [
-    'https://www.autocarindia.com/rss',
-    'https://www.carandbike.com/rss/news',
-    'https://www.hindustantimes.com/feeds/rss/autos/rssfeed.xml',
-  ],
+
   'Long Reads': [
-    'https://caravanmagazine.in/rss/all.xml',
-    'https://scroll.in/feed.rss',
-    'https://thewire.in/feed/',
-    'https://theprint.in/feed/',
+    'https://www.thehindu.com/features/magazine/feeder/default.rss',
+    'https://frontline.thehindu.com/feeder/default.rss',
+    'https://the-ken.com/feed/',
+    'https://www.newslaundry.com/feed',
+    'https://www.foreignaffairs.com/rss.xml',
   ],
-  Education: [
-    'https://indianexpress.com/section/education/feed/',
-    'https://www.hindustantimes.com/feeds/rss/education/rssfeed.xml',
-    'https://www.thehindu.com/education/feeder/default.rss',
+
+  Opinions: [
+    'https://www.thehindu.com/opinion/feeder/default.rss',
+    'https://indianexpress.com/section/opinion/feed/',
+    'https://www.hindustantimes.com/feeds/rss/opinion/rssfeed.xml',
+    'https://www.livemint.com/rss/opinion',
+    'https://www.business-standard.com/rss/opinion-specials-110.rss',
+    'https://theprint.in/category/opinion/feed/',
+    'https://timesofindia.indiatimes.com/rssfeeds/784865811.cms',
+    'https://economictimes.indiatimes.com/opinion/rssfeeds/897228639.cms',
+    'https://www.hindustantimes.com/feeds/rss/analysis/rssfeed.xml',
   ],
-  Weather: [
-    'https://mausam.imd.gov.in/responsive/rss/weather.xml',
+
+  'This & That': [
+    'https://www.thehindu.com/sci-tech/feeder/default.rss',
+    'https://indianexpress.com/section/trending/feed/',
+    'https://timesofindia.indiatimes.com/rssfeeds/7098549.cms',
+    'https://www.hindustantimes.com/feeds/rss/trending/rssfeed.xml',
+    'https://www.indiatoday.in/rss/1206602',
+    'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
   ],
+
+  Lifestyle: [
+    'https://www.cntraveller.in/feed/rss',
+    'https://timesofindia.indiatimes.com/rssfeeds/2269336.cms',
+    'https://www.hindustantimes.com/feeds/rss/htbrunch/rssfeed.xml',
+    'https://rss.app/feeds/nHyHlnWbZQy8Hfdu.xml',            // Mint Lounge (custom)
+    'https://rss.app/feeds/xa2LLXGin1Gy9x7F.xml',            // NYT (custom)
+  ],
+
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────
+// ─── SOURCE NAME MAP ──────────────────────────────────────────────────────
+function deriveSourceName(feedUrl) {
+  try {
+    // Custom rss.app feeds — match by full URL
+    const customMap = {
+      'https://rss.app/feeds/nHyHlnWbZQy8Hfdu.xml': 'Mint Lounge',
+      'https://rss.app/feeds/xa2LLXGin1Gy9x7F.xml': 'NYT',
+      'https://rss.app/r/feed/1dh3dHc5Z4Q2qhU9':    'BBC Cricket',
+    };
+    if (customMap[feedUrl]) return customMap[feedUrl];
+
+    const host = new URL(feedUrl).hostname.replace(/^www\./, '');
+    const map = {
+      'feeds.feedburner.com':              'NDTV',
+      'thehindu.com':                      'The Hindu',
+      'indianexpress.com':                 'Indian Express',
+      'indiatoday.in':                     'India Today',
+      'firstpost.com':                     'Firstpost',
+      'news18.com':                        'News18',
+      'timesofindia.indiatimes.com':       'Times of India',
+      'business-standard.com':             'Business Standard',
+      'livemint.com':                      'Mint',
+      'newslaundry.com':                   'Newslaundry',
+      'economictimes.indiatimes.com':      'Economic Times',
+      'thehindubusinessline.com':          'Business Line',
+      'moneycontrol.com':                  'Moneycontrol',
+      'vogue.in':                          'Vogue India',
+      'hindustantimes.com':                'Hindustan Times',
+      'theprint.in':                       'The Print',
+      'espncricinfo.com':                  'ESPN Cricinfo',
+      'sportskeeda.com':                   'Sportskeeda',
+      'gqindia.com':                       'GQ India',
+      'cntraveller.in':                    'CN Traveller India',
+      'the-ken.com':                       'The Ken',
+      'feeds.bbci.co.uk':                  'BBC',
+      'aljazeera.com':                     'Al Jazeera',
+      'foreignpolicy.com':                 'Foreign Policy',
+      'pinkvilla.com':                     'Pinkvilla',
+      'variety.com':                       'Variety',
+      'koimoi.com':                        'Koimoi',
+      'theverge.com':                      'The Verge',
+      'techcrunch.com':                    'TechCrunch',
+      'wired.com':                         'Wired',
+      'feeds.arstechnica.com':             'Ars Technica',
+      'gadgets.ndtv.com':                  'Gadgets 360',
+      '9to5mac.com':                       '9to5Mac',
+      'technologyreview.com':              'MIT Tech Review',
+      'frontline.thehindu.com':            'Frontline',
+      'foreignaffairs.com':                'Foreign Affairs',
+    };
+    return map[host] || host;
+  } catch (e) {
+    return 'Unknown';
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────
 
 function extractTag(xml, tag) {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
@@ -156,8 +234,8 @@ function extractImage(itemXml) {
   if (m) return m[1];
   m = itemXml.match(/<image>[\s\S]*?<url>([^<]+)<\/url>/i);
   if (m) return m[1].trim();
-  const desc = (itemXml.match(/<description>([\s\S]*?)<\/description>/i) || ['',''])[1];
-  const cont = (itemXml.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/i) || ['',''])[1];
+  const desc = (itemXml.match(/<description>([\s\S]*?)<\/description>/i) || ['', ''])[1];
+  const cont = (itemXml.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/i) || ['', ''])[1];
   const haystack = stripCDATA(desc + ' ' + cont);
   m = haystack.match(/<img[^>]+src=["']([^"']+)["']/i);
   if (m) return m[1];
@@ -174,7 +252,7 @@ function parseRSS(xml, sourceName, sectionName) {
     if (!title) continue;
 
     let url = '';
-    let linkMatch = itemXml.match(/<link[^>]*href=["']([^"']+)["']/i);
+    const linkMatch = itemXml.match(/<link[^>]*href=["']([^"']+)["']/i);
     if (linkMatch) {
       url = linkMatch[1];
     } else {
@@ -192,81 +270,25 @@ function parseRSS(xml, sourceName, sectionName) {
     const image = extractImage(itemXml);
 
     stories.push({
-      headline:    title.slice(0, 300),
-      rawSummary:  rawSummary,
-      summary:     '',
-      source:      sourceName,
-      section:     sectionName,
-      url:         url,
-      image:       image,
-      published:   pubDate,
+      headline:   title.slice(0, 300),
+      rawSummary: rawSummary,
+      summary:    '',
+      source:     sourceName,
+      section:    sectionName,
+      url:        url,
+      image:      image,
+      published:  pubDate,
     });
   }
 
   return stories;
 }
 
-function deriveSourceName(feedUrl) {
-  try {
-    const host = new URL(feedUrl).hostname.replace(/^www\./, '');
-    const map = {
-      'feeds.feedburner.com': 'NDTV',
-      'ndtv.com': 'NDTV',
-      'hindustantimes.com': 'Hindustan Times',
-      'indianexpress.com': 'Indian Express',
-      'economictimes.indiatimes.com': 'Economic Times',
-      'livemint.com': 'Mint',
-      'business-standard.com': 'Business Standard',
-      'thehindu.com': 'The Hindu',
-      'thehindubusinessline.com': 'Business Line',
-      'timesofindia.indiatimes.com': 'Times of India',
-      'cricbuzz.com': 'Cricbuzz',
-      'espncricinfo.com': 'ESPN Cricinfo',
-      'sportskeeda.com': 'Sportskeeda',
-      'vogue.in': 'Vogue India',
-      'cntraveller.in': 'Conde Nast Traveller',
-      'gqindia.com': 'GQ India',
-      'elle.in': 'Elle India',
-      'harpersbazaar.in': 'Harper\'s Bazaar India',
-      'grazia.co.in': 'Grazia India',
-      'femina.in': 'Femina',
-      'idiva.com': 'iDiva',
-      'missmalini.com': 'MissMalini',
-      'homegrown.co.in': 'Homegrown',
-      'curlytales.com': 'Curly Tales',
-      'whatshot.in': 'WhatsHot',
-      'outlooktraveller.com': 'Outlook Traveller',
-      'architecturaldigest.in': 'Architectural Digest India',
-      'autocarindia.com': 'Autocar India',
-      'carandbike.com': 'Car and Bike',
-      'variety.com': 'Variety',
-      'pinkvilla.com': 'Pinkvilla',
-      '9to5mac.com': '9to5Mac',
-      'techcrunch.com': 'TechCrunch',
-      'theverge.com': 'The Verge',
-      'caravanmagazine.in': 'The Caravan',
-      'scroll.in': 'Scroll',
-      'thewire.in': 'The Wire',
-      'theprint.in': 'The Print',
-      'firstpost.com': 'Firstpost',
-      'indiatoday.in': 'India Today',
-      'financialexpress.com': 'Financial Express',
-      'moneycontrol.com': 'Moneycontrol',
-      'livescience.com': 'Live Science',
-      'mausam.imd.gov.in': 'IMD India',
-      'healthshots.com': 'Health Shots',
-    };
-    return map[host] || host;
-  } catch (e) {
-    return 'Unknown';
-  }
-}
-
 async function fetchFeed(feedUrl, sectionName) {
   try {
     const res = await fetch(feedUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GRIDDSNewsBot/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; GRIDDSNewsBot/2.0)',
         'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
       },
       signal: AbortSignal.timeout(15000),
@@ -284,12 +306,11 @@ async function fetchFeed(feedUrl, sectionName) {
   }
 }
 
-// ─── OPENAI SUMMARY GENERATION ────────────────────────────────────────────
+// ─── OPENAI SUMMARIES ─────────────────────────────────────────────────────
 
-async function summariseWithOpenAI(story) {
+async function summariseWithOpenAI(story, wordLimit = 75) {
   if (!OPENAI_KEY) return null;
-  const userPrompt = `Headline: ${story.headline}\n\nArticle excerpt: ${story.rawSummary}\n\nWrite a tight, factual summary in 60-75 words MAXIMUM (never exceed 75 words) in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
-
+  const userPrompt = `Headline: ${story.headline}\n\nArticle excerpt: ${story.rawSummary}\n\nWrite a tight, factual summary in ${wordLimit} words MAXIMUM (never exceed ${wordLimit} words) in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -300,7 +321,7 @@ async function summariseWithOpenAI(story) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an editor writing crisp, factual news summaries in 60-75 words MAXIMUM (never more than 75 words). Style of Inshorts. Indian English. No opinion, no hype, no padding.' },
+          { role: 'system', content: `You are an editor writing crisp, factual news summaries in ${wordLimit} words MAXIMUM. Style of Inshorts. Indian English. No opinion, no hype, no padding.` },
           { role: 'user',   content: userPrompt },
         ],
         max_tokens: 150,
@@ -308,13 +329,9 @@ async function summariseWithOpenAI(story) {
       }),
       signal: AbortSignal.timeout(20000),
     });
-    if (!res.ok) {
-      const txt = await res.text();
-      console.warn('OpenAI error', res.status, txt.slice(0, 200));
-      return null;
-    }
+    if (!res.ok) return null;
     const data = await res.json();
-    const out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    const out = data.choices?.[0]?.message?.content;
     return out ? out.trim() : null;
   } catch (err) {
     console.error('OpenAI summarise failed:', err.message);
@@ -323,13 +340,17 @@ async function summariseWithOpenAI(story) {
 }
 
 async function addSummaries(stories) {
+  const SHORT_SUMMARY_SOURCES = new Set(['NYT', 'BBC', 'BBC Cricket', 'BBC World']);
   if (!OPENAI_KEY) {
     stories.forEach(s => {
-      const words = s.rawSummary.split(/\s+/).slice(0, 90);
-      s.summary = words.join(' ') + (words.length >= 90 ? '...' : '');
+      const wordLimit = SHORT_SUMMARY_SOURCES.has(s.source) ? 30 : 75;
+      const words = s.rawSummary.split(/\s+/).slice(0, wordLimit);
+      s.summary = words.join(' ') + (words.length >= wordLimit ? '...' : '');
     });
     return;
   }
+  const SHORT_WORDS = 30;
+  const LONG_WORDS  = 75;
 
   const CONCURRENCY = 5;
   let idx = 0;
@@ -337,18 +358,18 @@ async function addSummaries(stories) {
     while (idx < stories.length) {
       const i = idx++;
       const s = stories[i];
-      const ai = await summariseWithOpenAI(s);
+      const isShort = SHORT_SUMMARY_SOURCES.has(s.source);
+      const wordLimit = isShort ? SHORT_WORDS : LONG_WORDS;
+      const ai = await summariseWithOpenAI(s, wordLimit);
       if (ai) {
         s.summary = ai;
       } else {
-        const words = s.rawSummary.split(/\s+/).slice(0, 90);
-        s.summary = words.join(' ') + (words.length >= 90 ? '...' : '');
+        const words = s.rawSummary.split(/\s+/).slice(0, wordLimit);
+        s.summary = words.join(' ') + (words.length >= wordLimit ? '...' : '');
       }
     }
   }
-  const workers = [];
-  for (let i = 0; i < CONCURRENCY; i++) workers.push(worker());
-  await Promise.all(workers);
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 }
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────
@@ -396,6 +417,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       fetched: allStories.length,
+      sections: Object.keys(FEEDS).length,
+      feeds: Object.values(FEEDS).flat().length,
       withAISummaries: !!OPENAI_KEY,
       aiDurationMs: aiDuration,
       webhook: parsed,
