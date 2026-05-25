@@ -237,17 +237,18 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token: WEBHOOK_TOKEN,
-          stories: [{
-            headline:  finalHeadline,
-            summary:   finalSummary,
-            source:    source,
-            section:   section,
-            url:       url,
-            image:     finalImage,
-            published: new Date().toISOString(),
-          }],
-        }),
+  token:  WEBHOOK_TOKEN,
+  source: 'SUBMIT',
+  stories: [{
+    headline:  finalHeadline,
+    summary:   finalSummary,
+    source:    source,
+    section:   section,
+    url:       url,
+    image:     finalImage,
+    published: new Date().toISOString(),
+  }],
+}),
         redirect: 'follow',
       });
       const data = await webhookRes.text();
