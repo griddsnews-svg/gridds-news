@@ -53,8 +53,6 @@ const FEEDS = {
     'https://www.financialexpress.com/economy/feed/',
     'https://feeds.feedburner.com/ndtv/BusinessNews',
     'https://finshots.in/feed/',
-    'https://capitalmind.in/feed/',
-    'https://themorningcontext.com/feed',
   ],
 
   Wellness: [
@@ -62,9 +60,7 @@ const FEEDS = {
     'https://www.thehindu.com/sci-tech/health/feeder/default.rss',
     'https://www.healthshots.com/feed/',
     'https://www.livemint.com/rss/mint-lounge/health',
-    'https://www.femina.in/rss.cms',
     'https://food.ndtv.com/feeds/rss/all/stories',
-    'https://www.idiva.com/rss/all',
     'https://www.onlymyhealth.com/rss',
   ],
 
@@ -93,16 +89,11 @@ const FEEDS = {
     'https://vogue.in/feed/rss',
     'https://www.gqindia.com/feed/rss',
     'https://www.architecturaldigest.in/feed/rss',
-    'https://www.elle.in/feed/',
-    'https://www.harpersbazaar.in/feed',
     'https://www.livemint.com/rss/mint-lounge',
     'https://homegrown.co.in/rss',
     'https://www.thehindu.com/magazine/feeder/default.rss',
-    'https://www.grazia.co.in/feed/',
     'https://www.outlookindia.com/feed',
     'https://the-ken.com/feed/',
-    'https://theswaddle.com/feed/',
-    'https://www.arre.co.in/feed/',
   ],
 
   'City News': [
@@ -112,11 +103,6 @@ const FEEDS = {
     'https://indianexpress.com/section/cities/mumbai/feed/',
     'https://www.thehindu.com/news/cities/bangalore/feeder/default.rss',
     'https://indianexpress.com/section/cities/bangalore/feed/',
-    'https://citizenmatters.in/feed/',
-    'https://thelede.in/feed',
-    'https://www.curlytales.com/feed/',
-    'https://www.whatshot.in/rss',
-    'https://lbb.in/feed/',
   ],
 
   'World News': [
@@ -130,15 +116,10 @@ const FEEDS = {
   ],
 
   Entertainment: [
-    'https://www.filmcompanion.in/feed/',
     'https://www.pinkvilla.com/rss.xml',
-    'https://www.bollywoodhungama.com/rss/news/type/news/',
-    'https://www.filmfare.com/rss/news.xml',
     'https://indianexpress.com/section/entertainment/feed/',
     'https://variety.com/v/film/feed/',
     'https://www.thehindu.com/entertainment/feeder/default.rss',
-    'https://www.cinestaan.com/articles/rss',
-    'https://www.galatta.com/feed/',
   ],
 
   Tech: [
@@ -152,22 +133,15 @@ const FEEDS = {
     'https://www.91mobiles.com/rss.xml',
     'https://9to5mac.com/feed/',
     'https://www.technologyreview.com/feed/',
-    'https://entrackr.com/feed/',
     'https://inc42.com/feed/',
-    'https://medianama.com/feed/',
-    'https://yourstory.com/feed',
   ],
 
   'Long Reads': [
     'https://caravanmagazine.in/rss/all.xml',
     'https://frontline.thehindu.com/feeder/default.rss',
     'https://the-ken.com/feed/',
-    'https://www.foundingfuel.com/feed/',
     'https://www.thehindu.com/features/magazine/feeder/default.rss',
     'https://www.foreignaffairs.com/rss.xml',
-    'https://www.himalmag.com/feed/',
-    'https://www.theindiaforum.in/rss.xml',
-    'https://fiftytwo.in/feed/',
     'https://scroll.in/feed.rss',
   ],
 
@@ -179,31 +153,19 @@ const FEEDS = {
     'https://theprint.in/category/opinion/feed/',
     'https://timesofindia.indiatimes.com/rssfeeds/784865811.cms',
     'https://economictimes.indiatimes.com/opinion/rssfeeds/897228639.cms',
-    'https://fountainink.in/feed',
   ],
 
   'This & That': [
     'https://www.thehindu.com/sci-tech/feeder/default.rss',
     'https://indianexpress.com/section/trending/feed/',
     'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
-    'https://in.mashable.com/feed',
-    'https://mausam.imd.gov.in/responsive/rss/weather.xml',
-    'https://www.thebetterindia.com/feed/',
-    'https://www.atlasobscura.com/feeds/latest',
     'https://thewire.in/category/science/feed',
   ],
 
   Lifestyle: [
     'https://www.cntraveller.in/feed/rss',
-    'https://www.outlooktraveller.com/rssfeeds/55',
     'https://www.nationalgeographic.com/latest-stories/_jcr_content/content/featuredstories.rss',
-    'https://www.curlytales.com/feed/',
-    'https://www.whatshot.in/rss',
-    'https://lbb.in/feed/',
-    'https://www.idiva.com/rss/all',
-    'https://www.missmalini.com/feed',
     'https://food.ndtv.com/feeds/rss/all/stories',
-    'https://timesofindia.indiatimes.com/rssfeeds/2269336.cms',
     'https://homegrown.co.in/rss',
     'https://rss.app/feeds/nHyHlnWbZQy8Hfdu.xml',
     'https://rss.app/feeds/xa2LLXGin1Gy9x7F.xml',
@@ -247,7 +209,6 @@ function deriveSourceName(feedUrl) {
       'gqindia.com':                   'GQ India',
       'architecturaldigest.in':        'AD India',
       'cntraveller.in':                'CN Traveller India',
-      'elle.in':                       'Elle India',
       'harpersbazaar.in':              "Harper's Bazaar",
       'homegrown.co.in':               'Homegrown',
       'grazia.co.in':                  'Grazia India',
