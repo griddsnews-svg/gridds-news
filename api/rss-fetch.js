@@ -403,84 +403,52 @@ function dedupByHeadline(stories) {
   return kept;
 }
 
-// ─── AI SCORING ───────────────────────────────────────────────────────────
-// Scores stories 1–10. Below MIN_SCORE → discarded.
-// Returns stories with _score and _reason added.
+// ─── COMBINED AI SCORE + SUMMARISE (one call per batch, run in parallel) ────
+// Each batch of stories is scored 1-10 AND summarised in a SINGLE OpenAI call.
+// Batches run in parallel (up to MAX_PARALLEL at once) for speed.
+// This roughly halves OpenAI time vs the old two-pass approach.
 
-async function scoreStories(stories) {
-  if (!OPENAI_KEY || !stories.length) {
-    // No API key — pass everything through as DRAFT with neutral score
-    return stories.map(s => ({ ...s, _score: 6, _reason: 'unscored' }));
+const SHORT_SOURCES = new Set(['NYT', 'BBC', 'BBC Cricket']);
+const SCORE_BATCH   = 8;    // stories per OpenAI call
+const MAX_PARALLEL  = 6;    // how many batches run at once
+
+function rawExcerpt(story) {
+  const wl = SHORT_SOURCES.has(story.source) ? 30 : 75;
+  const words = (story.rawSummary || '').split(/\s+/).slice(0, wl);
+  return words.join(' ') + (words.length >= wl ? '...' : '');
+}
+
+async function scoreAndSummariseBatch(batch) {
+  // Fallback if no API key
+  if (!OPENAI_KEY) {
+    return batch.map(s => ({ ...s, _score: 6, _reason: 'unscored', summary: rawExcerpt(s) }));
   }
 
-  const BATCH = 10;
-  const scored = [];
+  const input = batch.map((s, idx) => ({
+    i:   idx,
+    sec: s.section,
+    src: s.source,
+    h:   s.headline,
+    sum: (s.rawSummary || '').slice(0, 200),
+    short: SHORT_SOURCES.has(s.source),   // tells model to write 30-word summary
+  }));
 
-  for (let i = 0; i < stories.length; i += BATCH) {
-    const batch = stories.slice(i, i + BATCH);
-    const input = batch.map((s, idx) => ({
-      i:   idx,
-      sec: s.section,
-      src: s.source,
-      h:   s.headline,
-      sum: (s.rawSummary || '').slice(0, 120),
-    }));
+  const prompt = `You are the editorial filter AND summary writer for GRIDDS.NEWS, a curated Indian news aggregator.
 
-    const prompt = `You are the editorial filter for GRIDDS.NEWS, a curated Indian news aggregator.
-Score each story 1–10.
+For EACH story do TWO things:
+1. SCORE it 1-10:
+   HIGH (8-10): original reporting, strong analysis, genuinely newsworthy, credible non-tabloid source, unique today.
+   LOW (1-5): wire rewrite covered by 10 outlets, press release, clickbait, match scores with no narrative, astrology, stock ticks, filler.
+   MEDIUM (6-7): borderline.
+2. WRITE a tight factual summary in the style of Inshorts. Indian English. No opinion, no hype, no clickbait, no bullet points. Do not repeat the headline verbatim. If "short" is true write MAX 30 words, otherwise MAX 75 words.
 
-SCORE HIGH (8–10): original reporting, strong analysis, genuinely newsworthy, credible non-tabloid source, adds something unique today.
-SCORE LOW (1–5): wire rewrite covered by 10 outlets, press release dressed as news, clickbait, match scores with no narrative, astrology, stock ticks, vague lifestyle filler.
-SCORE MEDIUM (6–7): borderline, worth a human glance.
-
-Respond ONLY with a JSON array, same order as input:
-[{"i":0,"score":8,"reason":"original analysis"},{"i":1,"score":4,"reason":"wire rewrite"}]
+Respond ONLY with a JSON array, same order as input, each object:
+{"i":0,"score":8,"reason":"original analysis","summary":"the summary text"}
 No other text. No markdown.
 
 Stories:
 ${JSON.stringify(input)}`;
 
-    try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_KEY}`,
-          'Content-Type':  'application/json',
-        },
-        body: JSON.stringify({
-          model:       'gpt-4o-mini',
-          messages:    [{ role: 'user', content: prompt }],
-          max_tokens:  400,
-          temperature: 0.2,
-        }),
-        signal: AbortSignal.timeout(25000),
-      });
-
-      if (!res.ok) throw new Error(`OpenAI ${res.status}`);
-      const data   = await res.json();
-      const raw    = (data.choices?.[0]?.message?.content || '').trim();
-      const scores = JSON.parse(raw);
-
-      batch.forEach((s, idx) => {
-        const sc = scores.find(x => x.i === idx) || { score: 6, reason: 'unscored' };
-        scored.push({ ...s, _score: sc.score, _reason: sc.reason });
-      });
-
-    } catch (err) {
-      console.error('Scoring batch failed:', err.message);
-      // On failure pass batch through as DRAFT
-      batch.forEach(s => scored.push({ ...s, _score: 6, _reason: 'scoring-failed' }));
-    }
-  }
-
-  return scored;
-}
-
-// ─── AI SUMMARIES ─────────────────────────────────────────────────────────
-
-async function summariseWithOpenAI(story, wordLimit = 75) {
-  if (!OPENAI_KEY) return null;
-  const prompt = `Headline: ${story.headline}\n\nArticle excerpt: ${story.rawSummary}\n\nWrite a tight, factual summary in ${wordLimit} words MAXIMUM in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -490,52 +458,71 @@ async function summariseWithOpenAI(story, wordLimit = 75) {
       },
       body: JSON.stringify({
         model:       'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: `You are an editor writing crisp, factual news summaries in ${wordLimit} words MAXIMUM. Style of Inshorts. Indian English. No opinion, no hype, no padding.` },
-          { role: 'user',   content: prompt },
-        ],
-        max_tokens:  150,
-        temperature: 0.5,
+        messages:    [{ role: 'user', content: prompt }],
+        max_tokens:  1400,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(30000),
     });
-    if (!res.ok) return null;
+
+    if (!res.ok) throw new Error(`OpenAI ${res.status}`);
     const data = await res.json();
-    const out  = data.choices?.[0]?.message?.content;
-    return out ? out.trim() : null;
+    let raw = (data.choices?.[0]?.message?.content || '').trim();
+
+    // response_format json_object may wrap array in a key — handle both
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      // strip markdown fences if any
+      raw = raw.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(raw);
+    }
+    // If wrapped in an object like {results:[...]} or {stories:[...]}, unwrap
+    const arr = Array.isArray(parsed) ? parsed
+              : (parsed.results || parsed.stories || parsed.data || Object.values(parsed)[0]);
+
+    return batch.map((s, idx) => {
+      const r = (Array.isArray(arr) ? arr.find(x => x.i === idx) : null)
+                || { score: 6, reason: 'unscored', summary: rawExcerpt(s) };
+      return {
+        ...s,
+        _score:  r.score || 6,
+        _reason: r.reason || 'unscored',
+        summary: (r.summary && r.summary.trim()) ? r.summary.trim() : rawExcerpt(s),
+      };
+    });
+
   } catch (err) {
-    console.error('OpenAI summarise failed:', err.message);
-    return null;
+    console.error('Score+summarise batch failed:', err.message);
+    // Fallback: trusted sources still get benefit of doubt via _reason
+    return batch.map(s => ({ ...s, _score: 6, _reason: 'scoring-failed', summary: rawExcerpt(s) }));
   }
 }
 
-async function addSummaries(stories) {
-  const SHORT_SOURCES = new Set(['NYT', 'BBC', 'BBC Cricket']);
-  if (!OPENAI_KEY) {
-    stories.forEach(s => {
-      const wl    = SHORT_SOURCES.has(s.source) ? 30 : 75;
-      const words = s.rawSummary.split(/\s+/).slice(0, wl);
-      s.summary   = words.join(' ') + (words.length >= wl ? '...' : '');
-    });
-    return;
+// Process all stories in parallel batches
+async function scoreAndSummariseAll(stories) {
+  if (!stories.length) return [];
+
+  // Build list of batches
+  const batches = [];
+  for (let i = 0; i < stories.length; i += SCORE_BATCH) {
+    batches.push(stories.slice(i, i + SCORE_BATCH));
   }
-  const CONCURRENCY = 10;
+
+  // Run batches with limited parallelism
+  const results = [];
   let idx = 0;
   async function worker() {
-    while (idx < stories.length) {
-      const i  = idx++;
-      const s  = stories[i];
-      const wl = SHORT_SOURCES.has(s.source) ? 30 : 75;
-      const ai = await summariseWithOpenAI(s, wl);
-      if (ai) {
-        s.summary = ai;
-      } else {
-        const words = s.rawSummary.split(/\s+/).slice(0, wl);
-        s.summary   = words.join(' ') + (words.length >= wl ? '...' : '');
-      }
+    while (idx < batches.length) {
+      const b = batches[idx++];
+      const done = await scoreAndSummariseBatch(b);
+      results.push(...done);
     }
   }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  await Promise.all(Array.from({ length: Math.min(MAX_PARALLEL, batches.length) }, worker));
+  return results;
 }
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────
@@ -582,27 +569,23 @@ export default async function handler(req, res) {
   const deduped = dedupByHeadline(allStories);
   console.log(`After dedup: ${deduped.length} stories`);
 
-  // 3. AI scoring — runs in parallel with nothing (summaries come after filtering)
-  const scored = await scoreStories(deduped);
+  // 3. AI score + summarise in ONE pass (parallel batches)
+  const aiStart = Date.now();
+  const scored = await scoreAndSummariseAll(deduped);
+  const aiDuration = Date.now() - aiStart;
 
-  const autoLiveCount = { count: 0 };
-  const draftCount    = { count: 0 };
-  const discardCount  = { count: 0 };
+  let autoLiveN = 0, draftN = 0, discardN = 0;
 
   const toSend = scored
     .filter(s => {
-      if (s._score < MIN_SCORE) { discardCount.count++; return false; }
+      if (s._score < MIN_SCORE) { discardN++; return false; }
       return true;
     })
     .map(s => {
-      const isTrusted = TRUSTED_SOURCES.has(s.source);
-      // Trusted sources go LIVE if:
-      //   a) score >= AUTO_LIVE_SCORE (normal path), OR
-      //   b) scoring failed/timed out but source is trusted (give benefit of doubt)
+      const isTrusted     = TRUSTED_SOURCES.has(s.source);
       const scoringFailed = s._reason === 'scoring-failed' || s._reason === 'unscored';
-      const autoLive = isTrusted && (s._score >= AUTO_LIVE_SCORE || scoringFailed);
-      if (autoLive) autoLiveCount.count++;
-      else draftCount.count++;
+      const autoLive      = isTrusted && (s._score >= AUTO_LIVE_SCORE || scoringFailed);
+      if (autoLive) autoLiveN++; else draftN++;
 
       return {
         headline:   s.headline,
@@ -617,30 +600,8 @@ export default async function handler(req, res) {
       };
     });
 
-  console.log(`Scoring: kept ${toSend.length}, discarded ${discardCount.count}`);
-  console.log(`Auto-LIVE: ${autoLiveCount.count}, DRAFT queue: ${draftCount.count}`);
-
-  // 4. Generate AI summaries — only for stories scoring 7+ (saves time + cost)
-  //    Stories scoring 6 (border) get a raw excerpt instead
-  const aiStart = Date.now();
-  const forSummary = toSend.filter(s => {
-    const sc = scored.find(x => x.url === s.url);
-    return !sc || sc._score >= 7;
-  });
-  const skipSummary = toSend.filter(s => {
-    const sc = scored.find(x => x.url === s.url);
-    return sc && sc._score < 7;
-  });
-  // Give skipped stories a raw excerpt
-  skipSummary.forEach(s => {
-    if (!s.summary) {
-      const sc = scored.find(x => x.url === s.url);
-      const words = (sc?.rawSummary || '').split(/\s+/).slice(0, 75);
-      s.summary = words.join(' ') + (words.length >= 75 ? '...' : '');
-    }
-  });
-  await addSummaries(forSummary);
-  const aiDuration = Date.now() - aiStart;
+  console.log(`Scored+summarised in ${aiDuration}ms`);
+  console.log(`Kept ${toSend.length}, discarded ${discardN}, auto-LIVE ${autoLiveN}, draft ${draftN}`);
 
   // 5. POST to Google Sheet
   try {
@@ -658,10 +619,10 @@ export default async function handler(req, res) {
       ok:           true,
       raw:          allStories.length,
       afterDedup:   deduped.length,
-      discarded:    discardCount.count,
+      discarded:    discardN,
       sent:         toSend.length,
-      autoLive:     autoLiveCount.count,
-      draft:        draftCount.count,
+      autoLive:     autoLiveN,
+      draft:        draftN,
       aiSummaries:  !!OPENAI_KEY,
       aiDurationMs: aiDuration,
       webhook:      parsed,
