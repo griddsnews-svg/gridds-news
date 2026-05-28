@@ -1046,3 +1046,61 @@ body.editing-tiles .tile-wrap:not([data-locked="true"]) { animation: wiggle 0.4s
   box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 body.editing-tiles .edit-mode-banner { display: block; }
+
+/* ═══════════════ SNAKE BREAK ═══════════════ */
+#snake-overlay{
+  position:fixed; inset:0; z-index:9999; display:none;
+  background:rgba(8,8,12,0.97); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  align-items:center; justify-content:center;
+}
+#snake-overlay.show{ display:flex; }
+#snake-inner{
+  width:100%; max-width:360px; padding:20px 18px 24px;
+  display:flex; flex-direction:column; gap:14px;
+}
+#snake-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+#snake-title{
+  font-family:'Libre Baskerville',Georgia,serif; font-weight:700; font-size:22px;
+  color:#F5F0E8; letter-spacing:1px; line-height:1;
+}
+#snake-sub{ font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(245,240,232,0.45);
+  text-transform:uppercase; letter-spacing:1.5px; margin-top:6px; }
+#snake-close{
+  background:transparent; border:1px solid rgba(245,240,232,0.25); color:rgba(245,240,232,0.7);
+  border-radius:20px; padding:7px 13px; font-size:12px; font-family:'DM Sans',sans-serif;
+  cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+#snake-close:active{ transform:scale(0.96); }
+#snake-scorebar{
+  display:flex; justify-content:space-between; font-family:'DM Sans',sans-serif;
+  font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(245,240,232,0.4);
+}
+#snake-scorebar b{ color:#E8520A; font-size:15px; margin-left:5px; font-weight:700; }
+#snake-stage{ position:relative; width:100%; aspect-ratio:1/1; border-radius:14px; overflow:hidden;
+  background:#101018; border:1px solid rgba(245,240,232,0.08); }
+#snake-canvas{ width:100%; height:100%; display:block; touch-action:none; }
+#snake-gameover, #snake-start{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px; text-align:center;
+  background:rgba(8,8,12,0.82); padding:20px;
+}
+#snake-gameover{ display:none; }
+#snake-go-title{ font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:#F5F0E8; }
+#snake-go-score{ font-family:'DM Sans',sans-serif; font-size:13px; color:rgba(245,240,232,0.55); }
+#snake-start-icon{ font-size:42px; }
+#snake-start-txt{ font-family:'DM Sans',sans-serif; font-size:13px; color:rgba(245,240,232,0.55);
+  letter-spacing:0.5px; }
+#snake-restart, #snake-resume{
+  font-family:'DM Sans',sans-serif; font-size:13px; border-radius:22px; padding:9px 22px;
+  cursor:pointer; border:none; font-weight:600;
+}
+#snake-restart{ background:#E8520A; color:#fff; }
+#snake-resume{ background:transparent; color:rgba(245,240,232,0.6); border:1px solid rgba(245,240,232,0.25); }
+#snake-restart:active, #snake-resume:active{ transform:scale(0.96); }
+#snake-hint{ font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(245,240,232,0.3);
+  text-align:center; letter-spacing:0.5px; }
+body.light-mode #snake-overlay{ background:rgba(245,240,232,0.97); }
+body.light-mode #snake-title,
+body.light-mode #snake-go-title{ color:#1a1a2a; }
+body.light-mode #snake-stage{ background:#fff; border-color:rgba(0,0,0,0.1); }
+body.light-mode #snake-close{ color:#444; border-color:rgba(0,0,0,0.2); }
