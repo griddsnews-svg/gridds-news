@@ -4,11 +4,10 @@
 // Receives URL + section from /submit form, fetches the article page,
 // scrapes headline/image/text, generates AI summary, saves to Supabase.
 //
-// Password-protected via EDITOR_PASSWORD env var.
+// Auth: Supabase JWT token (from editor Google sign-in session)
 // ═══════════════════════════════════════════════════════════════════════════
  
 const OPENAI_KEY      = process.env.OPENAI_API_KEY;
-const EDITOR_PASSWORD = process.env.EDITOR_PASSWORD;
 const SUPABASE_URL    = process.env.SUPABASE_URL;
 const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY;   // service_role
  
@@ -105,6 +104,45 @@ function detectSource(html, articleUrl) {
   } catch (e) { return 'Unknown'; }
 }
  
+// ─── AUTH: VERIFY SUPABASE JWT ────────────────────────────────────────────
+ 
+async function verifySupabaseToken(token) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPABASE_KEY,
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const user = await res.json();
+    if (!user || !user.id) return null;
+ 
+    // Check profile role — only admin and editor allowed
+    const profileRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=role`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    if (!profileRes.ok) return null;
+    const profiles = await profileRes.json();
+    const role = profiles?.[0]?.role;
+    if (role !== 'admin' && role !== 'editor') return null;
+ 
+    return { id: user.id, email: user.email, role };
+  } catch (e) {
+    console.error('Token verification failed:', e.message);
+    return null;
+  }
+}
+ 
 // ─── FETCH WITH PROXY FALLBACK ────────────────────────────────────────────
  
 const BROWSER_HEADERS = {
@@ -189,17 +227,21 @@ async function summariseWithOpenAI(headline, articleText) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Editor-Password');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
  
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'POST only' });
  
-  // ─── Auth ───────────────────────────────────────────────────────────
-  const providedPwd = req.headers['x-editor-password'] || (req.body && req.body.password) || '';
-  if (!EDITOR_PASSWORD) return res.status(500).json({ error: 'EDITOR_PASSWORD env var not set' });
-  if (providedPwd !== EDITOR_PASSWORD) {
-    await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
-    return res.status(401).json({ error: 'Unauthorized' });
+  // ─── Auth: verify Supabase session token ────────────────────────────
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace('Bearer ', '').trim();
+  if (!token) {
+    return res.status(401).json({ error: 'No auth token provided' });
+  }
+ 
+  const user = await verifySupabaseToken(token);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
   }
  
   // ─── Input ──────────────────────────────────────────────────────────
