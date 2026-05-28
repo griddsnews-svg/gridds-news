@@ -995,7 +995,7 @@ document.getElementById('qs-fetch').addEventListener('click', async () => {
 
   try {
     const { data: { session: _sess } } = await sb.auth.getSession();
-    const res = await fetch('/api/editor-submit', {
+    const res = await fetch('/api/submit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
