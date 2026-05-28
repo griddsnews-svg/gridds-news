@@ -1,161 +1,112 @@
-// ─────────────────────────────────────────────────────────────────────────
-// GRIDDS.NEWS — Edition API v2
-// Fetches all section tabs from the Editorial Master sheet,
-// filters LIVE stories, returns clean JSON for the GRIDDS app.
-// Cache: 30 seconds
-// ─────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// GRIDDS.NEWS — Edition API   /api/edition
+//
+// Reads all LIVE stories from Supabase and returns them in the exact shape
+// the public app (index.html) expects:
+//   { meta: { editionDate }, sections: { <appKey>: { label, color, stories } } }
+//
+// Each story is mapped to the app's field names: { h, summary, source, url, image }
+//
+// Edge-cached 60s so it survives traffic spikes.
+// ═══════════════════════════════════════════════════════════════════════════
 
-const SHEET_ID = '1c91ctKwDGJUkWnicAycilNyg_B0-lCqj1zrSYNhe2Zo';
+const SUPABASE_URL  = process.env.SUPABASE_URL;
+const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY;
 
-// Section key → Sheet tab name → display label & colour
-// Tab names must match exactly what's in your Google Sheet
-const SECTIONS = [
-  { key: 'headlines',     tab: 'Headlines',     label: 'Headlines',      color: '#E8520A' },
-  { key: 'finance',       tab: 'Finance',       label: 'Finance',        color: '#1B5E20' },
-  { key: 'wellness',      tab: 'Wellness',      label: 'Wellness',       color: '#6A1B9A' },
-  { key: 'politics',      tab: 'Politics',      label: 'Politics',       color: '#8B1538' },
-  { key: 'ipl',           tab: 'IPL',           label: 'IPL 2026',       color: '#FFA000' },
-  { key: 'loves',         tab: 'GRIDD Loves',   label: '✶ GRIDD Loves',  color: '#7B5EA7' },
-  { key: 'cityNews',      tab: 'City News',     label: 'City News',      color: '#37474F' },
-  { key: 'worldNews',     tab: 'World News',    label: 'World News',     color: '#1565C0' },
-  { key: 'entertainment', tab: 'Entertainment', label: 'Entertainment',  color: '#C2185B' },
-  { key: 'tech',          tab: 'Tech',          label: 'Tech',           color: '#1976D2' },
-  { key: 'longreads',     tab: 'Long Reads',    label: 'Long Reads',     color: '#5D4037' },
-  { key: 'opinions',      tab: 'Opinions',      label: 'Opinions',       color: '#455A64' },
-  { key: 'thisAndThat',   tab: 'This & That',   label: 'This & That',    color: '#00695C' },
-  { key: 'lifestyle',     tab: 'Lifestyle',     label: 'Lifestyle',      color: '#006064' },
-];
+// Database section id → the key the APP uses internally (note camelCase differences)
+const DB_TO_APP_KEY = {
+  'headlines':     'headlines',
+  'finance':       'finance',
+  'wellness':      'wellness',
+  'politics':      'politics',
+  'ipl':           'ipl',
+  'griddloves':    'loves',          // app uses 'loves'
+  'citynews':      'cityNews',       // app uses camelCase
+  'worldnews':     'worldNews',
+  'entertainment': 'entertainment',
+  'tech':          'tech',
+  'opinions':      'opinions',
+  'longreads':     'longreads',
+  'thisandthat':   'thisAndThat',
+  'lifestyle':     'lifestyle',
+};
 
-const COL = { ID: 0, HEADLINE: 1, SUMMARY: 2, SOURCE: 3, URL: 4, IMAGE: 5, ORDER: 6, STATUS: 7, PUBLISHED_AT: 8 };
-
-function wrapImageForProxy(rawUrl) {
-  if (!rawUrl) return '';
-  const trimmed = rawUrl.trim();
-  if (!trimmed) return '';
-  if (trimmed.startsWith('/api/img') || trimmed.startsWith('data:')) return trimmed;
-  if (!/^https?:\/\//i.test(trimmed)) return trimmed;
-  return '/api/img?url=' + encodeURIComponent(trimmed);
-}
-
-async function fetchTab(tabName) {
-  // &t= busts Google's server-side cache so edits show up immediately
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}&t=${Date.now()}`;
-  try {
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS)' },
-    });
-    if (!res.ok) {
-      console.warn(`Tab "${tabName}" returned status ${res.status}`);
-      return [];
-    }
-    const text = await res.text();
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start < 0 || end <= start) return [];
-
-    const data = JSON.parse(text.slice(start, end + 1));
-    if (!data.table || !data.table.rows) return [];
-
-    const stories = [];
-    data.table.rows.forEach((row) => {
-      if (!row.c) return;
-      const cells = row.c.map(c => (c && c.v !== null && c.v !== undefined) ? String(c.v).trim() : '');
-
-      const headline = cells[COL.HEADLINE];
-      const status   = (cells[COL.STATUS] || '').toUpperCase();
-
-      if (!headline) return;
-      if (status !== 'LIVE') return;
-      if (headline.startsWith('[')) return;
-
-      stories.push({
-        id:      cells[COL.ID]      || '',
-        h:       headline,
-        summary: cells[COL.SUMMARY] || '',
-        source:  cells[COL.SOURCE]  || '',
-        url:     cells[COL.URL]     || '',
-        image:   wrapImageForProxy(cells[COL.IMAGE] || ''),
-        order:   parseInt(cells[COL.ORDER]) || 999,
-      });
-    });
-
-    stories.sort((a, b) => a.order - b.order);
-    return stories;
-  } catch (err) {
-    console.error(`Error fetching tab "${tabName}":`, err.message);
-    return [];
-  }
-}
-
-async function fetchControl() {
-  // &t= busts Google's server-side cache
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Edition Control')}&t=${Date.now()}`;
-  try {
-    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS)' } });
-    if (!res.ok) return null;
-    const text = await res.text();
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start < 0 || end <= start) return null;
-    const data = JSON.parse(text.slice(start, end + 1));
-    if (!data.table || !data.table.rows) return null;
-
-    const ctrl = {};
-    data.table.rows.forEach(row => {
-      if (!row.c || row.c.length < 2) return;
-      const label = row.c[0] && row.c[0].v ? String(row.c[0].v).trim() : '';
-      const value = row.c[1] && row.c[1].v !== null && row.c[1].v !== undefined ? row.c[1].v : '';
-      if (label) ctrl[label] = value;
-    });
-    return ctrl;
-  } catch (err) {
-    return null;
-  }
-}
+// Labels + colours per app key (matches the hardcoded SECS in index.html)
+const SECTION_META = {
+  headlines:     { label: 'Headlines',     color: '#E8520A' },
+  finance:       { label: 'Finance',       color: '#1B5E20' },
+  wellness:      { label: 'Wellness',      color: '#6A1B9A' },
+  politics:      { label: 'Politics',      color: '#8B1538' },
+  ipl:           { label: 'IPL 2026',      color: '#FFA000' },
+  loves:         { label: '✶ GRIDD Loves', color: '#7B5EA7' },
+  cityNews:      { label: 'City News',     color: '#37474F' },
+  worldNews:     { label: 'World News',    color: '#1565C0' },
+  entertainment: { label: 'Entertainment', color: '#C2185B' },
+  tech:          { label: 'Tech',          color: '#1976D2' },
+  longreads:     { label: 'Long Reads',    color: '#5D4037' },
+  opinions:      { label: 'Opinions',      color: '#455A64' },
+  thisAndThat:   { label: 'This & That',   color: '#00695C' },
+  lifestyle:     { label: 'Lifestyle',     color: '#006064' },
+};
 
 export default async function handler(req, res) {
-  // 30s CDN cache, no stale serving
-  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=0');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (!SUPABASE_URL || !SUPABASE_ANON) {
+    return res.status(500).json({ error: 'Supabase env vars not set' });
+  }
+
+  const url = `${SUPABASE_URL}/rest/v1/stories`
+    + `?status=eq.LIVE`
+    + `&select=section_id,headline,summary,source,url,image,sort_order`
+    + `&order=section_id.asc,sort_order.asc`;
 
   try {
-    const [sectionsData, control] = await Promise.all([
-      Promise.all(SECTIONS.map(s => fetchTab(s.tab))),
-      fetchControl(),
-    ]);
-
-    const edition = {
-      meta: {
-        editionNumber: control ? (control['Edition Number'] || 1) : 1,
-        editionDate:   control ? (control['Edition Date'] || new Date().toISOString().split('T')[0]) : new Date().toISOString().split('T')[0],
-        editionTitle:  control ? (control['Edition Title (optional)'] || '') : '',
-        editor:        control ? (control['Editor'] || 'GRIDDS Editor') : 'GRIDDS Editor',
-        published:     control ? (String(control['PUBLISHED'] || 'YES').toUpperCase() === 'YES') : true,
-        generatedAt:   new Date().toISOString(),
+    const resp = await fetch(url, {
+      headers: {
+        'apikey':        SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
       },
-      sections: {},
-    };
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      return res.status(502).json({ error: 'Supabase read failed', detail: txt.slice(0, 200) });
+    }
+    const rows = await resp.json();
 
-    SECTIONS.forEach((s, i) => {
-      edition.sections[s.key] = {
-        label:   s.label,
-        color:   s.color,
-        stories: sectionsData[i],
+    // Build the sections object in app format
+    const sections = {};
+    // Seed all sections (so empty ones are explicitly empty)
+    Object.keys(SECTION_META).forEach(appKey => {
+      sections[appKey] = {
+        label:   SECTION_META[appKey].label,
+        color:   SECTION_META[appKey].color,
+        stories: [],
       };
     });
 
-    if (!edition.meta.published) {
-      return res.status(200).json({
-        meta: edition.meta,
-        sections: {},
-        message: "Today's edition is being prepared.",
+    // Map each LIVE story into its app section
+    for (const r of rows) {
+      const appKey = DB_TO_APP_KEY[r.section_id];
+      if (!appKey || !sections[appKey]) continue;
+      sections[appKey].stories.push({
+        h:       r.headline,
+        summary: r.summary || '',
+        source:  r.source || '',
+        url:     r.url || '',
+        image:   r.image || '',
+        section: appKey,
       });
     }
 
-    return res.status(200).json(edition);
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    return res.status(200).json({
+      meta:     { editionDate: new Date().toISOString() },
+      sections: sections,
+    });
+
   } catch (err) {
-    console.error('Edition API error:', err);
-    return res.status(500).json({ error: 'Failed to build edition', detail: err.message });
+    return res.status(500).json({ error: 'Edition fetch failed', detail: err.message });
   }
 }
+
+export const config = { maxDuration: 10 };
