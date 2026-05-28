@@ -1,6 +1,6 @@
 # GRIDDS.NEWS — Deployment Package
 
-This folder is your GRIDDS.NEWS website + content API.
+This folder is your GRIDDS.NEWS website + content API. 
 
 ## Files
 
