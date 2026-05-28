@@ -14,7 +14,7 @@ This folder is your GRIDDS.NEWS website + content API.
 1. You edit stories in the Google Sheet (set Status = LIVE to publish)
 2. The app calls `/api/edition` on launch
 3. The API fetches your sheet, returns only LIVE stories
-4. Cached for 5 minutes (so the sheet isn't hammered)
+4. Cached for 5 minutes (so the sheet isn't hammered)  
 5. App updates automatically every time it loads
 
 ## Sheet ID hardcoded
