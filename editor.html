@@ -140,10 +140,6 @@
     width: 64px; height: 64px; border-radius: 6px;
     object-fit: cover; flex-shrink: 0; background: var(--panel-2);
   }
-  .story-thumb.noimg {
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-faint); font-size: 9px; text-align: center;
-  }
   .story-main { flex: 1; min-width: 0; }
   .story-headline { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
   .story-summary { font-size: 12px; color: var(--text-dim); line-height: 1.45; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -207,6 +203,81 @@
   .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
   .modal-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .modal-cancel { background: none; border: 1px solid var(--border-2); color: var(--text-dim); border-radius: 6px; padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ── IMAGE ADD POPOVER ── */
+  .img-popover {
+    position: absolute; z-index: 50;
+    background: var(--panel); border: 1px solid var(--border-2);
+    border-radius: 10px; padding: 14px; width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    left: 80px; top: 0;
+  }
+  .img-popover-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .img-popover input[type="text"] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border-2);
+    border-radius: 6px; padding: 8px 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+  }
+  .img-popover-preview {
+    width: 100%; height: 100px; object-fit: cover; border-radius: 6px;
+    margin-top: 8px; display: none; background: var(--panel-2);
+  }
+  .img-popover-actions {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .img-popover-actions button {
+    border: none; border-radius: 5px; padding: 6px 14px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .img-pop-save { background: var(--green); color: #fff; }
+  .img-pop-upload { background: var(--blue); color: #fff; }
+  .img-pop-cancel { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border) !important; }
+  .img-upload-zone {
+    border: 2px dashed var(--border-2); border-radius: 6px;
+    padding: 12px; text-align: center; margin-top: 8px;
+    color: var(--text-faint); font-size: 11px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .img-upload-zone:hover, .img-upload-zone.dragover {
+    border-color: var(--blue); background: rgba(43,124,211,0.06);
+  }
+  .img-upload-zone input { display: none; }
+  .img-upload-progress {
+    display: none; margin-top: 6px; font-size: 11px; color: var(--amber);
+  }
+
+  .story-thumb.noimg {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); font-size: 9px; text-align: center;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    border: 2px dashed transparent; position: relative;
+  }
+  .story-thumb.noimg:hover {
+    border-color: var(--blue); background: rgba(43,124,211,0.08);
+    color: var(--blue);
+  }
+  .story { position: relative; }
+
+  /* ── EDIT MODAL IMAGE PREVIEW ── */
+  .edit-img-preview {
+    width: 100%; height: 140px; object-fit: cover; border-radius: 6px;
+    margin-top: 6px; background: var(--panel-2); display: none;
+  }
+  .edit-img-upload-zone {
+    border: 2px dashed var(--border-2); border-radius: 6px;
+    padding: 14px; text-align: center; margin-top: 8px;
+    color: var(--text-faint); font-size: 12px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .edit-img-upload-zone:hover {
+    border-color: var(--blue); background: rgba(43,124,211,0.06);
+  }
+  .edit-img-upload-zone input { display: none; }
 
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -362,7 +433,14 @@
     <label>Summary</label>
     <textarea id="edit-summary"></textarea>
     <label>Image URL</label>
-    <input type="text" id="edit-image">
+    <input type="text" id="edit-image" placeholder="Paste image URL or upload below">
+    <img class="edit-img-preview" id="edit-img-preview">
+    <div class="edit-img-upload-zone" id="edit-img-upload-zone">
+      <div>📷 Drop image here or <strong style="color:var(--blue)">click to upload</strong></div>
+      <div style="margin-top:4px;font-size:10px;color:var(--text-faint)">JPG, PNG, WebP · Max 5 MB</div>
+      <input type="file" id="edit-img-file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div id="edit-img-uploading" style="display:none;margin-top:6px;font-size:11px;color:var(--amber)">Uploading image…</div>
     <div class="modal-actions">
       <button class="modal-cancel" id="modal-cancel">Cancel</button>
       <button class="modal-save" id="modal-save">Save</button>
@@ -568,7 +646,12 @@ function renderStory(story, sec) {
   // Thumbnail
   const thumbHtml = story.image
     ? `<img class="story-thumb" src="/api/img?url=${encodeURIComponent(story.image)}&section=${story.section_id}" onerror="this.classList.add('noimg');this.removeAttribute('src');this.textContent='no image'">`
-    : `<div class="story-thumb noimg">no image</div>`;
+    : `<div class="story-thumb noimg" data-story-id="${story.id}" onclick="openImagePopover(event, '${story.id}')" title="Click to add image">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span style="font-size:8px;letter-spacing:0.5px">ADD IMAGE</span>
+        </span>
+      </div>`;
 
   // Score badge
   let scoreBadge = '';
@@ -656,6 +739,16 @@ function openEdit(story) {
   document.getElementById('edit-summary').value = story.summary || '';
   document.getElementById('edit-image').value = story.image || '';
 
+  // Show image preview if image exists
+  const prevEl = document.getElementById('edit-img-preview');
+  if (story.image) {
+    prevEl.src = story.image;
+    prevEl.style.display = 'block';
+    prevEl.onerror = () => { prevEl.style.display = 'none'; };
+  } else {
+    prevEl.style.display = 'none';
+  }
+
   // Populate section dropdown — admin can move to any section,
   // editors can only move within sections they own
   const sel = document.getElementById('edit-section');
@@ -709,6 +802,161 @@ function toast(msg) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── IMAGE POPOVER (inline add-image on story cards) ──
+let activePopover = null;
+
+function closeImagePopover() {
+  if (activePopover) { activePopover.remove(); activePopover = null; }
+}
+
+function openImagePopover(event, storyId) {
+  event.stopPropagation();
+  closeImagePopover();
+
+  const storyEl = event.target.closest('.story');
+  const pop = document.createElement('div');
+  pop.className = 'img-popover';
+  pop.innerHTML = `
+    <div class="img-popover-title">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      Add Image
+    </div>
+    <input type="text" id="pop-img-url" placeholder="Paste image URL…">
+    <img class="img-popover-preview" id="pop-img-preview">
+    <div class="img-upload-zone" id="pop-upload-zone">
+      <div>📷 Drop image or <strong style="color:var(--blue)">click to upload</strong></div>
+      <div style="margin-top:3px;font-size:10px;color:var(--text-faint)">JPG, PNG, WebP · Max 5 MB</div>
+      <input type="file" id="pop-img-file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div class="img-upload-progress" id="pop-upload-progress">Uploading…</div>
+    <div class="img-popover-actions">
+      <button class="img-pop-save" id="pop-save">Save</button>
+      <button class="img-pop-cancel" id="pop-cancel">Cancel</button>
+    </div>
+  `;
+  storyEl.appendChild(pop);
+  activePopover = pop;
+
+  const urlInput = pop.querySelector('#pop-img-url');
+  const preview = pop.querySelector('#pop-img-preview');
+  const uploadZone = pop.querySelector('#pop-upload-zone');
+  const fileInput = pop.querySelector('#pop-img-file');
+  const progressEl = pop.querySelector('#pop-upload-progress');
+
+  // Live preview on URL input
+  urlInput.addEventListener('input', () => {
+    const v = urlInput.value.trim();
+    if (v) { preview.src = v; preview.style.display = 'block'; preview.onerror = () => { preview.style.display = 'none'; }; }
+    else { preview.style.display = 'none'; }
+  });
+
+  // Click-to-upload
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handlePopUpload(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handlePopUpload(fileInput.files[0]); });
+
+  async function handlePopUpload(file) {
+    if (file.size > 5 * 1024 * 1024) { toast('File too large (max 5 MB)'); return; }
+    progressEl.style.display = 'block';
+    const url = await uploadImageToStorage(file, storyId);
+    progressEl.style.display = 'none';
+    if (url) {
+      urlInput.value = url;
+      preview.src = url;
+      preview.style.display = 'block';
+    }
+  }
+
+  // Save
+  pop.querySelector('#pop-save').addEventListener('click', async () => {
+    const imgUrl = urlInput.value.trim();
+    if (!imgUrl) { toast('Please enter or upload an image'); return; }
+    const { error } = await sb.from('stories').update({ image: imgUrl }).eq('id', storyId);
+    if (error) { toast('Error: ' + error.message); return; }
+    toast('Image added ✓');
+    closeImagePopover();
+    loadStories();
+  });
+
+  // Cancel
+  pop.querySelector('#pop-cancel').addEventListener('click', closeImagePopover);
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (activePopover && !activePopover.contains(e.target)) {
+        closeImagePopover();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 50);
+}
+
+// ── UPLOAD IMAGE TO SUPABASE STORAGE ──
+async function uploadImageToStorage(file, storyId) {
+  try {
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const fileName = `story-${storyId}-${Date.now()}.${ext}`;
+    const { data, error } = await sb.storage.from('story-images').upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type,
+    });
+    if (error) {
+      // If bucket doesn't exist, fall back to converting to data URL
+      console.warn('Storage upload failed:', error.message);
+      toast('Storage upload failed — try pasting a URL instead');
+      return null;
+    }
+    // Get public URL
+    const { data: urlData } = sb.storage.from('story-images').getPublicUrl(fileName);
+    return urlData?.publicUrl || null;
+  } catch (e) {
+    console.error('Upload error:', e);
+    toast('Upload error: ' + e.message);
+    return null;
+  }
+}
+
+// ── EDIT MODAL IMAGE PREVIEW + UPLOAD ──
+const editImageInput = document.getElementById('edit-image');
+const editImgPreview = document.getElementById('edit-img-preview');
+const editUploadZone = document.getElementById('edit-img-upload-zone');
+const editFileInput = document.getElementById('edit-img-file');
+const editUploading = document.getElementById('edit-img-uploading');
+
+editImageInput.addEventListener('input', () => {
+  const v = editImageInput.value.trim();
+  if (v) {
+    editImgPreview.src = v;
+    editImgPreview.style.display = 'block';
+    editImgPreview.onerror = () => { editImgPreview.style.display = 'none'; };
+  } else {
+    editImgPreview.style.display = 'none';
+  }
+});
+
+editUploadZone.addEventListener('click', () => editFileInput.click());
+editUploadZone.addEventListener('dragover', e => { e.preventDefault(); editUploadZone.style.borderColor = 'var(--blue)'; editUploadZone.style.background = 'rgba(43,124,211,0.06)'; });
+editUploadZone.addEventListener('dragleave', () => { editUploadZone.style.borderColor = ''; editUploadZone.style.background = ''; });
+editUploadZone.addEventListener('drop', e => { e.preventDefault(); editUploadZone.style.borderColor = ''; editUploadZone.style.background = ''; if (e.dataTransfer.files[0]) handleEditUpload(e.dataTransfer.files[0]); });
+editFileInput.addEventListener('change', () => { if (editFileInput.files[0]) handleEditUpload(editFileInput.files[0]); });
+
+async function handleEditUpload(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('File too large (max 5 MB)'); return; }
+  const storyId = document.getElementById('edit-id').value;
+  editUploading.style.display = 'block';
+  const url = await uploadImageToStorage(file, storyId);
+  editUploading.style.display = 'none';
+  if (url) {
+    editImageInput.value = url;
+    editImgPreview.src = url;
+    editImgPreview.style.display = 'block';
+  }
 }
 
 // ── TAB NAVIGATION ──
