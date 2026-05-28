@@ -1,23 +1,25 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// GRIDDS.NEWS — RSS Fetcher v5.0
+// GRIDDS.NEWS — RSS + Webpage Fetcher v7.0
 //
-// CHANGES from v4:
-// 1. source_published_at stored from RSS pubDate (issue #2)
-// 2. OG:image fallback for NDTV, TheKen etc (issue #3)
-// 3. Summaries enforced 60-75 words via prompt (issue #4-5)
-// 4. City News reweighted: Gurgaon > Delhi > Noida first (issue #6)
-// 5. More Wellness/Lifestyle/Entertainment feeds (issue #7)
-// 6. GRIDD Loves NEVER auto-publishes (issue #7)
-// 7. Cross-source auto-publish: Headlines 3+ of NDTV/IE/HT/Hindu (issue #10)
-// 8. Cross-source auto-publish: Finance both Mint+ET (issue #11)
-// 9. Drafts older than 72h auto-archived on each run (issue #8)
+// CHANGES from v6:
+// 0a. Feed list loaded from rss_feeds table (dashboard-controlled), fallback to
+//     hardcoded FEEDS (RSS only) if the table read fails.
+// 0b. WEBPAGE feeds (is_webpage=true) are now scraped: fetch the listing page,
+//     extract same-domain article links under the section path, scrape up to
+//     10 articles each (headline/image/text via OG tags + article/main/p),
+//     then run them through the same dedup + AI summarise + publish pipeline.
+//     Scraping logic ported from api/submit.js (direct → proxy fallback).
+//
+// (v5 changes retained: pubDate timestamps, OG image fallback, 60-75 word
+//  summaries, reweighted City News, GRIDD Loves never auto-publishes,
+//  cross-source auto-publish for Headlines/Finance, 72h draft auto-archive.)
 // ═══════════════════════════════════════════════════════════════════════════
- 
+
 const OPENAI_KEY    = process.env.OPENAI_API_KEY;
 const CRON_SECRET   = process.env.CRON_SECRET;
 const SUPABASE_URL  = process.env.SUPABASE_URL;
 const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY;
- 
+
 const SECTION_ID = {
   'Headlines': 'headlines', 'Finance': 'finance', 'Wellness': 'wellness',
   'Politics': 'politics', 'IPL': 'ipl', 'GRIDD Loves': 'griddloves',
@@ -25,11 +27,11 @@ const SECTION_ID = {
   'Tech': 'tech', 'Opinions': 'opinions', 'Long Reads': 'longreads',
   'This & That': 'thisandthat', 'Lifestyle': 'lifestyle',
 };
- 
+
 // ─── SCORING CONFIG ───────────────────────────────────────────────────────
 const MIN_SCORE = 6;
 const AUTO_LIVE_SCORE = 8;
- 
+
 const TRUSTED_SOURCES = new Set([
   'The Wire', 'Scroll', 'The Print', 'Mint', 'The Ken', 'Finshots',
   'Capitalmind', 'Morning Context', 'Inc42', 'MediaNama', 'Entrackr',
@@ -38,19 +40,22 @@ const TRUSTED_SOURCES = new Set([
   'Foreign Affairs', 'Al Jazeera', 'BBC', 'Founding Fuel',
   'The India Forum', 'Himal Southasian', 'Article 14',
 ]);
- 
+
 // ─── CROSS-SOURCE AUTO-PUBLISH CONFIG (issues #10, #11) ──────────────────
 // Headlines: if 3+ of these sources carry same story → auto LIVE
 const HEADLINES_AUTO_SOURCES = new Set(['NDTV', 'Indian Express', 'Hindustan Times', 'The Hindu']);
 const HEADLINES_AUTO_THRESHOLD = 3;
- 
+
 // Finance: if BOTH Mint AND Economic Times carry same story → auto LIVE
 const FINANCE_AUTO_SOURCES = new Set(['Mint', 'Economic Times']);
 const FINANCE_AUTO_THRESHOLD = 2;
- 
-// ─── FEED LIST v3 — reweighted city, more wellness/lifestyle/entertainment ──
+
+// ─── FEED LIST v3 — FALLBACK ONLY ─────────────────────────────────────────
+// NOTE: As of v6 the live feed list is read from the rss_feeds table so it can
+// be managed from the editorial dashboard. This hardcoded object is now only a
+// safety fallback used if the table read fails or returns nothing.
 const FEEDS = {
- 
+
   Headlines: [
     'https://feeds.feedburner.com/ndtvnews-top-stories',
     'https://www.thehindu.com/news/national/feeder/default.rss',
@@ -63,7 +68,7 @@ const FEEDS = {
     'https://article-14.com/feed',
     'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml',
   ],
- 
+
   Finance: [
     'https://www.livemint.com/rss/economy',
     'https://www.livemint.com/rss/money',
@@ -76,7 +81,7 @@ const FEEDS = {
     'https://finshots.in/feed/',
     'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
   ],
- 
+
   Wellness: [
     'https://indianexpress.com/section/health-wellness/feed/',
     'https://www.thehindu.com/sci-tech/health/feeder/default.rss',
@@ -89,7 +94,7 @@ const FEEDS = {
     'https://timesofindia.indiatimes.com/rssfeeds/3908999.cms',
     'https://www.thehindubusinessline.com/blink/know/feeder/default.rss',
   ],
- 
+
   Politics: [
     'https://www.thehindu.com/news/national/feeder/default.rss',
     'https://indianexpress.com/section/political-pulse/feed/',
@@ -100,7 +105,7 @@ const FEEDS = {
     'https://economictimes.indiatimes.com/news/politics-and-nation/rssfeeds/1052732854.cms',
     'https://caravanmagazine.in/rss/all.xml',
   ],
- 
+
   IPL: [
     'https://www.espncricinfo.com/rss/content/story/feeds/0.xml',
     'https://feeds.feedburner.com/ndtvsports-cricket',
@@ -109,7 +114,7 @@ const FEEDS = {
     'https://indianexpress.com/section/sports/ipl/feed/',
     'https://www.thehindu.com/sport/cricket/feeder/default.rss',
   ],
- 
+
   'GRIDD Loves': [
     'https://vogue.in/feed/rss',
     'https://www.gqindia.com/feed/rss',
@@ -119,7 +124,7 @@ const FEEDS = {
     'https://www.thehindu.com/magazine/feeder/default.rss',
     'https://the-ken.com/feed/',
   ],
- 
+
   // REWEIGHTED: Gurgaon > Delhi > Noida first, then 1 each for Mumbai/Bangalore
   'City News': [
     'https://indianexpress.com/section/cities/delhi/feed/',
@@ -132,7 +137,7 @@ const FEEDS = {
     'https://indianexpress.com/section/cities/mumbai/feed/',
     'https://www.thehindu.com/news/cities/bangalore/feeder/default.rss',
   ],
- 
+
   'World News': [
     'https://feeds.bbci.co.uk/news/world/rss.xml',
     'https://www.thehindu.com/news/international/feeder/default.rss',
@@ -142,7 +147,7 @@ const FEEDS = {
     'https://foreignpolicy.com/feed/',
     'https://thewire.in/category/world/feed',
   ],
- 
+
   Entertainment: [
     'https://www.pinkvilla.com/rss.xml',
     'https://indianexpress.com/section/entertainment/feed/',
@@ -153,7 +158,7 @@ const FEEDS = {
     'https://scroll.in/reel/feed',
     'https://www.filmcompanion.in/feed/',
   ],
- 
+
   Tech: [
     'https://www.theverge.com/rss/index.xml',
     'https://techcrunch.com/feed/',
@@ -167,7 +172,7 @@ const FEEDS = {
     'https://www.technologyreview.com/feed/',
     'https://inc42.com/feed/',
   ],
- 
+
   'Long Reads': [
     'https://caravanmagazine.in/rss/all.xml',
     'https://frontline.thehindu.com/feeder/default.rss',
@@ -176,7 +181,7 @@ const FEEDS = {
     'https://www.foreignaffairs.com/rss.xml',
     'https://scroll.in/feed.rss',
   ],
- 
+
   Opinions: [
     'https://www.thehindu.com/opinion/feeder/default.rss',
     'https://indianexpress.com/section/opinion/feed/',
@@ -186,14 +191,14 @@ const FEEDS = {
     'https://timesofindia.indiatimes.com/rssfeeds/784865811.cms',
     'https://economictimes.indiatimes.com/opinion/rssfeeds/897228639.cms',
   ],
- 
+
   'This & That': [
     'https://www.thehindu.com/sci-tech/feeder/default.rss',
     'https://indianexpress.com/section/trending/feed/',
     'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
     'https://thewire.in/category/science/feed',
   ],
- 
+
   Lifestyle: [
     'https://www.cntraveller.in/feed/rss',
     'https://www.nationalgeographic.com/latest-stories/_jcr_content/content/featuredstories.rss',
@@ -205,9 +210,52 @@ const FEEDS = {
     'https://www.thehindu.com/life-and-style/feeder/default.rss',
     'https://www.femina.in/life/feed',
   ],
- 
+
 };
- 
+
+// ─── DB → display-name reverse map (for feeds loaded from rss_feeds table) ──
+const DBID_TO_SECTION = Object.fromEntries(
+  Object.entries(SECTION_ID).map(([name, id]) => [id, name])
+);
+
+// ─── Load active feeds from the rss_feeds table (dashboard-controlled) ──────
+// Returns { rss: { 'Section': [url,...] }, webpage: [{ url, section }] }.
+// RSS feeds are grouped by section name (the shape fetchFeed expects).
+// Webpage feeds are a flat list (each scraped via scrapeWebpageFeed).
+// Returns null on any failure or empty result so the caller can fall back to
+// the hardcoded FEEDS object (RSS only).
+async function loadFeedsFromDB() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return null;
+  try {
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/rss_feeds?is_active=eq.true&select=feed_url,section_id,is_webpage`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!resp.ok) { console.warn('rss_feeds read failed:', resp.status); return null; }
+    const rows = await resp.json();
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+
+    const rss = {};
+    const webpage = [];
+    for (const r of rows) {
+      const name = DBID_TO_SECTION[r.section_id];
+      if (!name) { console.warn('Unknown section_id in rss_feeds:', r.section_id); continue; }
+      if (r.is_webpage) {
+        webpage.push({ url: r.feed_url, section: name });
+      } else {
+        (rss[name] = rss[name] || []).push(r.feed_url);
+      }
+    }
+    const rssCount = Object.values(rss).reduce((a, b) => a + b.length, 0);
+    if (rssCount === 0 && webpage.length === 0) return null;
+    console.log(`Loaded ${rssCount} RSS + ${webpage.length} webpage feeds from rss_feeds table`);
+    return { rss, webpage };
+  } catch (e) {
+    console.error('loadFeedsFromDB error:', e.message);
+    return null;
+  }
+}
+
 // ─── SOURCE NAME MAP ──────────────────────────────────────────────────────
 function deriveSourceName(feedUrl) {
   try {
@@ -217,7 +265,7 @@ function deriveSourceName(feedUrl) {
       'https://rss.app/r/feed/1dh3dHc5Z4Q2qhU9':    'BBC Cricket',
     };
     if (customMap[feedUrl]) return customMap[feedUrl];
- 
+
     const host = new URL(feedUrl).hostname.replace(/^www\./, '');
     const map = {
       'feeds.feedburner.com':          'NDTV',
@@ -280,24 +328,24 @@ function deriveSourceName(feedUrl) {
     return 'Unknown';
   }
 }
- 
+
 // ─── RSS PARSING HELPERS ──────────────────────────────────────────────────
- 
+
 function extractTag(xml, tag) {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
   const m = xml.match(re);
   if (!m) return '';
   return stripCDATA(m[1]).trim();
 }
- 
+
 function stripCDATA(s) {
   return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
 }
- 
+
 function stripTags(s) {
   return s.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
- 
+
 function decodeEntities(s) {
   return s
     .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -306,7 +354,7 @@ function decodeEntities(s) {
     .replace(/&#8220;/g, '"').replace(/&#8221;/g, '"')
     .replace(/&#8211;/g, '–').replace(/&#8212;/g, '—');
 }
- 
+
 function extractImage(itemXml) {
   let m = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i);
   if (m) return m[1];
@@ -325,7 +373,7 @@ function extractImage(itemXml) {
   if (m) return m[1];
   return '';
 }
- 
+
 // ─── OG:IMAGE FALLBACK (issue #3) ─────────────────────────────────────────
 // For stories with no image from RSS, fetch the article page and grab og:image
 async function fetchOgImage(articleUrl) {
@@ -353,16 +401,16 @@ async function fetchOgImage(articleUrl) {
     return '';
   }
 }
- 
+
 function parseRSS(xml, sourceName, sectionName) {
   const stories = [];
   const itemPattern = /<item[\s>][\s\S]*?<\/item>|<entry[\s>][\s\S]*?<\/entry>/gi;
   const items = xml.match(itemPattern) || [];
- 
+
   for (const itemXml of items) {
     const title = decodeEntities(stripTags(extractTag(itemXml, 'title')));
     if (!title) continue;
- 
+
     let url = '';
     const linkMatch = itemXml.match(/<link[^>]*href=["']([^"']+)["']/i);
     if (linkMatch) { url = linkMatch[1]; }
@@ -370,26 +418,26 @@ function parseRSS(xml, sourceName, sectionName) {
     if (!url) url = extractTag(itemXml, 'guid');
     url = decodeEntities(url.trim());
     if (!url || !url.startsWith('http')) continue;
- 
+
     let description = extractTag(itemXml, 'description')
       || extractTag(itemXml, 'content:encoded')
       || extractTag(itemXml, 'summary');
     description = decodeEntities(stripTags(description));
     const rawSummary = description.split(/\s+/).slice(0, 200).join(' ');
- 
+
     // Parse pubDate for timestamp storage (issue #2)
     const pubDateStr = extractTag(itemXml, 'pubDate')
       || extractTag(itemXml, 'published')
       || extractTag(itemXml, 'updated') || '';
- 
+
     let sourcePubAt = null;
     if (pubDateStr) {
       const d = new Date(pubDateStr);
       if (!isNaN(d.getTime())) sourcePubAt = d.toISOString();
     }
- 
+
     const image = extractImage(itemXml);
- 
+
     stories.push({
       headline:       title.slice(0, 300),
       rawSummary,
@@ -403,7 +451,7 @@ function parseRSS(xml, sourceName, sectionName) {
   }
   return stories;
 }
- 
+
 async function fetchFeed(feedUrl, sectionName) {
   try {
     const res = await fetch(feedUrl, {
@@ -421,12 +469,220 @@ async function fetchFeed(feedUrl, sectionName) {
     return [];
   }
 }
- 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WEBPAGE SCRAPING (for is_webpage feeds) — ported from api/submit.js
+// A webpage feed is a listing/section page (e.g. indianexpress.com/.../lifestyle-desk/).
+// We fetch it, extract same-domain article links under the section path, then
+// scrape each article for headline/image/text (reusing the same extractors).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const WEBPAGE_MAX_ARTICLES = 10;   // cap per webpage feed per run
+
+const BROWSER_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en-IN,en;q=0.9',
+};
+
+async function fetchDirect(url) {
+  const res = await fetch(url, {
+    headers: BROWSER_HEADERS,
+    redirect: 'follow',
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.text();
+}
+
+async function fetchViaProxy(url) {
+  const proxies = [
+    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json', field: 'contents' },
+    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
+  ];
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS Bot)' },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) continue;
+      if (proxy.type === 'json') {
+        const data = await res.json();
+        const html = data[proxy.field];
+        if (html && html.length > 500) return html;
+      } else {
+        const html = await res.text();
+        if (html && html.length > 500) return html;
+      }
+    } catch (e) {
+      console.warn(`Proxy ${proxy.url.split('?')[0]} failed:`, e.message);
+      continue;
+    }
+  }
+  throw new Error('All proxies failed');
+}
+
+async function fetchPage(url) {
+  try {
+    return await fetchDirect(url);
+  } catch (directErr) {
+    console.warn(`Direct fetch failed (${directErr.message}), trying proxies: ${url}`);
+  }
+  return await fetchViaProxy(url);   // throws if all fail
+}
+
+// Meta/OG extractors (same approach as submit.js)
+function wpExtractMeta(html, names) {
+  for (const name of names) {
+    let m = html.match(new RegExp(`<meta[^>]*property=["']${name}["'][^>]*content=["']([^"']+)["']`, 'i'));
+    if (m) return decodeEntities(m[1]);
+    m = html.match(new RegExp(`<meta[^>]*content=["']([^"']+)["'][^>]*property=["']${name}["']`, 'i'));
+    if (m) return decodeEntities(m[1]);
+    m = html.match(new RegExp(`<meta[^>]*name=["']${name}["'][^>]*content=["']([^"']+)["']`, 'i'));
+    if (m) return decodeEntities(m[1]);
+    m = html.match(new RegExp(`<meta[^>]*content=["']([^"']+)["'][^>]*name=["']${name}["']`, 'i'));
+    if (m) return decodeEntities(m[1]);
+  }
+  return '';
+}
+function wpHeadline(html) {
+  let h = wpExtractMeta(html, ['og:title', 'twitter:title']);
+  if (h) return h;
+  const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (m) return decodeEntities(stripTags(m[1]));
+  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  if (h1) return decodeEntities(stripTags(h1[1]));
+  return '';
+}
+function wpImage(html, articleUrl) {
+  const img = wpExtractMeta(html, ['og:image', 'twitter:image', 'twitter:image:src']);
+  if (img) { try { return new URL(img, articleUrl).toString(); } catch (e) { return img; } }
+  return '';
+}
+function wpText(html) {
+  const desc = wpExtractMeta(html, ['og:description', 'twitter:description', 'description']);
+  let body = '';
+  const a = html.match(/<article[^>]*>([\s\S]{200,8000}?)<\/article>/i);
+  if (a) body = stripTags(a[1]);
+  if (!body) { const mm = html.match(/<main[^>]*>([\s\S]{200,8000}?)<\/main>/i); if (mm) body = stripTags(mm[1]); }
+  if (!body) {
+    const ps = html.match(/<p[^>]*>[\s\S]{50,1000}?<\/p>/gi) || [];
+    body = ps.slice(0, 8).map(p => stripTags(p)).join(' ');
+  }
+  return (desc + ' ' + body).slice(0, 4000);
+}
+function wpPubDate(html) {
+  const d = wpExtractMeta(html, ['article:published_time', 'og:updated_time']);
+  if (d) { const dt = new Date(d); if (!isNaN(dt.getTime())) return dt.toISOString(); }
+  return null;
+}
+
+// Pull same-domain links that look like articles. Listing pages often live at a
+// different path than the articles they link to (e.g. IE lists at /agency/...
+// but articles sit at /article/...), so we keep same-domain links with an
+// article-like slug and skip obvious navigation/section/asset links.
+function extractArticleLinks(listingHtml, listingUrl) {
+  const out = [];
+  const seen = new Set();
+  let base;
+  try { base = new URL(listingUrl).origin; }
+  catch (e) { return out; }
+
+  // path segments that signal navigation/section pages rather than articles
+  const SKIP_SEGMENTS = new Set([
+    'about-us','about','contact','contact-us','privacy','terms','subscribe',
+    'subscription','newsletter','author','authors','agency','tag','tags','topic',
+    'topics','section','category','page','login','signin','sitemap','rss','feed',
+  ]);
+
+  const hrefs = listingHtml.match(/<a[^>]+href=["']([^"']+)["']/gi) || [];
+  for (const tag of hrefs) {
+    const m = tag.match(/href=["']([^"']+)["']/i);
+    if (!m) continue;
+    let href = m[1].trim();
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('javascript:')) continue;
+    let abs, path;
+    try { abs = new URL(href, listingUrl).toString(); path = new URL(abs).pathname; }
+    catch (e) { continue; }
+
+    if (!abs.startsWith(base)) continue;                          // same domain only
+    if (abs.replace(/\/+$/, '') === listingUrl.replace(/\/+$/, '')) continue;  // not the listing itself
+    if (/\.(jpg|jpeg|png|gif|webp|svg|pdf|css|js)(\?|$)/i.test(abs)) continue; // not an asset
+
+    const segs = path.split('/').filter(Boolean);
+    if (segs.length === 0) continue;                              // homepage
+    if (SKIP_SEGMENTS.has(segs[0])) continue;                     // nav/section/author/agency pages
+    if (/^\d+$/.test(segs[segs.length - 1])) continue;            // pure-number pagination
+
+    // article-like: a reasonably long, word-bearing final slug
+    const lastSeg = segs[segs.length - 1];
+    if (lastSeg.length < 12) continue;                            // too short to be a headline slug
+    if (!lastSeg.includes('-')) continue;                         // article slugs are hyphenated
+
+    if (seen.has(abs)) continue;
+    seen.add(abs);
+    out.push(abs);
+  }
+  return out;
+}
+
+async function scrapeWebpageFeed(feed) {
+  const { url: listingUrl, section } = feed;
+  const stories = [];
+  let listingHtml;
+  try {
+    listingHtml = await fetchPage(listingUrl);
+  } catch (e) {
+    console.warn(`Webpage feed unreachable: ${listingUrl} (${e.message})`);
+    return stories;
+  }
+  const links = extractArticleLinks(listingHtml, listingUrl).slice(0, WEBPAGE_MAX_ARTICLES);
+  console.log(`Webpage feed ${listingUrl}: ${links.length} article links`);
+
+  const source = detectSourceFromUrl(listingUrl);
+  await Promise.allSettled(links.map(async (articleUrl) => {
+    try {
+      const html = await fetchPage(articleUrl);
+      const headline = wpHeadline(html);
+      if (!headline) return;
+      const image = wpImage(html, articleUrl);
+      const text  = wpText(html);
+      stories.push({
+        headline:  headline.slice(0, 300),
+        rawSummary: text.split(/\s+/).slice(0, 200).join(' '),
+        summary:   '',
+        source,
+        section,
+        url:       articleUrl,
+        image,
+        sourcePubAt: wpPubDate(html),
+      });
+    } catch (e) {
+      // skip individual article failures
+    }
+  }));
+  return stories;
+}
+
+// Source name from URL only (listing/article pages)
+function detectSourceFromUrl(u) {
+  try {
+    const host = new URL(u).hostname.replace(/^www\./, '');
+    // reuse deriveSourceName's host map by faking a feed URL
+    const name = deriveSourceName(u);
+    if (name && name !== host) return name;
+    const parts = host.split('.');
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+  } catch (e) { return 'Unknown'; }
+}
+
 // ─── HEADLINE DEDUP ───────────────────────────────────────────────────────
 function normalizeHeadline(h) {
   return h.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 }
- 
+
 function dedupByHeadline(stories) {
   const kept = [];
   for (const story of stories) {
@@ -444,17 +700,17 @@ function dedupByHeadline(stories) {
   }
   return kept;
 }
- 
+
 // ─── CROSS-SOURCE AUTO-PUBLISH (issues #10, #11) ──────────────────────────
 // Returns a Set of story URLs that should auto-publish based on multi-source coverage
 function findCrossSourceAutoPublish(stories) {
   const autoUrls = new Set();
- 
+
   // Group headlines stories by normalized headline (first 8 words)
   function headlineKey(h) {
     return normalizeHeadline(h).split(' ').slice(0, 8).join(' ');
   }
- 
+
   // Headlines: same story from 3+ of NDTV/IE/HT/Hindu
   const headlineGroups = {};
   stories
@@ -464,7 +720,7 @@ function findCrossSourceAutoPublish(stories) {
       if (!headlineGroups[key]) headlineGroups[key] = new Set();
       headlineGroups[key].add(s.source);
     });
- 
+
   for (const [key, sources] of Object.entries(headlineGroups)) {
     const matchCount = [...sources].filter(s => HEADLINES_AUTO_SOURCES.has(s)).length;
     if (matchCount >= HEADLINES_AUTO_THRESHOLD) {
@@ -474,7 +730,7 @@ function findCrossSourceAutoPublish(stories) {
         .forEach(s => autoUrls.add(s.url));
     }
   }
- 
+
   // Finance: same story from both Mint AND Economic Times
   const financeGroups = {};
   stories
@@ -484,7 +740,7 @@ function findCrossSourceAutoPublish(stories) {
       if (!financeGroups[key]) financeGroups[key] = new Set();
       financeGroups[key].add(s.source);
     });
- 
+
   for (const [key, sources] of Object.entries(financeGroups)) {
     const matchCount = [...sources].filter(s => FINANCE_AUTO_SOURCES.has(s)).length;
     if (matchCount >= FINANCE_AUTO_THRESHOLD) {
@@ -493,26 +749,26 @@ function findCrossSourceAutoPublish(stories) {
         .forEach(s => autoUrls.add(s.url));
     }
   }
- 
+
   return autoUrls;
 }
- 
+
 // ─── AI SCORE + SUMMARISE ─────────────────────────────────────────────────
 const SHORT_SOURCES = new Set(['NYT', 'BBC', 'BBC Cricket']);
 const SCORE_BATCH   = 8;
 const MAX_PARALLEL  = 6;
- 
+
 function rawExcerpt(story) {
   const wl = SHORT_SOURCES.has(story.source) ? 30 : 75;
   const words = (story.rawSummary || '').split(/\s+/).slice(0, wl);
   return words.join(' ') + (words.length >= wl ? '...' : '');
 }
- 
+
 async function scoreAndSummariseBatch(batch) {
   if (!OPENAI_KEY) {
     return batch.map(s => ({ ...s, _score: 6, _reason: 'unscored', summary: rawExcerpt(s) }));
   }
- 
+
   const input = batch.map((s, idx) => ({
     i:   idx,
     sec: s.section,
@@ -521,10 +777,10 @@ async function scoreAndSummariseBatch(batch) {
     sum: (s.rawSummary || '').slice(0, 300),
     short: SHORT_SOURCES.has(s.source),
   }));
- 
+
   // UPDATED PROMPT (issues #4-5): enforces 60-75 word summaries
   const prompt = `You are the editorial filter AND summary writer for GRIDDS.NEWS, a curated Indian news aggregator.
- 
+
 For EACH story do TWO things:
 1. SCORE it 1-10:
    HIGH (8-10): original reporting, strong analysis, genuinely newsworthy, credible non-tabloid source, unique today.
@@ -536,14 +792,14 @@ For EACH story do TWO things:
    - Style: Inshorts. Indian English. No opinion, no hype, no clickbait, no bullet points.
    - Do NOT repeat the headline verbatim.
    - If the article excerpt is too short to write 60 words, expand with context from the headline.
- 
+
 Respond ONLY with a JSON array, same order as input, each object:
 {"i":0,"score":8,"reason":"original analysis","summary":"the 60-75 word summary text here"}
 No other text. No markdown fences.
- 
+
 Stories:
 ${JSON.stringify(input)}`;
- 
+
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -560,11 +816,11 @@ ${JSON.stringify(input)}`;
       }),
       signal: AbortSignal.timeout(30000),
     });
- 
+
     if (!res.ok) throw new Error(`OpenAI ${res.status}`);
     const data = await res.json();
     let raw = (data.choices?.[0]?.message?.content || '').trim();
- 
+
     let parsed;
     try {
       parsed = JSON.parse(raw);
@@ -574,7 +830,7 @@ ${JSON.stringify(input)}`;
     }
     const arr = Array.isArray(parsed) ? parsed
               : (parsed.results || parsed.stories || parsed.data || Object.values(parsed)[0]);
- 
+
     return batch.map((s, idx) => {
       const r = (Array.isArray(arr) ? arr.find(x => x.i === idx) : null)
                 || { score: 6, reason: 'unscored', summary: rawExcerpt(s) };
@@ -585,13 +841,13 @@ ${JSON.stringify(input)}`;
         summary: (r.summary && r.summary.trim()) ? r.summary.trim() : rawExcerpt(s),
       };
     });
- 
+
   } catch (err) {
     console.error('Score+summarise batch failed:', err.message);
     return batch.map(s => ({ ...s, _score: 6, _reason: 'scoring-failed', summary: rawExcerpt(s) }));
   }
 }
- 
+
 async function scoreAndSummariseAll(stories) {
   if (!stories.length) return [];
   const batches = [];
@@ -610,7 +866,7 @@ async function scoreAndSummariseAll(stories) {
   await Promise.all(Array.from({ length: Math.min(MAX_PARALLEL, batches.length) }, worker));
   return results;
 }
- 
+
 // ─── AUTO-ARCHIVE OLD DRAFTS (issue #8) ───────────────────────────────────
 async function archiveOldDrafts() {
   if (!SUPABASE_URL || !SUPABASE_KEY) return 0;
@@ -636,9 +892,9 @@ async function archiveOldDrafts() {
     return 0;
   }
 }
- 
+
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────
- 
+
 export default async function handler(req, res) {
   if (CRON_SECRET) {
     const authHeader = req.headers['authorization'] || '';
@@ -648,21 +904,31 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
   }
- 
+
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     return res.status(500).json({ error: 'SUPABASE_URL or SUPABASE_SERVICE_KEY not set' });
   }
- 
+
   const startedAt  = Date.now();
- 
+
   // Archive old drafts first (issue #8)
   await archiveOldDrafts();
- 
+
   const allStories = [];
- 
-  // 1. Fetch all feeds in parallel
+
+  // 1. Load feed list from the rss_feeds table (dashboard-controlled).
+  //    Shape: { rss: { Section: [url,...] }, webpage: [{url,section}] }.
+  //    Fall back to hardcoded FEEDS (RSS only) if the table read fails.
+  const dbFeeds = await loadFeedsFromDB();
+  const usingDB = !!dbFeeds;
+  const rssFeeds     = usingDB ? dbFeeds.rss     : FEEDS;
+  const webpageFeeds = usingDB ? dbFeeds.webpage : [];
+  console.log(`Feed source: ${usingDB ? 'rss_feeds table' : 'hardcoded fallback'} — ` +
+              `${Object.values(rssFeeds).reduce((a,b)=>a+b.length,0)} RSS, ${webpageFeeds.length} webpage`);
+
+  // 1a. RSS feeds in parallel
   const fetchPromises = [];
-  for (const [section, feeds] of Object.entries(FEEDS)) {
+  for (const [section, feeds] of Object.entries(rssFeeds)) {
     for (const feedUrl of feeds) {
       fetchPromises.push(
         fetchFeed(feedUrl, section).then(stories => {
@@ -671,17 +937,29 @@ export default async function handler(req, res) {
       );
     }
   }
+
+  // 1b. Webpage feeds in parallel (each scrapes its listing page + up to 10 articles)
+  let webpageStoryCount = 0;
+  for (const feed of webpageFeeds) {
+    fetchPromises.push(
+      scrapeWebpageFeed(feed).then(stories => {
+        webpageStoryCount += stories.length;
+        allStories.push(...stories);   // already capped at WEBPAGE_MAX_ARTICLES
+      })
+    );
+  }
+
   await Promise.allSettled(fetchPromises);
-  console.log(`Fetched ${allStories.length} raw stories`);
- 
+  console.log(`Fetched ${allStories.length} raw stories (${webpageStoryCount} from webpage feeds)`);
+
   if (allStories.length === 0) {
     return res.status(200).json({ ok: true, fetched: 0, sent: 0, message: 'No stories found' });
   }
- 
+
   // 2. Deduplicate
   const deduped = dedupByHeadline(allStories);
   console.log(`After dedup: ${deduped.length} stories`);
- 
+
   // 3. OG:image fallback for stories without images (issue #3)
   // Do this for up to 30 stories to avoid timeout — prioritize NDTV, TheKen etc
   const noImageStories = deduped.filter(s => !s.image).slice(0, 30);
@@ -692,18 +970,18 @@ export default async function handler(req, res) {
     await Promise.allSettled(ogPromises);
     console.log(`Fetched og:image for ${noImageStories.length} stories`);
   }
- 
+
   // 4. AI score + summarise
   const aiStart = Date.now();
   const scored = await scoreAndSummariseAll(deduped);
   const aiDuration = Date.now() - aiStart;
- 
+
   // 5. Cross-source auto-publish detection (issues #10, #11)
   const crossSourceAutoUrls = findCrossSourceAutoPublish(scored);
   console.log(`Cross-source auto-publish candidates: ${crossSourceAutoUrls.size}`);
- 
+
   let autoLiveN = 0, draftN = 0, discardN = 0;
- 
+
   const toSend = scored
     .filter(s => {
       if (s._score < MIN_SCORE) { discardN++; return false; }
@@ -713,7 +991,7 @@ export default async function handler(req, res) {
       const isTrusted     = TRUSTED_SOURCES.has(s.source);
       const scoringFailed = s._reason === 'scoring-failed' || s._reason === 'unscored';
       const isGriddLoves  = s.section === 'GRIDD Loves';
- 
+
       // GRIDD Loves NEVER auto-publishes (issue #7)
       let autoLive = false;
       if (!isGriddLoves) {
@@ -724,9 +1002,9 @@ export default async function handler(req, res) {
   // Trusted source + high score no longer auto-publishes
   // Everything else goes to DRAFT for admin review
 }
- 
+
       if (autoLive) autoLiveN++; else draftN++;
- 
+
       return {
         headline:    s.headline,
         summary:     s.summary,
@@ -739,10 +1017,10 @@ export default async function handler(req, res) {
         scoreNote:   `${s._score}/10 — ${s._reason}`,
       };
     });
- 
+
   console.log(`Scored+summarised in ${aiDuration}ms`);
   console.log(`Kept ${toSend.length}, discarded ${discardN}, auto-LIVE ${autoLiveN}, draft ${draftN}`);
- 
+
   // 6. Write to Supabase
   const rows = toSend.map(s => ({
     section_id:        SECTION_ID[s.section] || 'headlines',
@@ -758,7 +1036,7 @@ export default async function handler(req, res) {
     published_at:      s.statusHint === 'LIVE' ? new Date().toISOString() : null,
     source_published_at: s.sourcePubAt || null,   // NEW (issue #2)
   }));
- 
+
   try {
     let inserted = 0;
     for (let i = 0; i < rows.length; i += 100) {
@@ -782,9 +1060,12 @@ export default async function handler(req, res) {
       }
       inserted += chunk.length;
     }
- 
+
     return res.status(200).json({
       ok:           true,
+      feedSource:   usingDB ? 'rss_feeds-table' : 'hardcoded-fallback',
+      webpageFeeds: webpageFeeds.length,
+      fromWebpage:  webpageStoryCount,
       raw:          allStories.length,
       afterDedup:   deduped.length,
       discarded:    discardN,
@@ -801,5 +1082,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: 'Supabase write failed', detail: err.message });
   }
 }
- 
+
 export const config = { maxDuration: 300 };
