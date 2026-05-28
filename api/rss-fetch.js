@@ -4,10 +4,19 @@
 //        updated feed list (v2 — duplicates removed, new sources added)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const WEBHOOK_URL  = process.env.INBOX_WEBHOOK_URL;
-const TOKEN        = process.env.INBOX_TOKEN;
-const OPENAI_KEY   = process.env.OPENAI_API_KEY;
-const CRON_SECRET  = process.env.CRON_SECRET;
+const OPENAI_KEY    = process.env.OPENAI_API_KEY;
+const CRON_SECRET   = process.env.CRON_SECRET;
+const SUPABASE_URL  = process.env.SUPABASE_URL;
+const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY;   // service_role — bypasses RLS
+
+// Section display-name → section id used in the database
+const SECTION_ID = {
+  'Headlines': 'headlines', 'Finance': 'finance', 'Wellness': 'wellness',
+  'Politics': 'politics', 'IPL': 'ipl', 'GRIDD Loves': 'griddloves',
+  'City News': 'citynews', 'World News': 'worldnews', 'Entertainment': 'entertainment',
+  'Tech': 'tech', 'Opinions': 'opinions', 'Long Reads': 'longreads',
+  'This & That': 'thisandthat', 'Lifestyle': 'lifestyle',
+};
 
 // ─── SCORING CONFIG ───────────────────────────────────────────────────────
 
@@ -540,8 +549,8 @@ export default async function handler(req, res) {
     }
   }
 
-  if (!WEBHOOK_URL || !TOKEN) {
-    return res.status(500).json({ error: 'INBOX_WEBHOOK_URL or INBOX_TOKEN not set' });
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return res.status(500).json({ error: 'SUPABASE_URL or SUPABASE_SERVICE_KEY not set' });
   }
 
   const startedAt  = Date.now();
@@ -603,17 +612,46 @@ export default async function handler(req, res) {
   console.log(`Scored+summarised in ${aiDuration}ms`);
   console.log(`Kept ${toSend.length}, discarded ${discardN}, auto-LIVE ${autoLiveN}, draft ${draftN}`);
 
-  // 5. POST to Google Sheet
+  // 5. Write to Supabase (upsert — dedup handled by unique(section_id, url))
+  //    Uses the REST API directly with the service_role key (bypasses RLS).
+  const rows = toSend.map(s => ({
+    section_id:  SECTION_ID[s.section] || 'headlines',
+    headline:    s.headline,
+    summary:     s.summary,
+    source:      s.source,
+    url:         s.url,
+    image:       s.image,
+    status:      s.statusHint,                 // 'LIVE' or 'DRAFT'
+    source_type: 'RSS',
+    ai_score:    parseInt((s.scoreNote || '0').split('/')[0]) || null,
+    ai_reason:   (s.scoreNote || '').split('— ')[1] || null,
+    published_at: s.statusHint === 'LIVE' ? new Date().toISOString() : null,
+  }));
+
   try {
-    const webhookRes = await fetch(WEBHOOK_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ token: TOKEN, source: 'RSS', stories: toSend }),
-      redirect: 'follow',
-    });
-    const data = await webhookRes.text();
-    let parsed;
-    try { parsed = JSON.parse(data); } catch (e) { parsed = { raw: data.slice(0, 300) }; }
+    // Upsert in chunks of 100; on_conflict ignores duplicates by (section_id,url)
+    let inserted = 0;
+    for (let i = 0; i < rows.length; i += 100) {
+      const chunk = rows.slice(i, i + 100);
+      const resp = await fetch(
+        `${SUPABASE_URL}/rest/v1/stories?on_conflict=section_id,url`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey':        SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type':  'application/json',
+            'Prefer':        'resolution=ignore-duplicates,return=minimal',
+          },
+          body: JSON.stringify(chunk),
+        }
+      );
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`Supabase ${resp.status}: ${txt.slice(0, 200)}`);
+      }
+      inserted += chunk.length;
+    }
 
     return res.status(200).json({
       ok:           true,
@@ -623,13 +661,13 @@ export default async function handler(req, res) {
       sent:         toSend.length,
       autoLive:     autoLiveN,
       draft:        draftN,
+      writtenToDB:  inserted,
       aiSummaries:  !!OPENAI_KEY,
       aiDurationMs: aiDuration,
-      webhook:      parsed,
       durationMs:   Date.now() - startedAt,
     });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: 'Webhook POST failed', detail: err.message });
+    return res.status(500).json({ ok: false, error: 'Supabase write failed', detail: err.message });
   }
 }
 
