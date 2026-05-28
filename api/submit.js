@@ -2,15 +2,33 @@
 // GRIDDS.NEWS — Editor Submit API
 //
 // Receives URL + section from /submit form, fetches the article page,
-// scrapes headline/image/text, generates AI summary, sends to Google Sheet.
+// scrapes headline/image/text, generates AI summary, saves to Supabase.
 //
 // Password-protected via EDITOR_PASSWORD env var.
 // ═══════════════════════════════════════════════════════════════════════════
  
-const WEBHOOK_URL     = process.env.INBOX_WEBHOOK_URL;
-const WEBHOOK_TOKEN   = process.env.INBOX_TOKEN;
 const OPENAI_KEY      = process.env.OPENAI_API_KEY;
 const EDITOR_PASSWORD = process.env.EDITOR_PASSWORD;
+const SUPABASE_URL    = process.env.SUPABASE_URL;
+const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY;   // service_role
+ 
+// Section display-name → database section id
+const SECTION_ID = {
+  'Headlines':     'headlines',
+  'Finance':       'finance',
+  'Wellness':      'wellness',
+  'Politics':      'politics',
+  'IPL':           'ipl',
+  'GRIDD Loves':   'griddloves',
+  'City News':     'citynews',
+  'World News':    'worldnews',
+  'Entertainment': 'entertainment',
+  'Tech':          'tech',
+  'Opinions':      'opinions',
+  'Long Reads':    'longreads',
+  'This & That':   'thisandthat',
+  'Lifestyle':     'lifestyle',
+};
  
 // ─── HELPERS ──────────────────────────────────────────────────────────────
  
@@ -88,8 +106,6 @@ function detectSource(html, articleUrl) {
 }
  
 // ─── FETCH WITH PROXY FALLBACK ────────────────────────────────────────────
-// Tries direct fetch first. If blocked (403/401/429 or network error),
-// retries via allorigins.win which proxies through their server.
  
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
@@ -108,7 +124,6 @@ async function fetchDirect(url) {
 }
  
 async function fetchViaProxy(url) {
-  // allorigins returns { contents: "<html>..." }
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
   const res = await fetch(proxyUrl, {
     headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS Editor)' },
@@ -121,7 +136,6 @@ async function fetchViaProxy(url) {
 }
  
 async function fetchArticlePage(url) {
-  // 1. Try direct
   try {
     const html = await fetchDirect(url);
     console.log(`Direct fetch OK: ${url}`);
@@ -129,8 +143,6 @@ async function fetchArticlePage(url) {
   } catch (directErr) {
     console.warn(`Direct fetch failed (${directErr.message}), trying proxy: ${url}`);
   }
- 
-  // 2. Fallback to proxy
   try {
     const html = await fetchViaProxy(url);
     console.log(`Proxy fetch OK: ${url}`);
@@ -226,37 +238,57 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, headline, summary, source, image, url, section });
   }
  
-  // ─── Publish ────────────────────────────────────────────────────────
+  // ─── Publish — writes directly to Supabase as LIVE ──────────────────
   if (action === 'publish') {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      return res.status(500).json({ error: 'Supabase env vars not set' });
+    }
+ 
     const finalHeadline = (body.editedHeadline || headline).trim();
     const finalSummary  = (body.editedSummary  || summary).trim();
     const finalImage    = (body.editedImage    || image).trim();
+    const sectionId     = SECTION_ID[section] || 'headlines';
+ 
+    // Submit-form stories go LIVE immediately, float to top (sort_order 0)
+    const row = {
+      section_id:   sectionId,
+      headline:     finalHeadline,
+      summary:      finalSummary,
+      source:       source,
+      url:          url,
+      image:        finalImage,
+      status:       'LIVE',
+      source_type:  'SUBMIT',
+      sort_order:   0,
+      published_at: new Date().toISOString(),
+    };
  
     try {
-      const webhookRes = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-  token:  WEBHOOK_TOKEN,
-  source: 'SUBMIT',
-  stories: [{
-    headline:  finalHeadline,
-    summary:   finalSummary,
-    source:    source,
-    section:   section,
-    url:       url,
-    image:     finalImage,
-    published: new Date().toISOString(),
-  }],
-}),
-        redirect: 'follow',
-      });
-      const data = await webhookRes.text();
-      let parsed;
-      try { parsed = JSON.parse(data); } catch (e) { parsed = { raw: data.slice(0, 300) }; }
-      return res.status(200).json({ ok: true, webhook: parsed });
+      const resp = await fetch(
+        `${SUPABASE_URL}/rest/v1/stories?on_conflict=section_id,url`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey':        SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type':  'application/json',
+            'Prefer':        'resolution=merge-duplicates,return=representation',
+          },
+          body: JSON.stringify(row),
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+ 
+      if (!resp.ok) {
+        const txt = await resp.text();
+        return res.status(500).json({ error: 'Supabase insert failed', detail: txt.slice(0, 300) });
+      }
+ 
+      const inserted = await resp.json();
+      return res.status(200).json({ ok: true, story: inserted[0] || row });
+ 
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to send to sheet', detail: err.message });
+      return res.status(500).json({ error: 'Failed to save story', detail: err.message });
     }
   }
  
