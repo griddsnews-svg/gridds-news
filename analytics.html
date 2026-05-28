@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GRIDDS.NEWS — Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D0D12; --panel:#16161d; --panel2:#1d1d26;
+    --line:rgba(255,255,255,0.08); --ink:#F5F0E8; --muted:rgba(245,240,232,0.5);
+    --accent:#E8520A; --accent2:#FFA000; --green:#2E7D32;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased;padding:0 0 60px}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(13,13,18,0.92);
+          backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+          padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{font-family:'Libre Baskerville',Georgia,serif;font-weight:700;font-size:20px;letter-spacing:1px}
+  .brand .dot{color:var(--accent)}
+  .brand .sub{color:var(--muted);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .ranges{display:flex;gap:6px}
+  .range-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+             padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:500;
+             transition:all .15s}
+  .range-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .wrap{max-width:1100px;margin:0 auto;padding:22px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:26px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+  .kpi .val{font-family:'Playfair Display',Georgia,serif;font-size:34px;font-weight:700;line-height:1}
+  .kpi .val.accent{color:var(--accent2)}
+  .section-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:30px 0 14px;
+                 display:flex;align-items:center;gap:10px}
+  .section-title .bar{width:5px;height:22px;background:var(--accent);border-radius:3px;display:inline-block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);
+     padding:13px 18px;border-bottom:1px solid var(--line);font-weight:600}
+  th.num,td.num{text-align:right}
+  td{padding:13px 18px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--panel2)}
+  .dot-sec{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:9px;vertical-align:middle}
+  .bar-cell{position:relative;min-width:120px}
+  .bar-fill{position:absolute;left:18px;bottom:8px;height:4px;background:var(--accent);border-radius:2px;opacity:.55}
+  .hl{font-weight:500;line-height:1.35}
+  .src{color:var(--muted);font-size:12px;margin-top:2px}
+  .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:var(--panel2);
+        color:var(--muted);border:1px solid var(--line)}
+  .ctr{font-variant-numeric:tabular-nums;font-weight:600}
+  .ctr.good{color:#7BC67E}
+  .muted{color:var(--muted)}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  .ad-box{background:linear-gradient(135deg,rgba(232,82,10,0.12),rgba(255,160,0,0.06));
+          border:1px solid rgba(232,82,10,0.3)}
+  .ad-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0}
+  .ad-cell{padding:20px 22px;border-right:1px solid var(--line)}
+  .ad-cell:last-child{border-right:none}
+  .ad-cell .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+  .ad-cell .val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700}
+  .ad-note{padding:12px 22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+  .cpm-input{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+             border-radius:8px;padding:6px 10px;width:90px;font-size:14px;font-family:'DM Sans'}
+  .loading{padding:50px;text-align:center;color:var(--muted)}
+  .err{padding:20px;color:#E57373;font-size:13px}
+  .footnote{margin-top:30px;color:var(--muted);font-size:12px;text-align:center;line-height:1.6}
+  @media(max-width:600px){
+    .wrap{padding:14px}
+    th,td{padding:11px 12px;font-size:13px}
+    .kpi .val{font-size:28px}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <div class="brand">GRIDDS<span class="dot">.</span>NEWS</div>
+    <div class="sub">Analytics Dashboard</div>
+  </div>
+  <div class="ranges" id="ranges">
+    <button class="range-btn" data-range="today">Today</button>
+    <button class="range-btn active" data-range="7d">7 Days</button>
+    <button class="range-btn" data-range="30d">30 Days</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="content"><div class="loading">Loading analytics…</div></div>
+
+  <div class="footnote">
+    "Opens" = a reader tapped a tile to read a story. "Clicks" = tapped FULL STORY to the source.<br>
+    CTR = clicks ÷ opens. Data updates in real time. Section IDs map to display names automatically.
+  </div>
+</div>
+
+<script>
+var SECTION_COLOR = {
+  headlines:'#E8520A', finance:'#1B5E20', wellness:'#6A1B9A', politics:'#8B1538',
+  ipl:'#FFA000', loves:'#7B5EA7', cityNews:'#37474F', worldNews:'#1565C0',
+  entertainment:'#C2185B', tech:'#1976D2', longreads:'#5D4037', opinions:'#455A64',
+  thisAndThat:'#00695C', lifestyle:'#006064'
+};
+var currentRange = '7d';
+var cpmRate = 2.0;  // default ₹ per 1000 impressions (editable)
+
+function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function fmt(n){ return (n||0).toLocaleString('en-IN'); }
+
+function load(range){
+  currentRange = range;
+  document.querySelectorAll('.range-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-range')===range);
+  });
+  document.getElementById('content').innerHTML = '<div class="loading">Loading analytics…</div>';
+  fetch('/api/analytics?range='+range)
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(render)
+    .catch(function(e){
+      document.getElementById('content').innerHTML =
+        '<div class="card err">Could not load analytics: '+esc(String(e.message))+
+        '<br><br>Make sure the SUPABASE_SERVICE_KEY env var is set in Vercel and the story_events table exists.</div>';
+    });
+}
+
+function render(data){
+  var maxOpens = 0;
+  (data.sections||[]).forEach(function(s){ if(s.opens>maxOpens) maxOpens=s.opens; });
+
+  var html = '';
+
+  // KPIs
+  html += '<div class="kpis">';
+  html += kpi('Total Opens', fmt(data.totals.opens), false);
+  html += kpi('Full-Story Clicks', fmt(data.totals.clicks), false);
+  var overallCtr = data.totals.opens ? Math.round((data.totals.clicks/data.totals.opens)*1000)/10 : 0;
+  html += kpi('Overall CTR', overallCtr+'%', true);
+  html += kpi('Active Sections', (data.sections||[]).filter(function(s){return s.opens>0;}).length, false);
+  html += '</div>';
+
+  // Ad / CPM impression counter (item 4)
+  var imp = data.totals.impressions || 0;
+  html += '<div class="section-title"><span class="bar"></span>Advertiser Impressions</div>';
+  html += '<div class="card ad-box">';
+  html += '<div class="ad-grid">';
+  html += '<div class="ad-cell"><div class="label">Impressions ('+rangeLabel(data.range)+')</div><div class="val">'+fmt(imp)+'</div></div>';
+  html += '<div class="ad-cell"><div class="label">Per-1000 (CPM units)</div><div class="val">'+(imp/1000).toFixed(2)+'</div></div>';
+  html += '<div class="ad-cell"><div class="label">CPM Rate (₹/1000) <input class="cpm-input" id="cpm" type="number" step="0.5" value="'+cpmRate+'"></div>'
+       +  '<div class="val" id="ad-revenue">₹'+((imp/1000)*cpmRate).toFixed(0)+'</div></div>';
+  html += '</div>';
+  html += '<div class="ad-note">Shareable estimate for advertisers. Edit the CPM rate to recompute revenue. An "impression" counts each story open.</div>';
+  html += '</div>';
+
+  // Section leaderboard
+  html += '<div class="section-title"><span class="bar"></span>Section Leaderboard</div>';
+  html += '<div class="card">';
+  if(!(data.sections||[]).length || maxOpens===0){
+    html += '<div class="empty">No section activity yet in this period.</div>';
+  } else {
+    html += '<table><thead><tr><th>Section</th><th class="num">Opens</th><th class="num">Clicks</th><th class="num">CTR</th></tr></thead><tbody>';
+    data.sections.forEach(function(s){
+      if(s.opens===0 && s.clicks===0) return;
+      var col = SECTION_COLOR[s.section_id]||'#888';
+      var pct = maxOpens? (s.opens/maxOpens*100):0;
+      html += '<tr>'
+        + '<td class="bar-cell"><span class="dot-sec" style="background:'+col+'"></span>'+esc(s.label)
+        +   '<span class="bar-fill" style="width:'+(pct*0.9)+'px"></span></td>'
+        + '<td class="num">'+fmt(s.opens)+'</td>'
+        + '<td class="num">'+fmt(s.clicks)+'</td>'
+        + '<td class="num"><span class="ctr '+(s.ctr>=30?'good':'')+'">'+s.ctr+'%</span></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div>';
+
+  // Top stories
+  html += '<div class="section-title"><span class="bar"></span>Top Stories</div>';
+  html += '<div class="card">';
+  if(!(data.topStories||[]).length){
+    html += '<div class="empty">No story opens recorded yet in this period.</div>';
+  } else {
+    html += '<table><thead><tr><th>Story</th><th>Section</th><th class="num">Opens</th><th class="num">Clicks</th><th class="num">CTR</th></tr></thead><tbody>';
+    data.topStories.forEach(function(st){
+      var col = SECTION_COLOR[st.section_id]||'#888';
+      html += '<tr>'
+        + '<td><div class="hl">'+esc(st.headline)+'</div>'+(st.source?'<div class="src">'+esc(st.source)+'</div>':'')+'</td>'
+        + '<td><span class="dot-sec" style="background:'+col+'"></span><span class="pill">'+esc(st.section)+'</span></td>'
+        + '<td class="num">'+fmt(st.opens)+'</td>'
+        + '<td class="num">'+fmt(st.clicks)+'</td>'
+        + '<td class="num"><span class="ctr '+(st.ctr>=30?'good':'')+'">'+st.ctr+'%</span></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Wire CPM live recompute
+  var cpmEl = document.getElementById('cpm');
+  if(cpmEl){
+    cpmEl.addEventListener('input', function(){
+      cpmRate = parseFloat(this.value)||0;
+      document.getElementById('ad-revenue').textContent = '₹'+((imp/1000)*cpmRate).toFixed(0);
+    });
+  }
+}
+
+function kpi(label, val, accent){
+  return '<div class="kpi"><div class="label">'+label+'</div><div class="val'+(accent?' accent':'')+'">'+val+'</div></div>';
+}
+function rangeLabel(r){ return r==='today'?'Today':r==='30d'?'30 days':'7 days'; }
+
+document.getElementById('ranges').addEventListener('click', function(e){
+  var btn = e.target.closest('.range-btn');
+  if(btn) load(btn.getAttribute('data-range'));
+});
+
+load('7d');
+</script>
+</body>
+</html>
