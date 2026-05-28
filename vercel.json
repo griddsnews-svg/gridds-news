@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/submit",
+      "destination": "/editor.html"
+    }
+  ],
   "crons": [
     {
       "path": "/api/rss-fetch",
