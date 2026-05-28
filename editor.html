@@ -994,9 +994,13 @@ document.getElementById('qs-fetch').addEventListener('click', async () => {
   document.getElementById('qs-preview').style.display = 'none';
 
   try {
+    const { data: { session: _sess } } = await sb.auth.getSession();
     const res = await fetch('/api/editor-submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Editor-Password': localStorage.getItem('gridds_editor_pwd') || '' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${_sess?.access_token || ''}`,
+      },
       body: JSON.stringify({ url, section, action: 'preview' }),
     });
     const data = await res.json();
