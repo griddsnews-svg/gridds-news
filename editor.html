@@ -994,13 +994,12 @@ document.getElementById('qs-fetch').addEventListener('click', async () => {
   document.getElementById('qs-preview').style.display = 'none';
 
   try {
-    const { data: { session: _sess } } = await sb.auth.getSession();
-    const { data: { session: _sess } } = await sb.auth.getSession();
+    const { data: { session: _qsSess } } = await sb.auth.getSession();
 const res = await fetch('/api/submit', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${_sess?.access_token || ''}`,
+    'Authorization': `Bearer ${_qsSess?.access_token || ''}`,
   },
   body: JSON.stringify({ url, section, action: 'preview' }),
 });
