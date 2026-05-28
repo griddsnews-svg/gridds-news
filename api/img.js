@@ -1,20 +1,20 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // GRIDDS.NEWS — Image Proxy  /api/img?url=<encoded-image-url>
 //
-// v3: Firewall-blocked domains (HT, TOI etc) return 204 No Content so the
-// app shows its own placeholder rather than a repeated stock fallback image.
+// v4: Removed NDTV from firewall blocklist (images load fine via proxy).
+//     Kept truly blocked domains (HT, TOI, India Today etc).
 // ═══════════════════════════════════════════════════════════════════════════
-
+ 
 const BLOCKED_HOSTS   = ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254'];
 const MAX_BYTES       = 4 * 1024 * 1024;
 const CACHE_SECONDS   = 60 * 60 * 6;
-
+ 
 // Domains that block all external server IPs at firewall level.
 // Returning 204 immediately avoids a wasted timeout + stops broken-image icon.
+// NOTE: NDTV removed — their CDN images (e.g. c.ndtvimg.com) serve fine via proxy.
 const FIREWALL_BLOCKED = [
   'hindustantimes.com', 'htmedia.in',
   'timesofindia.com',   'toi.in',       'indiatimes.com',
-  'ndtv.com',           'ndtvimg.com',
   'indiatoday.in',      'aajtak.in',
   'livehindustan.com',  'jagran.com',
   'bhaskar.com',        'amarujala.com',
@@ -22,34 +22,32 @@ const FIREWALL_BLOCKED = [
   'zeenews.india.com',  'zeemedia.in',
   'news18.com',         'cnbctv18.com',
 ];
-
+ 
 function isFirewallBlocked(hostname) {
   return FIREWALL_BLOCKED.some(d => hostname === d || hostname.endsWith('.' + d));
 }
-
+ 
 export default async function handler(req, res) {
   const { url } = req.query;
-
+ 
   if (!url) return res.status(400).json({ error: 'Missing url param' });
-
+ 
   let parsed;
   try { parsed = new URL(decodeURIComponent(url)); }
   catch (e) { return res.status(400).json({ error: 'Invalid URL' }); }
-
+ 
   if (!['http:', 'https:'].includes(parsed.protocol))
     return res.status(400).json({ error: 'Protocol not allowed' });
-
+ 
   if (BLOCKED_HOSTS.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h)))
     return res.status(403).json({ error: 'Blocked host' });
-
+ 
   // ── Known firewall-blocked domain — return 204 immediately ───────────────
-  // The app treats a non-image response as "no image" and shows its own
-  // section-colour placeholder. Far better than a repeated stock photo.
   if (isFirewallBlocked(parsed.hostname)) {
     res.setHeader('Cache-Control', `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS}`);
     return res.status(204).end();
   }
-
+ 
   // ── Fetch ─────────────────────────────────────────────────────────────────
   let upstream;
   try {
@@ -69,15 +67,15 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(204).end();   // timeout/network — silent no-image
   }
-
+ 
   if (!upstream.ok) return res.status(204).end();
-
+ 
   const contentType = upstream.headers.get('content-type') || 'image/jpeg';
   if (!contentType.startsWith('image/')) return res.status(204).end();
-
+ 
   const buf = await upstream.arrayBuffer();
   if (buf.byteLength > MAX_BYTES) return res.status(204).end();
-
+ 
   // ── Success ───────────────────────────────────────────────────────────────
   res.setHeader('Content-Type',  contentType);
   res.setHeader('Cache-Control', `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=3600`);
@@ -86,5 +84,6 @@ export default async function handler(req, res) {
   res.setHeader('Content-Length', buf.byteLength);
   res.status(200).send(Buffer.from(buf));
 }
-
+ 
 export const config = { maxDuration: 15 };
+ 
