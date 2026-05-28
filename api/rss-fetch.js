@@ -717,13 +717,13 @@ export default async function handler(req, res) {
       // GRIDD Loves NEVER auto-publishes (issue #7)
       let autoLive = false;
       if (!isGriddLoves) {
-        // Cross-source auto-publish takes priority
-        if (crossSourceAutoUrls.has(s.url)) {
-          autoLive = true;
-        } else if (isTrusted && (s._score >= AUTO_LIVE_SCORE || scoringFailed)) {
-          autoLive = true;
-        }
-      }
+  // ONLY cross-source consensus triggers auto-LIVE
+  if (crossSourceAutoUrls.has(s.url)) {
+    autoLive = true;
+  }
+  // Trusted source + high score no longer auto-publishes
+  // Everything else goes to DRAFT for admin review
+}
  
       if (autoLive) autoLiveN++; else draftN++;
  
