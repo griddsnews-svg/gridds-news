@@ -319,52 +319,75 @@ function showLoginError(msg) {
   el.style.display = 'block';
 }
 
+async function loadProfileWithRetry(userId, attempts = 4) {
+  for (let i = 0; i < attempts; i++) {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role')
+      .eq('id', userId)
+      .maybeSingle();          // maybeSingle: no throw when 0 rows
+    if (data) return data;
+    if (error) console.warn('profile lookup error (attempt ' + (i+1) + '):', error.message);
+    await new Promise(r => setTimeout(r, 600));   // wait then retry
+  }
+  return null;
+}
+
+let initRunning = false;
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    document.getElementById('login').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
-    return;
+  if (initRunning) return;     // prevent overlapping runs
+  initRunning = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+
+    // Clean the #access_token fragment from the URL once logged in
+    if (window.location.hash.includes('access_token')) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+
+    // Load my profile (with retry — the row/trigger may lag a moment)
+    const profile = await loadProfileWithRetry(session.user.id);
+    if (!profile) {
+      showLoginError('Profile not found. Try refreshing in a few seconds, or contact admin.');
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+    ME = profile;
+
+    // Load all sections
+    const { data: secs } = await sb.from('sections').select('*').order('sort_order');
+    SECTIONS = secs || [];
+
+    // Load my owned sections
+    if (ME.role === 'admin') {
+      MY_SECTIONS = SECTIONS.map(s => s.id);   // admin owns all
+    } else {
+      const { data: owned } = await sb
+        .from('section_owners')
+        .select('section_id')
+        .eq('user_id', ME.id);
+      MY_SECTIONS = (owned || []).map(o => o.section_id);
+    }
+
+    // Show app
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-email').textContent = ME.email;
+    const roleEl = document.getElementById('user-role');
+    roleEl.textContent = ME.role;
+    roleEl.className = 'role role-' + ME.role;
+
+    buildSectionFilters();
+    loadStories();
+  } finally {
+    initRunning = false;
   }
-
-  // Load my profile
-  const { data: profile, error } = await sb
-    .from('profiles')
-    .select('id, email, role')
-    .eq('id', session.user.id)
-    .single();
-
-  if (error || !profile) {
-    showLoginError('Profile not found. Contact admin.');
-    return;
-  }
-  ME = profile;
-
-  // Load all sections
-  const { data: secs } = await sb.from('sections').select('*').order('sort_order');
-  SECTIONS = secs || [];
-
-  // Load my owned sections
-  if (ME.role === 'admin') {
-    MY_SECTIONS = SECTIONS.map(s => s.id);   // admin owns all
-  } else {
-    const { data: owned } = await sb
-      .from('section_owners')
-      .select('section_id')
-      .eq('user_id', ME.id);
-    MY_SECTIONS = (owned || []).map(o => o.section_id);
-  }
-
-  // Show app
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('user-email').textContent = ME.email;
-  const roleEl = document.getElementById('user-role');
-  roleEl.textContent = ME.role;
-  roleEl.className = 'role role-' + ME.role;
-
-  buildSectionFilters();
-  loadStories();
 }
 
 function buildSectionFilters() {
@@ -598,9 +621,16 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// Handle OAuth redirect + init
-sb.auth.onAuthStateChange(() => init());
-init();
+// Handle OAuth redirect + init.
+// onAuthStateChange fires once the session (incl. OAuth redirect token)
+// is fully processed — this is the reliable trigger.
+sb.auth.onAuthStateChange((event, session) => {
+  init();
+});
+
+// Also run once on load for the already-logged-in case (no redirect token).
+// Small delay lets supabase-js finish parsing any URL hash first.
+setTimeout(init, 300);
 </script>
 </body>
 </html>
