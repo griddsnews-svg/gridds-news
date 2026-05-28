@@ -2,402 +2,572 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>GRIDDS Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRIDDS.NEWS — Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { background:#0d0d12; color:#F5F0E8; font-family:'DM Sans',sans-serif; min-height:100vh; }
-  body { padding:24px 20px 80px; max-width:540px; margin:0 auto; }
-
-  .logo {
-    text-align:center; margin-bottom:8px;
-    font-family:'Libre Baskerville',Georgia,serif; font-weight:700; letter-spacing:2px;
+  :root {
+    --bg:        #0e0e12;
+    --panel:     #16161d;
+    --panel-2:   #1c1c25;
+    --border:    rgba(255,255,255,0.08);
+    --border-2:  rgba(255,255,255,0.14);
+    --text:      #ececf0;
+    --text-dim:  rgba(236,236,240,0.55);
+    --text-faint:rgba(236,236,240,0.3);
+    --accent:    #E8520A;
+    --green:     #3DA35D;
+    --amber:     #D4860A;
+    --blue:      #2B7CD3;
+    --red:       #C8453C;
   }
-  .logo .gridds { font-size:28px; color:#F5F0E8; }
-  .logo .dot { font-size:24px; color:#E8520A; }
-  .logo .news { font-size:14px; color:#BEB5A8; }
-
-  .tag {
-    text-align:center; font-size:10px; letter-spacing:3px; text-transform:uppercase;
-    color:rgba(255,255,255,0.35); margin-bottom:28px;
-  }
-
-  h1 {
-    font-family:'Libre Baskerville',serif; font-weight:700; font-size:22px;
-    margin-bottom:6px;
-  }
-  .sub {
-    font-size:13px; color:rgba(255,255,255,0.55); margin-bottom:24px;
-  }
-
-  label {
-    display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase;
-    color:rgba(255,255,255,0.5); margin-bottom:6px; margin-top:16px;
-  }
-  input[type=text], input[type=password], input[type=url], select, textarea {
-    width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
-    color:#F5F0E8; font-family:'DM Sans',sans-serif; font-size:14px;
-    padding:12px 14px; border-radius:8px; outline:none;
-    -webkit-appearance:none;
-  }
-  textarea { resize:vertical; min-height:120px; line-height:1.6; }
-  input:focus, select:focus, textarea:focus {
-    border-color:#E8520A; background:rgba(255,255,255,0.08);
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .btn {
-    width:100%; background:#E8520A; color:#fff; border:none;
-    padding:14px; border-radius:8px; cursor:pointer;
-    font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
-    letter-spacing:1.5px; text-transform:uppercase;
-    margin-top:20px;
+  /* ── LOGIN SCREEN ── */
+  #login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
   }
-  .btn:hover { background:#FF6020; }
-  .btn:disabled { background:rgba(255,255,255,0.12); cursor:not-allowed; }
-  .btn.secondary { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#F5F0E8; }
+  .login-logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .login-logo .dot { color: var(--accent); }
+  .login-logo .news { font-size: 16px; color: var(--text-dim); letter-spacing: 2px; }
+  .login-sub { color: var(--text-dim); font-size: 13px; letter-spacing: 0.5px; }
+  .google-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; color: #1a1a1a;
+    border: none; border-radius: 6px;
+    padding: 11px 22px; font-size: 14px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .google-btn:hover { transform: translateY(-1px); }
+  .google-btn svg { width: 18px; height: 18px; }
 
-  .preview {
-    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
-    border-radius:10px; padding:18px; margin-top:24px;
+  /* ── APP SHELL ── */
+  #app { display: none; min-height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    position: sticky; top: 0; z-index: 20;
   }
-  .preview img {
-    width:100%; max-height:200px; object-fit:cover; border-radius:6px; margin-bottom:14px;
+  .topbar-logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
   }
-  .preview .headline {
-    font-family:'Libre Baskerville',serif; font-size:18px; line-height:1.35;
-    color:#F5F0E8; margin-bottom:10px;
+  .topbar-logo .dot { color: var(--accent); }
+  .topbar-logo .news { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
+  .user-chip .role {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    padding: 2px 7px; border-radius: 3px; font-weight: 600;
   }
-  .preview .meta {
-    font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:1px;
-    text-transform:uppercase; margin-bottom:14px;
+  .role-admin  { background: rgba(232,82,10,0.15); color: var(--accent); }
+  .role-editor { background: rgba(43,124,211,0.15); color: var(--blue); }
+  .logout-btn {
+    background: none; border: 1px solid var(--border-2);
+    color: var(--text-dim); border-radius: 5px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
   }
-  .preview .summary {
-    font-size:14px; line-height:1.6; color:rgba(255,255,255,0.85);
-  }
-  .edit-link {
-    display:inline-block; font-size:11px; color:#E8520A;
-    text-decoration:underline; cursor:pointer; margin-top:8px;
-  }
+  .logout-btn:hover { color: var(--text); border-color: var(--text-dim); }
 
-  .status {
-    padding:12px 14px; border-radius:8px; font-size:13px; margin-top:16px;
-    display:none;
+  /* ── FILTER BAR ── */
+  .filterbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 22px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 53px; z-index: 15;
   }
-  .status.show { display:block; }
-  .status.success { background:rgba(76,175,80,0.12); color:#81C784; border:1px solid rgba(76,175,80,0.3); }
-  .status.error   { background:rgba(244,67,54,0.12); color:#EF9A9A; border:1px solid rgba(244,67,54,0.3); }
-  .status.loading { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); }
-
-  .hidden { display:none !important; }
-
-  .footer-note {
-    margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);
-    font-size:11px; color:rgba(255,255,255,0.3); text-align:center; line-height:1.6;
+  .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip {
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--text-dim); border-radius: 20px;
+    padding: 5px 13px; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    transition: all 0.12s;
   }
+  .chip:hover { border-color: var(--border-2); color: var(--text); }
+  .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+  .filterbar-spacer { flex: 1; }
+  .refresh-btn {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 5px; padding: 6px 14px; font-size: 12px;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .refresh-btn:hover { opacity: 0.9; }
+
+  /* ── STORY LIST ── */
+  .list-wrap { padding: 16px 22px 60px; max-width: 1100px; margin: 0 auto; }
+  .section-header {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 15px; font-weight: 700;
+    margin: 24px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header .count { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-faint); font-weight: 400; }
+  .section-header .sec-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .story {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+    transition: border-color 0.12s;
+  }
+  .story:hover { border-color: var(--border-2); }
+  .story-thumb {
+    width: 64px; height: 64px; border-radius: 6px;
+    object-fit: cover; flex-shrink: 0; background: var(--panel-2);
+  }
+  .story-thumb.noimg {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); font-size: 9px; text-align: center;
+  }
+  .story-main { flex: 1; min-width: 0; }
+  .story-headline { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+  .story-summary { font-size: 12px; color: var(--text-dim); line-height: 1.45; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .story-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-faint); flex-wrap: wrap; }
+  .story-meta a { color: var(--blue); text-decoration: none; }
+  .story-meta a:hover { text-decoration: underline; }
+  .score-badge { padding: 1px 6px; border-radius: 3px; font-weight: 600; font-size: 10px; }
+  .score-high { background: rgba(61,163,93,0.18); color: var(--green); }
+  .score-mid  { background: rgba(212,134,10,0.18); color: var(--amber); }
+  .score-low  { background: rgba(200,69,60,0.18); color: var(--red); }
+
+  .status-pill {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 2px 8px; border-radius: 3px; font-weight: 600;
+  }
+  .st-DRAFT    { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+  .st-PENDING  { background: rgba(212,134,10,0.18); color: var(--amber); }
+  .st-LIVE     { background: rgba(61,163,93,0.2); color: var(--green); }
+  .st-ARCHIVED { background: rgba(255,255,255,0.05); color: var(--text-faint); }
+  .st-REJECTED { background: rgba(200,69,60,0.15); color: var(--red); }
+
+  .story-actions { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .act-btn {
+    border: none; border-radius: 5px; padding: 5px 12px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    transition: opacity 0.12s;
+  }
+  .act-btn:hover { opacity: 0.85; }
+  .act-publish { background: var(--green); color: #fff; }
+  .act-pending { background: var(--amber); color: #fff; }
+  .act-archive { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border); }
+  .act-reject  { background: var(--panel-2); color: var(--red); border: 1px solid var(--border); }
+  .act-edit    { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border); }
+  .act-disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .empty { text-align: center; color: var(--text-faint); padding: 60px 20px; font-size: 13px; }
+  .loading { text-align: center; color: var(--text-dim); padding: 40px; font-size: 13px; }
+
+  /* ── EDIT MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border-2);
+    border-radius: 10px; width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto; padding: 22px;
+  }
+  .modal h3 { font-family: 'Libre Baskerville', serif; font-size: 16px; margin-bottom: 16px; }
+  .modal label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); margin: 12px 0 5px; }
+  .modal input, .modal textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border-2);
+    border-radius: 6px; padding: 9px 11px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+  }
+  .modal textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+  .modal-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .modal-cancel { background: none; border: 1px solid var(--border-2); color: var(--text-dim); border-radius: 6px; padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--panel-2); border: 1px solid var(--border-2);
+    color: var(--text); padding: 10px 18px; border-radius: 6px;
+    font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 
-<div class="logo">
-  <span class="gridds">GRIDDS</span><span class="dot">.</span><span class="news">EDITOR</span>
-</div>
-<div class="tag">Editorial submission</div>
-
-<!-- LOGIN SCREEN -->
-<div id="login-screen">
-  <h1>Editor access</h1>
-  <div class="sub">Sign in to add a story to your edition.</div>
-
-  <label>Password</label>
-  <input type="password" id="pwd-input" placeholder="Editor password" autocomplete="current-password">
-
-  <button class="btn" id="login-btn">Sign in</button>
-
-  <div class="status error" id="login-error"></div>
+<!-- ══ LOGIN ══ -->
+<div id="login">
+  <div class="login-logo">GRIDDS<span class="dot">.</span><span class="news">NEWS</span></div>
+  <div class="login-sub">Editorial Console</div>
+  <button class="google-btn" id="google-login">
+    <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Sign in with Google
+  </button>
+  <div class="login-sub" id="login-error" style="color:var(--red);display:none"></div>
 </div>
 
-<!-- SUBMIT FORM -->
-<div id="submit-screen" class="hidden">
-  <h1>Add a story</h1>
-  <div class="sub">Paste any article URL. I'll fetch, summarise, and queue it as a draft in your sheet.</div>
-
-  <label>Article URL</label>
-  <input type="url" id="url-input" placeholder="https://...">
-
-  <label>Section</label>
-  <select id="section-input">
-    <option value="Headlines">Headlines</option>
-    <option value="Finance">Finance</option>
-    <option value="Health">Health</option>
-    <option value="Politics">Politics</option>
-    <option value="IPL">IPL</option>
-    <option value="GRIDD Loves">GRIDD Loves</option>
-    <option value="City News">City News</option>
-    <option value="Science">Science</option>
-    <option value="Entertainment">Entertainment</option>
-    <option value="Tech">Tech</option>
-    <option value="Auto">Auto</option>
-    <option value="Long Reads">Long Reads</option>
-    <option value="Education">Education</option>
-    <option value="Weather">Weather</option>
-  </select>
-
-  <button class="btn" id="preview-btn">Preview &#8594;</button>
-
-  <div class="status loading" id="preview-status"></div>
-
-  <!-- PREVIEW BLOCK -->
-  <div class="preview hidden" id="preview-block">
-    <img id="pv-image" alt="" style="display:none">
-    <div class="headline" id="pv-headline" contenteditable="false"></div>
-    <div class="meta"><span id="pv-source"></span> &middot; <span id="pv-section"></span></div>
-    <div class="summary" id="pv-summary" contenteditable="false"></div>
-    <span class="edit-link" id="edit-toggle">Edit headline/summary</span>
-
-    <button class="btn" id="publish-btn" style="margin-top:18px">Add to sheet</button>
-    <button class="btn secondary" id="reset-btn">Cancel</button>
-
-    <div class="status" id="publish-status"></div>
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">GRIDDS<span class="dot">.</span><span class="news">NEWS</span></div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <span id="user-email"></span>
+        <span class="role" id="user-role"></span>
+      </div>
+      <button class="logout-btn" id="logout">Sign out</button>
+    </div>
   </div>
 
-  <div class="footer-note">
-    Stories land as DRAFT in your sheet. Flip to LIVE there when ready.<br>
-    Signed in for 30 days. <a href="#" id="signout-link" style="color:#E8520A">Sign out</a>
+  <div class="filterbar">
+    <div class="filter-group" id="status-filters">
+      <button class="chip active" data-status="PENDING">Pending</button>
+      <button class="chip" data-status="DRAFT">Draft</button>
+      <button class="chip" data-status="LIVE">Live</button>
+      <button class="chip" data-status="ARCHIVED">Archived</button>
+      <button class="chip" data-status="ALL">All</button>
+    </div>
+    <div class="filterbar-spacer"></div>
+    <div class="filter-group" id="section-filters"></div>
+    <button class="refresh-btn" id="refresh">↻ Refresh</button>
+  </div>
+
+  <div class="list-wrap" id="list">
+    <div class="loading">Loading stories…</div>
   </div>
 </div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Edit Story</h3>
+    <input type="hidden" id="edit-id">
+    <label>Headline</label>
+    <input type="text" id="edit-headline">
+    <label>Summary</label>
+    <textarea id="edit-summary"></textarea>
+    <label>Image URL</label>
+    <input type="text" id="edit-image">
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-save" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-  var PWD_STORAGE_KEY = 'gridds_editor_pwd';
-  var pwd = '';
+// ══════════════════════════════════════════════════════════════════════════
+// CONFIG — these are injected at build or hardcoded (anon key is safe public)
+// ══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://whiohburctxwjdyxhslz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoaW9oYnVyY3R4d2pkeXhoc2x6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODA0MTksImV4cCI6MjA5NTQ1NjQxOX0.0m-orDO-lYQCRPjtwq71AWP8y9Cc3NVnl9v15PpH9Gc'; // ← replace this with your anon/public key from Supabase → Project Settings → API
 
-  function getStoredPwd() {
-    try { return sessionStorage.getItem(PWD_STORAGE_KEY) || localStorage.getItem(PWD_STORAGE_KEY) || ''; } catch(e) { return ''; }
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let ME = null;             // { id, email, role }
+let MY_SECTIONS = [];      // section ids this user owns (admin = all)
+let SECTIONS = [];         // all sections
+let activeStatus = 'PENDING';
+let activeSection = 'MINE';
+
+// ── AUTH ──
+document.getElementById('google-login').addEventListener('click', async () => {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+  if (error) showLoginError(error.message);
+});
+
+document.getElementById('logout').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    document.getElementById('login').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    return;
   }
-  function setStoredPwd(p) {
-    try {
-      localStorage.setItem(PWD_STORAGE_KEY, p);
-      sessionStorage.setItem(PWD_STORAGE_KEY, p);
-    } catch(e) {}
+
+  // Load my profile
+  const { data: profile, error } = await sb
+    .from('profiles')
+    .select('id, email, role')
+    .eq('id', session.user.id)
+    .single();
+
+  if (error || !profile) {
+    showLoginError('Profile not found. Contact admin.');
+    return;
   }
-  function clearStoredPwd() {
-    try {
-      localStorage.removeItem(PWD_STORAGE_KEY);
-      sessionStorage.removeItem(PWD_STORAGE_KEY);
-    } catch(e) {}
+  ME = profile;
+
+  // Load all sections
+  const { data: secs } = await sb.from('sections').select('*').order('sort_order');
+  SECTIONS = secs || [];
+
+  // Load my owned sections
+  if (ME.role === 'admin') {
+    MY_SECTIONS = SECTIONS.map(s => s.id);   // admin owns all
+  } else {
+    const { data: owned } = await sb
+      .from('section_owners')
+      .select('section_id')
+      .eq('user_id', ME.id);
+    MY_SECTIONS = (owned || []).map(o => o.section_id);
   }
 
-  function showSubmitScreen() {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('submit-screen').classList.remove('hidden');
+  // Show app
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = ME.email;
+  const roleEl = document.getElementById('user-role');
+  roleEl.textContent = ME.role;
+  roleEl.className = 'role role-' + ME.role;
+
+  buildSectionFilters();
+  loadStories();
+}
+
+function buildSectionFilters() {
+  const wrap = document.getElementById('section-filters');
+  wrap.innerHTML = '';
+  // "Mine" chip (editors) or "All sections" (admin default)
+  const mineChip = document.createElement('button');
+  mineChip.className = 'chip active';
+  mineChip.dataset.section = 'MINE';
+  mineChip.textContent = ME.role === 'admin' ? 'All sections' : 'My sections';
+  wrap.appendChild(mineChip);
+
+  SECTIONS.forEach(s => {
+    const c = document.createElement('button');
+    c.className = 'chip';
+    c.dataset.section = s.id;
+    c.textContent = s.display_name;
+    wrap.appendChild(c);
+  });
+
+  wrap.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      wrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeSection = chip.dataset.section;
+      loadStories();
+    });
+  });
+}
+
+// Status filter chips
+document.querySelectorAll('#status-filters .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#status-filters .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeStatus = chip.dataset.status;
+    loadStories();
+  });
+});
+
+document.getElementById('refresh').addEventListener('click', loadStories);
+
+// ── LOAD + RENDER STORIES ──
+async function loadStories() {
+  const list = document.getElementById('list');
+  list.innerHTML = '<div class="loading">Loading stories…</div>';
+
+  let q = sb.from('stories').select('*');
+
+  if (activeStatus !== 'ALL') q = q.eq('status', activeStatus);
+
+  if (activeSection === 'MINE') {
+    if (ME.role !== 'admin') q = q.in('section_id', MY_SECTIONS.length ? MY_SECTIONS : ['__none__']);
+  } else {
+    q = q.eq('section_id', activeSection);
   }
-  function showLoginScreen() {
-    document.getElementById('submit-screen').classList.add('hidden');
-    document.getElementById('login-screen').classList.remove('hidden');
+
+  q = q.order('section_id').order('sort_order', { ascending: true }).limit(500);
+
+  const { data: stories, error } = await q;
+  if (error) { list.innerHTML = '<div class="empty">Error: ' + error.message + '</div>'; return; }
+  if (!stories || !stories.length) { list.innerHTML = '<div class="empty">No stories match these filters.</div>'; return; }
+
+  // Group by section
+  const grouped = {};
+  stories.forEach(s => { (grouped[s.section_id] = grouped[s.section_id] || []).push(s); });
+
+  list.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    const items = grouped[sec.id];
+    if (!items || !items.length) return;
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<span class="sec-dot" style="background:${sec.color}"></span>${sec.display_name}<span class="count">${items.length}</span>`;
+    list.appendChild(header);
+
+    items.forEach(story => list.appendChild(renderStory(story, sec)));
+  });
+}
+
+function renderStory(story, sec) {
+  const canEdit = ME.role === 'admin' || MY_SECTIONS.includes(story.section_id);
+  const isAdmin = ME.role === 'admin';
+
+  const el = document.createElement('div');
+  el.className = 'story';
+
+  // Thumbnail
+  const thumbHtml = story.image
+    ? `<img class="story-thumb" src="/api/img?url=${encodeURIComponent(story.image)}&section=${story.section_id}" onerror="this.classList.add('noimg');this.removeAttribute('src');this.textContent='no image'">`
+    : `<div class="story-thumb noimg">no image</div>`;
+
+  // Score badge
+  let scoreBadge = '';
+  if (story.ai_score) {
+    const cls = story.ai_score >= 8 ? 'score-high' : story.ai_score >= 6 ? 'score-mid' : 'score-low';
+    scoreBadge = `<span class="score-badge ${cls}">${story.ai_score}/10</span>`;
   }
 
-  // On load — check if we already have a stored password
-  pwd = getStoredPwd();
-  if (pwd) showSubmitScreen();
+  el.innerHTML = `
+    ${thumbHtml}
+    <div class="story-main">
+      <div class="story-headline">${escapeHtml(story.headline)}</div>
+      <div class="story-summary">${escapeHtml(story.summary || '')}</div>
+      <div class="story-meta">
+        <span class="status-pill st-${story.status}">${story.status}</span>
+        ${scoreBadge}
+        <span>${escapeHtml(story.source || '')}</span>
+        <a href="${story.url}" target="_blank" rel="noopener">source ↗</a>
+      </div>
+    </div>
+    <div class="story-actions"></div>
+  `;
 
-  // ─── LOGIN ──────────────────────────────────────────────────────────
-  document.getElementById('login-btn').addEventListener('click', async function() {
-    var input = document.getElementById('pwd-input').value;
-    var errEl = document.getElementById('login-error');
-    errEl.classList.remove('show');
+  const actions = el.querySelector('.story-actions');
 
-    if (!input) {
-      errEl.textContent = 'Enter the password.';
-      errEl.classList.add('show');
-      return;
+  if (canEdit) {
+    // PUBLISH — admin only
+    if (story.status !== 'LIVE') {
+      const pub = mkBtn(isAdmin ? 'Publish' : 'Publish', 'act-publish');
+      if (!isAdmin) { pub.classList.add('act-disabled'); pub.title = 'Only admin can publish'; }
+      else pub.addEventListener('click', () => updateStatus(story.id, 'LIVE'));
+      actions.appendChild(pub);
     }
-
-    // Test the password by making a preview call with a sentinel URL
-    // Since the API will reject bad passwords with 401, we use that as the auth check
-    document.getElementById('login-btn').disabled = true;
-    document.getElementById('login-btn').textContent = 'Checking…';
-    try {
-      var res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': input },
-        body: JSON.stringify({ action: 'preview', url: 'https://example.com', section: 'Headlines' }),
-      });
-      if (res.status === 401) {
-        errEl.textContent = 'Wrong password.';
-        errEl.classList.add('show');
-      } else {
-        // Any other response (200, 422, etc) means auth passed
-        pwd = input;
-        setStoredPwd(pwd);
-        showSubmitScreen();
-        document.getElementById('pwd-input').value = '';
-      }
-    } catch (e) {
-      errEl.textContent = 'Network error. Try again.';
-      errEl.classList.add('show');
-    } finally {
-      document.getElementById('login-btn').disabled = false;
-      document.getElementById('login-btn').textContent = 'Sign in';
+    // PENDING — editors mark ready
+    if (story.status === 'DRAFT') {
+      const pend = mkBtn('Mark Ready', 'act-pending');
+      pend.addEventListener('click', () => updateStatus(story.id, 'PENDING'));
+      actions.appendChild(pend);
     }
-  });
-
-  document.getElementById('pwd-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') document.getElementById('login-btn').click();
-  });
-
-  // ─── SIGN OUT ────────────────────────────────────────────────────────
-  document.getElementById('signout-link').addEventListener('click', function(e) {
-    e.preventDefault();
-    pwd = '';
-    clearStoredPwd();
-    showLoginScreen();
-  });
-
-  // ─── PREVIEW ─────────────────────────────────────────────────────────
-  var previewBtn   = document.getElementById('preview-btn');
-  var previewStatus = document.getElementById('preview-status');
-  var previewBlock  = document.getElementById('preview-block');
-
-  previewBtn.addEventListener('click', async function() {
-    var url     = document.getElementById('url-input').value.trim();
-    var section = document.getElementById('section-input').value;
-    previewStatus.className = 'status loading';
-    previewStatus.textContent = '';
-    previewBlock.classList.add('hidden');
-
-    if (!/^https?:\/\//i.test(url)) {
-      previewStatus.className = 'status error show';
-      previewStatus.textContent = 'Paste a valid URL starting with http or https.';
-      return;
+    // EDIT
+    const edit = mkBtn('Edit', 'act-edit');
+    edit.addEventListener('click', () => openEdit(story));
+    actions.appendChild(edit);
+    // ARCHIVE
+    if (story.status !== 'ARCHIVED') {
+      const arch = mkBtn('Archive', 'act-archive');
+      arch.addEventListener('click', () => updateStatus(story.id, 'ARCHIVED'));
+      actions.appendChild(arch);
     }
+  }
 
-    previewStatus.classList.add('show');
-    previewStatus.textContent = 'Fetching article and writing summary…';
-    previewBtn.disabled = true;
+  return el;
+}
 
-    try {
-      var res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': pwd },
-        body: JSON.stringify({ action: 'preview', url: url, section: section }),
-      });
-      if (res.status === 401) {
-        // Password rejected — return to login
-        clearStoredPwd();
-        showLoginScreen();
-        document.getElementById('login-error').textContent = 'Session expired. Sign in again.';
-        document.getElementById('login-error').classList.add('show');
-        return;
-      }
-      var data = await res.json();
-      if (!res.ok || !data.ok) {
-        previewStatus.className = 'status error show';
-        previewStatus.textContent = data.error || 'Could not fetch the article.';
-        return;
-      }
+function mkBtn(label, cls) {
+  const b = document.createElement('button');
+  b.className = 'act-btn ' + cls;
+  b.textContent = label;
+  return b;
+}
 
-      previewStatus.classList.remove('show');
+async function updateStatus(id, status) {
+  const patch = { status };
+  if (status === 'LIVE') {
+    patch.published_at = new Date().toISOString();
+    patch.published_by = ME.id;
+  }
+  const { error } = await sb.from('stories').update(patch).eq('id', id);
+  if (error) { toast('Error: ' + error.message); return; }
+  toast(status === 'LIVE' ? 'Published ✓' : status.charAt(0) + status.slice(1).toLowerCase() + ' ✓');
+  loadStories();
+}
 
-      var pvImg = document.getElementById('pv-image');
-      if (data.image) {
-        pvImg.src = data.image;
-        pvImg.style.display = 'block';
-        pvImg.onerror = function() { pvImg.style.display = 'none'; };
-      } else {
-        pvImg.style.display = 'none';
-      }
-      document.getElementById('pv-headline').textContent = data.headline;
-      document.getElementById('pv-summary').textContent  = data.summary;
-      document.getElementById('pv-source').textContent   = data.source;
-      document.getElementById('pv-section').textContent  = data.section;
-      previewBlock.classList.remove('hidden');
+// ── EDIT MODAL ──
+function openEdit(story) {
+  document.getElementById('edit-id').value = story.id;
+  document.getElementById('edit-headline').value = story.headline || '';
+  document.getElementById('edit-summary').value = story.summary || '';
+  document.getElementById('edit-image').value = story.image || '';
+  document.getElementById('modal').classList.add('open');
+}
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('open');
+});
+document.getElementById('modal-save').addEventListener('click', async () => {
+  const id = document.getElementById('edit-id').value;
+  const patch = {
+    headline: document.getElementById('edit-headline').value.trim(),
+    summary:  document.getElementById('edit-summary').value.trim(),
+    image:    document.getElementById('edit-image').value.trim(),
+  };
+  const { error } = await sb.from('stories').update(patch).eq('id', id);
+  if (error) { toast('Error: ' + error.message); return; }
+  document.getElementById('modal').classList.remove('open');
+  toast('Saved ✓');
+  loadStories();
+});
 
-      // Store for publish step
-      window._previewData = data;
-    } catch (e) {
-      previewStatus.className = 'status error show';
-      previewStatus.textContent = 'Network error: ' + e.message;
-    } finally {
-      previewBtn.disabled = false;
-    }
-  });
+// ── HELPERS ──
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
 
-  // ─── EDIT TOGGLE ─────────────────────────────────────────────────────
-  document.getElementById('edit-toggle').addEventListener('click', function() {
-    var hl = document.getElementById('pv-headline');
-    var sm = document.getElementById('pv-summary');
-    var isEditing = hl.contentEditable === 'true';
-    if (isEditing) {
-      hl.contentEditable = 'false';
-      sm.contentEditable = 'false';
-      this.textContent = 'Edit headline/summary';
-    } else {
-      hl.contentEditable = 'true';
-      sm.contentEditable = 'true';
-      this.textContent = 'Done editing';
-      hl.focus();
-    }
-  });
-
-  // ─── PUBLISH ────────────────────────────────────────────────────────
-  var publishBtn    = document.getElementById('publish-btn');
-  var publishStatus = document.getElementById('publish-status');
-
-  publishBtn.addEventListener('click', async function() {
-    var data = window._previewData;
-    if (!data) return;
-
-    var editedHl   = document.getElementById('pv-headline').textContent.trim();
-    var editedSm   = document.getElementById('pv-summary').textContent.trim();
-
-    publishStatus.className = 'status loading show';
-    publishStatus.textContent = 'Adding to your sheet…';
-    publishBtn.disabled = true;
-
-    try {
-      var res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Editor-Password': pwd },
-        body: JSON.stringify({
-          action: 'publish',
-          url: data.url,
-          section: data.section,
-          editedHeadline: editedHl,
-          editedSummary: editedSm,
-          editedImage: data.image,
-        }),
-      });
-      var json = await res.json();
-      if (!res.ok || !json.ok) {
-        publishStatus.className = 'status error show';
-        publishStatus.textContent = json.error || 'Could not add to sheet.';
-        return;
-      }
-      publishStatus.className = 'status success show';
-      publishStatus.textContent = '✓ Added to ' + data.section + ' tab as DRAFT.';
-
-      // Reset form after a moment
-      setTimeout(function() {
-        document.getElementById('url-input').value = '';
-        previewBlock.classList.add('hidden');
-        publishStatus.classList.remove('show');
-        window._previewData = null;
-      }, 2200);
-    } catch (e) {
-      publishStatus.className = 'status error show';
-      publishStatus.textContent = 'Network error: ' + e.message;
-    } finally {
-      publishBtn.disabled = false;
-    }
-  });
-
-  // ─── RESET ──────────────────────────────────────────────────────────
-  document.getElementById('reset-btn').addEventListener('click', function() {
-    previewBlock.classList.add('hidden');
-    publishStatus.classList.remove('show');
-    window._previewData = null;
-  });
+// Handle OAuth redirect + init
+sb.auth.onAuthStateChange(() => init());
+init();
 </script>
-
 </body>
 </html>
