@@ -1,10 +1,15 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// GRIDDS.NEWS — Editor Submit API
+// GRIDDS.NEWS — Editor Submit API v2.0
 //
 // Receives URL + section from /submit form, fetches the article page,
 // scrapes headline/image/text, generates AI summary, saves to Supabase.
 //
 // Auth: Supabase JWT token (from editor Google sign-in session)
+//
+// v2.0 changes:
+// - Supabase token auth (replaces password auth)
+// - Multi-proxy fallback for sites like NDTV that block direct fetches
+// - URL slug fallback when all fetch methods fail
 // ═══════════════════════════════════════════════════════════════════════════
  
 const OPENAI_KEY      = process.env.OPENAI_API_KEY;
@@ -95,10 +100,43 @@ function extractArticleText(html) {
 }
  
 function detectSource(html, articleUrl) {
-  const name = extractMetaContent(html, ['og:site_name', 'application-name']);
-  if (name) return name;
+  if (html) {
+    const name = extractMetaContent(html, ['og:site_name', 'application-name']);
+    if (name) return name;
+  }
   try {
     const host = new URL(articleUrl).hostname.replace(/^www\./, '');
+    // Known source map for fallback detection
+    const map = {
+      'sports.ndtv.com': 'NDTV Sports', 'ndtv.com': 'NDTV',
+      'feeds.feedburner.com': 'NDTV', 'gadgets.ndtv.com': 'NDTV Gadgets',
+      'food.ndtv.com': 'NDTV Food',
+      'thehindu.com': 'The Hindu', 'indianexpress.com': 'Indian Express',
+      'hindustantimes.com': 'Hindustan Times', 'livemint.com': 'Mint',
+      'economictimes.indiatimes.com': 'Economic Times',
+      'timesofindia.indiatimes.com': 'Times of India',
+      'business-standard.com': 'Business Standard',
+      'thehindubusinessline.com': 'Business Line',
+      'moneycontrol.com': 'Moneycontrol', 'financialexpress.com': 'Financial Express',
+      'firstpost.com': 'Firstpost', 'thequint.com': 'The Quint',
+      'scroll.in': 'Scroll', 'thewire.in': 'The Wire',
+      'theprint.in': 'The Print', 'newslaundry.com': 'Newslaundry',
+      'caravanmagazine.in': 'The Caravan', 'the-ken.com': 'The Ken',
+      'inc42.com': 'Inc42', 'techcrunch.com': 'TechCrunch',
+      'theverge.com': 'The Verge', 'wired.com': 'Wired',
+      'feeds.bbci.co.uk': 'BBC', 'bbc.com': 'BBC', 'bbc.co.uk': 'BBC',
+      'aljazeera.com': 'Al Jazeera', 'foreignpolicy.com': 'Foreign Policy',
+      'espncricinfo.com': 'ESPN Cricinfo', 'sportskeeda.com': 'Sportskeeda',
+      'crictracker.com': 'CricTracker', 'pinkvilla.com': 'Pinkvilla',
+      'variety.com': 'Variety', 'vogue.in': 'Vogue India',
+      'gqindia.com': 'GQ India', 'cntraveller.in': 'CN Traveller India',
+      'homegrown.co.in': 'Homegrown', 'filmcompanion.in': 'Film Companion',
+    };
+    if (map[host]) return map[host];
+    // Check partial matches (subdomains)
+    for (const [key, val] of Object.entries(map)) {
+      if (host.endsWith(key)) return val;
+    }
     const parts = host.split('.');
     return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
   } catch (e) { return 'Unknown'; }
@@ -143,7 +181,7 @@ async function verifySupabaseToken(token) {
   }
 }
  
-// ─── FETCH WITH PROXY FALLBACK ────────────────────────────────────────────
+// ─── FETCH WITH MULTI-PROXY FALLBACK ──────────────────────────────────────
  
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
@@ -162,31 +200,93 @@ async function fetchDirect(url) {
 }
  
 async function fetchViaProxy(url) {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxyUrl, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS Editor)' },
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.contents) throw new Error('Proxy returned empty content');
-  return data.contents;
+  const proxies = [
+    {
+      url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+      type: 'json',
+      field: 'contents',
+    },
+    {
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      type: 'text',
+    },
+    {
+      url: `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      type: 'text',
+    },
+  ];
+ 
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (GRIDDS.NEWS Editor)' },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) continue;
+ 
+      if (proxy.type === 'json') {
+        const data = await res.json();
+        const html = data[proxy.field];
+        if (html && html.length > 500) return html;
+      } else {
+        const html = await res.text();
+        if (html && html.length > 500) return html;
+      }
+    } catch (e) {
+      console.warn(`Proxy ${proxy.url.split('?')[0]} failed:`, e.message);
+      continue;
+    }
+  }
+  throw new Error('All proxies failed');
 }
  
 async function fetchArticlePage(url) {
+  // Try direct fetch first
   try {
     const html = await fetchDirect(url);
     console.log(`Direct fetch OK: ${url}`);
     return html;
   } catch (directErr) {
-    console.warn(`Direct fetch failed (${directErr.message}), trying proxy: ${url}`);
+    console.warn(`Direct fetch failed (${directErr.message}), trying proxies: ${url}`);
   }
+  // Try proxy cascade
   try {
     const html = await fetchViaProxy(url);
     console.log(`Proxy fetch OK: ${url}`);
     return html;
   } catch (proxyErr) {
-    throw new Error(`Both direct and proxy fetch failed. Proxy error: ${proxyErr.message}`);
+    throw new Error(`All fetch methods failed for this site. ${proxyErr.message}`);
+  }
+}
+ 
+// ─── URL SLUG FALLBACK ────────────────────────────────────────────────────
+// When a site (like NDTV) blocks all automated fetches, extract a usable
+// headline from the URL slug as a last resort.
+ 
+function headlineFromSlug(url) {
+  try {
+    const pathname = new URL(url).pathname;
+    // Get the last meaningful segment
+    const segments = pathname.split('/').filter(Boolean);
+    let slug = segments[segments.length - 1] || '';
+    // Remove trailing article IDs (e.g. -11559398, -7654321)
+    slug = slug.replace(/-\d{5,}$/, '');
+    // Remove file extensions
+    slug = slug.replace(/\.\w+$/, '');
+    // Convert dashes to spaces, title-case
+    const words = slug.replace(/-/g, ' ').replace(/_/g, ' ').trim();
+    if (words.length < 10) return null;
+    // Title case: capitalize first letter of each word, but keep short words lowercase
+    const lowerWords = new Set(['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'by', 'is', 'it', 'vs']);
+    const titled = words.split(' ').map((w, i) => {
+      if (i === 0 || !lowerWords.has(w.toLowerCase())) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }
+      return w.toLowerCase();
+    }).join(' ');
+    return titled;
+  } catch (e) {
+    return null;
   }
 }
  
@@ -194,7 +294,10 @@ async function fetchArticlePage(url) {
  
 async function summariseWithOpenAI(headline, articleText) {
   if (!OPENAI_KEY) return null;
-  const userPrompt = `Headline: ${headline}\n\nArticle excerpt: ${articleText.slice(0, 3000)}\n\nWrite a tight, factual summary in 60-90 words in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`;
+  const hasContent = articleText && articleText.length > 100;
+  const userPrompt = hasContent
+    ? `Headline: ${headline}\n\nArticle excerpt: ${articleText.slice(0, 3000)}\n\nWrite a tight, factual summary in 60-90 words in the style of Inshorts. No opinion, no hype, no clickbait. Plain prose, no bullet points. Do not repeat the headline verbatim. Just the summary, nothing else.`
+    : `Headline: ${headline}\n\nWrite a brief 30-40 word factual summary based on this headline alone. Expand slightly on what the headline implies. No opinion, no hype. If you cannot infer enough context, write a neutral 1-2 sentence description. Just the summary, nothing else.`;
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -205,7 +308,7 @@ async function summariseWithOpenAI(headline, articleText) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an editor writing crisp, factual 60-90 word news summaries in the style of Inshorts. Indian English. No opinion, no hype, no padding.' },
+          { role: 'system', content: 'You are an editor writing crisp, factual news summaries in the style of Inshorts. Indian English. No opinion, no hype, no padding.' },
           { role: 'user',   content: userPrompt },
         ],
         max_tokens: 200,
@@ -253,31 +356,60 @@ export default async function handler(req, res) {
   if (!url || !/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'Invalid URL' });
   if (!section) return res.status(400).json({ error: 'Section required' });
  
-  // ─── Fetch + scrape ─────────────────────────────────────────────────
-  let html;
+  // ─── Fetch + scrape (with fallback) ─────────────────────────────────
+  let html = null;
+  let fetchFailed = false;
+ 
   try {
     html = await fetchArticlePage(url);
   } catch (err) {
-    return res.status(502).json({ error: 'Could not fetch article', detail: err.message });
+    console.warn(`All fetch methods failed for ${url}: ${err.message}`);
+    fetchFailed = true;
   }
  
-  const headline = extractHeadline(html);
-  const image    = extractImage(html, url);
-  const text     = extractArticleText(html);
-  const source   = detectSource(html, url);
+  let headline = '';
+  let image    = '';
+  let text     = '';
+  let source   = '';
+  let note     = '';
  
-  if (!headline) return res.status(422).json({ error: 'Could not extract headline from page' });
+  if (!fetchFailed && html) {
+    // Normal path: extract from HTML
+    headline = extractHeadline(html);
+    image    = extractImage(html, url);
+    text     = extractArticleText(html);
+    source   = detectSource(html, url);
+  }
+ 
+  if (!headline) {
+    // Fallback: extract headline from URL slug
+    const slugHeadline = headlineFromSlug(url);
+    if (!slugHeadline) {
+      return res.status(502).json({
+        error: 'Could not fetch article or extract headline',
+        detail: 'This site blocks automated access and the URL doesn\'t contain a readable headline.',
+      });
+    }
+    headline = slugHeadline;
+    source   = detectSource('', url);
+    note     = 'This site blocked automated access. Headline was extracted from the URL — please review and edit. Add an image manually.';
+    console.log(`URL slug fallback used for ${url}: "${headline}"`);
+  }
  
   // ─── Summarise ──────────────────────────────────────────────────────
-  let summary = await summariseWithOpenAI(headline, text);
+  let summary = await summariseWithOpenAI(headline, text || headline);
   if (!summary) {
-    const words = text.split(/\s+/).slice(0, 80);
-    summary = words.join(' ') + (words.length === 80 ? '…' : '');
+    if (text) {
+      const words = text.split(/\s+/).slice(0, 80);
+      summary = words.join(' ') + (words.length === 80 ? '…' : '');
+    } else {
+      summary = '';
+    }
   }
  
   // ─── Preview ────────────────────────────────────────────────────────
   if (action === 'preview') {
-    return res.status(200).json({ ok: true, headline, summary, source, image, url, section });
+    return res.status(200).json({ ok: true, headline, summary, source, image, url, section, note });
   }
  
   // ─── Publish — writes directly to Supabase as LIVE ──────────────────
@@ -291,7 +423,6 @@ export default async function handler(req, res) {
     const finalImage    = (body.editedImage    || image).trim();
     const sectionId     = SECTION_ID[section] || 'headlines';
  
-    // Submit-form stories go LIVE immediately, float to top (sort_order 0)
     const row = {
       section_id:   sectionId,
       headline:     finalHeadline,
@@ -338,4 +469,3 @@ export default async function handler(req, res) {
 }
  
 export const config = { maxDuration: 60 };
- 
