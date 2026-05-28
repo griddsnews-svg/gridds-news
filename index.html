@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>GRIDDS.NEWS</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="mast">
+  <div style="display:flex;gap:3px;align-items:flex-end">
+    <div style="display:flex;gap:3px;margin-bottom:3px;align-items:flex-start">
+      <div style="width:10px;height:34px;border-radius:2px;background:#E8520A;flex-shrink:0"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+        <div style="width:14px;height:10px;border-radius:2px;background:#2B5BA8"></div>
+        <div style="width:14px;height:10px;border-radius:2px;background:#D4860A"></div>
+        <div style="width:14px;height:10px;border-radius:2px;background:#2B5BA8;opacity:0.5"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;flex-shrink:0">
+        <div style="width:10px;height:15px;border-radius:2px;background:#D4860A;opacity:0.75"></div>
+        <div style="height:6px"></div>
+        <div style="width:10px;height:13px;border-radius:2px;background:#E8520A;opacity:0.4"></div>
+      </div>
+    </div>
+    <div style="position:relative;display:inline-block;line-height:1">
+      <span id="mast-gridds" style="font-family:'Libre Baskerville',Georgia,serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:1.5px;line-height:1">GRIDDS</span><span style="font-family:'Libre Baskerville',Georgia,serif;font-size:17px;font-weight:700;color:#E8520A;line-height:1;vertical-align:baseline">.</span><span style="font-family:'Libre Baskerville',Georgia,serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:1px;line-height:1;vertical-align:baseline">NEWS</span>
+      <div id="mast-bar" style="position:absolute;height:3px;background:#E8520A;border-radius:2px;top:-6px;left:0;width:8px"></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="row r1"><div class="tile-wrap sh" id="TW-headlines"><div class="tile-flipper"><div class="tile-card" id="TC-headlines"><div class="tile-face" id="face-headlines-f"><div class="f-photo" id="photo-headlines-f"></div><div class="f-color" id="color-headlines-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-headlines-f">Headlines</div><div class="f-hl" id="hl-headlines-f"></div><div class="f-foot"><div class="f-src" id="src-headlines-f"></div><div class="f-ctr" id="ctr-headlines-f"></div></div></div></div><div class="tile-face back" id="face-headlines-b"><div class="f-photo" id="photo-headlines-b"></div><div class="f-color" id="color-headlines-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-headlines-b">Headlines</div><div class="f-hl" id="hl-headlines-b"></div><div class="f-foot"><div class="f-src" id="src-headlines-b"></div><div class="f-ctr" id="ctr-headlines-b"></div></div></div></div></div></div></div></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-finance"><div class="tile-flipper"><div class="tile-card" id="TC-finance"><div class="tile-face" id="face-finance-f"><div class="f-photo" id="photo-finance-f"></div><div class="f-color" id="color-finance-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-finance-f">Finance</div><div class="f-hl" id="hl-finance-f"></div><div class="f-foot"><div class="f-src" id="src-finance-f"></div><div class="f-ctr" id="ctr-finance-f"></div></div></div></div><div class="tile-face back" id="face-finance-b"><div class="f-photo" id="photo-finance-b"></div><div class="f-color" id="color-finance-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-finance-b">Finance</div><div class="f-hl" id="hl-finance-b"></div><div class="f-foot"><div class="f-src" id="src-finance-b"></div><div class="f-ctr" id="ctr-finance-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-wellness"><div class="tile-flipper"><div class="tile-card" id="TC-wellness"><div class="tile-face" id="face-wellness-f"><div class="f-photo" id="photo-wellness-f"></div><div class="f-color" id="color-wellness-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-wellness-f">Wellness</div><div class="f-hl" id="hl-wellness-f"></div><div class="f-foot"><div class="f-src" id="src-wellness-f"></div><div class="f-ctr" id="ctr-wellness-f"></div></div></div></div><div class="tile-face back" id="face-wellness-b"><div class="f-photo" id="photo-wellness-b"></div><div class="f-color" id="color-wellness-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-wellness-b">Wellness</div><div class="f-hl" id="hl-wellness-b"></div><div class="f-foot"><div class="f-src" id="src-wellness-b"></div><div class="f-ctr" id="ctr-wellness-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-opinions"><div class="tile-flipper"><div class="tile-card" id="TC-opinions"><div class="tile-face" id="face-opinions-f"><div class="f-photo" id="photo-opinions-f"></div><div class="f-color" id="color-opinions-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-opinions-f">Opinions</div><div class="f-hl" id="hl-opinions-f"></div><div class="f-foot"><div class="f-src" id="src-opinions-f"></div><div class="f-ctr" id="ctr-opinions-f"></div></div></div></div><div class="tile-face back" id="face-opinions-b"><div class="f-photo" id="photo-opinions-b"></div><div class="f-color" id="color-opinions-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-opinions-b">Opinions</div><div class="f-hl" id="hl-opinions-b"></div><div class="f-foot"><div class="f-src" id="src-opinions-b"></div><div class="f-ctr" id="ctr-opinions-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-worldNews"><div class="tile-flipper"><div class="tile-card" id="TC-worldNews"><div class="tile-face" id="face-worldNews-f"><div class="f-photo" id="photo-worldNews-f"></div><div class="f-color" id="color-worldNews-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-worldNews-f">World News</div><div class="f-hl" id="hl-worldNews-f"></div><div class="f-foot"><div class="f-src" id="src-worldNews-f"></div><div class="f-ctr" id="ctr-worldNews-f"></div></div></div></div><div class="tile-face back" id="face-worldNews-b"><div class="f-photo" id="photo-worldNews-b"></div><div class="f-color" id="color-worldNews-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-worldNews-b">World News</div><div class="f-hl" id="hl-worldNews-b"></div><div class="f-foot"><div class="f-src" id="src-worldNews-b"></div><div class="f-ctr" id="ctr-worldNews-b"></div></div></div></div></div></div></div></div>
+<div class="row r1"><div class="tile-wrap sh" id="TW-loves"><div class="tile-flipper"><div class="tile-card" id="TC-loves"><div class="tile-face" id="face-loves-f"><div class="f-photo" id="photo-loves-f"></div><div class="f-color" id="color-loves-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-loves-f">&#10022; GRIDD Loves</div><div class="f-hl" id="hl-loves-f"></div><div class="f-foot"><div class="f-src" id="src-loves-f"></div><div class="f-ctr" id="ctr-loves-f"></div></div></div></div><div class="tile-face back" id="face-loves-b"><div class="f-photo" id="photo-loves-b"></div><div class="f-color" id="color-loves-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-loves-b">&#10022; GRIDD Loves</div><div class="f-hl" id="hl-loves-b"></div><div class="f-foot"><div class="f-src" id="src-loves-b"></div><div class="f-ctr" id="ctr-loves-b"></div></div></div></div></div></div></div></div>
+  <!-- âââ ADDITIONAL TILES (scroll down) âââ -->
+  <div style="border-top:1px solid rgba(255,255,255,0.05);margin:10px 0 6px;padding-top:6px"></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-politics"><div class="tile-flipper"><div class="tile-card" id="TC-politics"><div class="tile-face" id="face-politics-f"><div class="f-photo" id="photo-politics-f"></div><div class="f-color" id="color-politics-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-politics-f">Nation</div><div class="f-hl" id="hl-politics-f"></div><div class="f-foot"><div class="f-src" id="src-politics-f"></div><div class="f-ctr" id="ctr-politics-f"></div></div></div></div><div class="tile-face back" id="face-politics-b"><div class="f-photo" id="photo-politics-b"></div><div class="f-color" id="color-politics-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-politics-b">Nation</div><div class="f-hl" id="hl-politics-b"></div><div class="f-foot"><div class="f-src" id="src-politics-b"></div><div class="f-ctr" id="ctr-politics-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-thisAndThat"><div class="tile-flipper"><div class="tile-card" id="TC-thisAndThat"><div class="tile-face" id="face-thisAndThat-f"><div class="f-photo" id="photo-thisAndThat-f"></div><div class="f-color" id="color-thisAndThat-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-thisAndThat-f">This & That</div><div class="f-hl" id="hl-thisAndThat-f"></div><div class="f-foot"><div class="f-src" id="src-thisAndThat-f"></div><div class="f-ctr" id="ctr-thisAndThat-f"></div></div></div></div><div class="tile-face back" id="face-thisAndThat-b"><div class="f-photo" id="photo-thisAndThat-b"></div><div class="f-color" id="color-thisAndThat-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-thisAndThat-b">This & That</div><div class="f-hl" id="hl-thisAndThat-b"></div><div class="f-foot"><div class="f-src" id="src-thisAndThat-b"></div><div class="f-ctr" id="ctr-thisAndThat-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-tech"><div class="tile-flipper"><div class="tile-card" id="TC-tech"><div class="tile-face" id="face-tech-f"><div class="f-photo" id="photo-tech-f"></div><div class="f-color" id="color-tech-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-tech-f">Tech</div><div class="f-hl" id="hl-tech-f"></div><div class="f-foot"><div class="f-src" id="src-tech-f"></div><div class="f-ctr" id="ctr-tech-f"></div></div></div></div><div class="tile-face back" id="face-tech-b"><div class="f-photo" id="photo-tech-b"></div><div class="f-color" id="color-tech-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-tech-b">Tech</div><div class="f-hl" id="hl-tech-b"></div><div class="f-foot"><div class="f-src" id="src-tech-b"></div><div class="f-ctr" id="ctr-tech-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-ipl"><div class="tile-flipper"><div class="tile-card" id="TC-ipl"><div class="tile-face" id="face-ipl-f"><div class="f-photo" id="photo-ipl-f"></div><div class="f-color" id="color-ipl-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-ipl-f">Sports</div><div class="f-hl" id="hl-ipl-f"></div><div class="f-foot"><div class="f-src" id="src-ipl-f"></div><div class="f-ctr" id="ctr-ipl-f"></div></div></div></div><div class="tile-face back" id="face-ipl-b"><div class="f-photo" id="photo-ipl-b"></div><div class="f-color" id="color-ipl-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-ipl-b">Sports</div><div class="f-hl" id="hl-ipl-b"></div><div class="f-foot"><div class="f-src" id="src-ipl-b"></div><div class="f-ctr" id="ctr-ipl-b"></div></div></div></div></div></div></div></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-longreads"><div class="tile-flipper"><div class="tile-card" id="TC-longreads"><div class="tile-face" id="face-longreads-f"><div class="f-photo" id="photo-longreads-f"></div><div class="f-color" id="color-longreads-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-longreads-f">Long Reads</div><div class="f-hl" id="hl-longreads-f"></div><div class="f-foot"><div class="f-src" id="src-longreads-f"></div><div class="f-ctr" id="ctr-longreads-f"></div></div></div></div><div class="tile-face back" id="face-longreads-b"><div class="f-photo" id="photo-longreads-b"></div><div class="f-color" id="color-longreads-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-longreads-b">Long Reads</div><div class="f-hl" id="hl-longreads-b"></div><div class="f-foot"><div class="f-src" id="src-longreads-b"></div><div class="f-ctr" id="ctr-longreads-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-cityNews"><div class="tile-flipper"><div class="tile-card" id="TC-cityNews"><div class="tile-face" id="face-cityNews-f"><div class="f-photo" id="photo-cityNews-f"></div><div class="f-color" id="color-cityNews-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-cityNews-f">City News</div><div class="f-hl" id="hl-cityNews-f"></div><div class="f-foot"><div class="f-src" id="src-cityNews-f"></div><div class="f-ctr" id="ctr-cityNews-f"></div></div></div></div><div class="tile-face back" id="face-cityNews-b"><div class="f-photo" id="photo-cityNews-b"></div><div class="f-color" id="color-cityNews-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-cityNews-b">City News</div><div class="f-hl" id="hl-cityNews-b"></div><div class="f-foot"><div class="f-src" id="src-cityNews-b"></div><div class="f-ctr" id="ctr-cityNews-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-lifestyle"><div class="tile-flipper"><div class="tile-card" id="TC-lifestyle"><div class="tile-face" id="face-lifestyle-f"><div class="f-photo" id="photo-lifestyle-f"></div><div class="f-color" id="color-lifestyle-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-lifestyle-f">Lifestyle</div><div class="f-hl" id="hl-lifestyle-f"></div><div class="f-foot"><div class="f-src" id="src-lifestyle-f"></div><div class="f-ctr" id="ctr-lifestyle-f"></div></div></div></div><div class="tile-face back" id="face-lifestyle-b"><div class="f-photo" id="photo-lifestyle-b"></div><div class="f-color" id="color-lifestyle-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-lifestyle-b">Lifestyle</div><div class="f-hl" id="hl-lifestyle-b"></div><div class="f-foot"><div class="f-src" id="src-lifestyle-b"></div><div class="f-ctr" id="ctr-lifestyle-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-entertainment"><div class="tile-flipper"><div class="tile-card" id="TC-entertainment"><div class="tile-face" id="face-entertainment-f"><div class="f-photo" id="photo-entertainment-f"></div><div class="f-color" id="color-entertainment-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-entertainment-f">Entertainment</div><div class="f-hl" id="hl-entertainment-f"></div><div class="f-foot"><div class="f-src" id="src-entertainment-f"></div><div class="f-ctr" id="ctr-entertainment-f"></div></div></div></div><div class="tile-face back" id="face-entertainment-b"><div class="f-photo" id="photo-entertainment-b"></div><div class="f-color" id="color-entertainment-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-entertainment-b">Entertainment</div><div class="f-hl" id="hl-entertainment-b"></div><div class="f-foot"><div class="f-src" id="src-entertainment-b"></div><div class="f-ctr" id="ctr-entertainment-b"></div></div></div></div></div></div></div></div>
+<div class="card" id="card"><img class="c-img" id="c-img" src="" alt="" style="display:none"><div class="c-body"><div class="c-lbl" id="c-lbl"></div><div class="c-hl" id="c-hl"></div><div class="c-sum" id="c-sum"></div><div class="c-foot"><div><div class="c-src" id="c-src"></div><div class="c-hint" id="c-hint"></div></div><div style="display:flex;gap:8px"><button id="btn-viewall" class="c-viewall">&#9776; All Stories</button><button class="c-close" id="c-close">&#10005; Close</button></div></div></div></div>
+</div>
+<script>
+
+/* ──────────────────────────────────────────────────
+   GRIDDS.NEWS — Live edition fetcher
+   Fetches /api/edition (5 min cached) and replaces hardcoded SECS
+   ────────────────────────────────────────────────── */
+var GRIDDS_API_URL = '/api/edition';
+
+/* ── ANALYTICS: fire-and-forget event tracking to /api/track ── */
+function gtrack(eventType, story, sectionKey){
+  try {
+    var sid = (story && (story.section || sectionKey)) || sectionKey || null;
+    var payload = {
+      event_type: eventType,
+      story_id:   (story && story.id) ? story.id : null,
+      section_id: sid
+    };
+    var body = JSON.stringify(payload);
+    /* sendBeacon is best for fire-and-forget (survives page unload); fall back to fetch */
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/track', new Blob([body], {type:'application/json'}));
+    } else {
+      fetch('/api/track', {method:'POST', headers:{'Content-Type':'application/json'}, body:body, keepalive:true}).catch(function(){});
+    }
+  } catch(e) { /* never let tracking break the app */ }
+}
+window.gtrack = gtrack;
+
+function applyLiveEdition(edition) {
+  // Update browser tab title with live edition date
+  if (edition.meta && edition.meta.editionDate) {
+    var d = new Date(edition.meta.editionDate);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.title = 'GRIDDS.NEWS — ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  if (!edition || !edition.sections) return false;
+  var hasData = false;
+  Object.keys(edition.sections).forEach(function(key) {
+    var live = edition.sections[key];
+    if (!live) return;
+    if (!window.SECS[key]) {
+      window.SECS[key] = { label: live.label, color: live.color, stories: [] };
+    }
+    if (Array.isArray(live.stories) && live.stories.length > 0) {
+      /* Section has LIVE stories from sheet — use them, drop hardcoded */
+      window.SECS[key].stories = live.stories;
+      hasData = true;
+    } else {
+      /* Section has zero LIVE stories — clear it so empty sections stay empty */
+      window.SECS[key].stories = [];
+    }
+    if (live.label) window.SECS[key].label = live.label;
+    if (live.color) window.SECS[key].color = live.color;
+  });
+  return hasData;
+}
+
+function rerenderTilesIfReady() {
+  /* Trigger a re-paint of all tile faces with new data */
+  if (typeof window.KEYS === 'undefined' || typeof window.paintFace !== 'function') {
+    /* Not ready yet — defer */
+    setTimeout(rerenderTilesIfReady, 200);
+    return;
+  }
+  window.KEYS.forEach(function(key) {
+    if (!window.SECS[key] || !window.SECS[key].stories || !window.SECS[key].stories.length) return;
+    /* Paint front and back faces */
+    if (typeof window.ST !== 'undefined' && window.ST[key]) {
+      try {
+        window.paintFace(key, 'f', 0);
+        window.paintFace(key, 'b', 1);
+        window.ST[key].front = 0;
+        window.ST[key].back = 1;
+        window.ST[key].isFrontVisible = true;
+      } catch(e) {}
+    }
+  });
+}
+
+(function fetchLiveEdition(){
+  fetch(GRIDDS_API_URL, { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(edition){
+      if (!edition) return;
+      if (applyLiveEdition(edition)) {
+        rerenderTilesIfReady();
+      }
+    })
+    .catch(function(){ /* fall back to hardcoded SECS silently */ });
+})();
+
+
+/* ── OPEN ARTICLE IN SAME TAB ── */
+function openReader(url, title, source, summary, imgSrc) {
+  if (!url) return;
+  window.location.href = url;
+}
+function closeReader() {}
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+
+
+
+var IMGS={"image11.png": "assets/img_792bb703.png", "image15.jpeg": "assets/img_38ec1de2.jpeg", "image16.jpeg": "assets/img_be66ec85.jpeg", "image2.jpeg": "assets/img_38ec1de2.jpeg", "image17.jpeg": "assets/img_2fdf8f8e.jpeg", "image24.jpeg": "assets/img_422ce488.jpeg", "image8.jpeg": "assets/img_4dc6aeb7.jpeg", "image9.jpeg": "assets/img_485a7b78.jpeg", "image4.jpeg": "assets/img_354a5239.jpeg", "image25.jpeg": "assets/img_87f1e594.jpeg", "image13.jpeg": "assets/img_38ec1de2.jpeg", "image26.jpeg": "assets/img_87f1e594.jpeg", "image18.jpeg": "assets/img_76efa1b9.jpeg", "image1.jpeg": "assets/img_38ec1de2.jpeg", "image20.jpeg": "assets/img_7df334c5.jpeg", "image14.jpeg": "assets/img_75b3219c.jpeg", "image3.jpeg": "assets/img_fbc91a89.jpeg", "image10.png": "assets/img_de8a4a05.png", "image5.jpeg": "assets/img_354a5239.jpeg", "image23.jpeg": "assets/img_a9695616.jpeg", "image19.jpeg": "assets/img_38ec1de2.jpeg", "image22.jpeg": "assets/img_05dfbcc0.jpeg", "image21.jpeg": "assets/img_38ec1de2.jpeg", "image7.png": "assets/img_96ab4164.png", "image6.png": "assets/img_a34245ea.png", "image12.jpeg": "assets/img_38ec1de2.jpeg"};
+var SECS={"headlines":{"label":"Headlines","color":"#E8520A","stories":[]},"finance":{"label":"Finance","color":"#1B5E20","stories":[]},"wellness":{"label":"Wellness","color":"#6A1B9A","stories":[]},"politics":{"label":"Nation","color":"#8B1538","stories":[]},"ipl":{"label":"Sports","color":"#FFA000","stories":[]},"loves":{"label":"✶ GRIDD Loves","color":"#7B5EA7","stories":[]},"cityNews":{"label":"City News","color":"#37474F","stories":[]},"worldNews":{"label":"World News","color":"#1565C0","stories":[]},"entertainment":{"label":"Entertainment","color":"#C2185B","stories":[]},"tech":{"label":"Tech","color":"#1976D2","stories":[]},"longreads":{"label":"Long Reads","color":"#5D4037","stories":[]},"opinions":{"label":"Opinions","color":"#455A64","stories":[]},"thisAndThat":{"label":"This & That","color":"#00695C","stories":[]},"lifestyle":{"label":"Lifestyle","color":"#006064","stories":[]}};
+var KEYS=["headlines","finance","wellness","politics","ipl","loves","cityNews","worldNews","entertainment","tech","longreads","opinions","thisAndThat","lifestyle"];
+window.SECS = SECS; window.KEYS = KEYS;
+
+var ST={};
+window.ST = ST;
+;
+KEYS.forEach(function(k){ST[k]={front:0,back:1,isFrontVisible:true,busy:false};});
+
+function tick(){
+  var n=new Date(),h=n.getHours(),m=n.getMinutes(),ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  var clk=document.getElementById('clock'); if(clk) clk.textContent=h+':'+(m<10?'0':'')+m+' '+ap;
+  var D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var Mo=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dt=document.getElementById('date'); if(dt) dt.textContent=D[n.getDay()]+', '+n.getDate()+' '+Mo[n.getMonth()]+' '+n.getFullYear();
+}
+tick();setInterval(tick,1000);
+
+/* ── IMAGE PROXY — routes all images through /api/img to fix iOS Safari hotlink blocks ── */
+function proxyImg(url, section) {
+  if (!url) return '';
+  if (url.startsWith('/') || url.startsWith('data:')) return url;
+  var s = section ? '&section=' + encodeURIComponent(section) : '';
+  return '/api/img?url=' + encodeURIComponent(url) + s;
+}
+
+/* imgWithFallback: sets src via proxy; if proxy fails, tries original URL */
+function imgWithFallback(imgEl, url, proxiedUrl, onBothFail) {
+  /* Support old 3-arg call: imgWithFallback(el, url, callback) */
+  if (typeof proxiedUrl === 'function') { onBothFail = proxiedUrl; proxiedUrl = null; }
+  if (!url) { if(onBothFail) onBothFail(); return; }
+  var pUrl = proxiedUrl || proxyImg(url);
+  imgEl.onerror = function() {
+    /* Proxy failed — try original URL directly as last resort */
+    imgEl.onerror = function() {
+      imgEl.onerror = null;
+      imgEl.style.display = 'none';
+      imgEl.classList.add('img-error');
+      if(onBothFail) onBothFail();
+    };
+    imgEl.src = url;
+  };
+  imgEl.src = pUrl;
+}
+
+/* Attach onerror handler to an <img> element.
+   On first error: hides the broken icon, adds img-error class.
+   For .se-hero: also shows the placeholder div instead. */
+function attachImgFallback(imgEl, placeholderId) {
+  imgEl.onerror = function() {
+    this.onerror = null;           /* prevent infinite loop */
+    this.classList.add('img-error');
+    this.style.display = 'none';
+    if (placeholderId) {
+      var ph = document.getElementById(placeholderId);
+      if (ph) ph.classList.add('show');
+    }
+  };
+}
+
+function paintFace(key,sfx,idx){
+  var sec=SECS[key];
+  if(!sec||!sec.stories||!sec.stories.length) return;
+  var st=sec.stories[idx%sec.stories.length];
+  var photo=document.getElementById('photo-'+key+'-'+sfx);
+  var col=document.getElementById('color-'+key+'-'+sfx);
+  if(st.image){
+    (function(photoEl, imgUrl) {
+    var proxied = proxyImg(imgUrl, key);
+    var tester = new Image();
+    tester.onload = function() {
+      photoEl.style.backgroundImage = 'url(' + proxied + ')';
+      photoEl.classList.remove('no-image');
+    };
+    tester.onerror = function() {
+      photoEl.style.backgroundImage = 'none';
+      photoEl.classList.add('no-image');
+    };
+    tester.src = proxied;
+  }(photo, st.image));
+    photo.style.backgroundSize='cover';
+    photo.style.backgroundPosition='center';
+    photo.style.display='block';
+    col.style.display='none';
+  } else if(st.img&&IMGS[st.img]){
+    (function(photoEl, imgUrl) {
+    var proxied = proxyImg(imgUrl, key);
+    var tester = new Image();
+    tester.onload = function() {
+      photoEl.style.backgroundImage = 'url(' + proxied + ')';
+      photoEl.classList.remove('no-image');
+    };
+    tester.onerror = function() {
+      photoEl.style.backgroundImage = 'none';
+      photoEl.classList.add('no-image');
+    };
+    tester.src = proxied;
+  }(photo, IMGS[st.img]));
+    photo.style.display='block';
+    col.style.display='none';
+  } else {
+    photo.style.backgroundImage='none';
+    photo.style.display='none';
+    col.style.background=sec.color;
+    col.style.display='block';
+    col.style.opacity='0.45';
+  }
+  var lbl=document.getElementById('lbl-'+key+'-'+sfx);
+  if(lbl){ lbl.style.background=sec.color; lbl.style.opacity='1'; }
+  document.getElementById('hl-'+key+'-'+sfx).textContent=st.h;
+  document.getElementById('src-'+key+'-'+sfx).textContent=st.source||'';
+  document.getElementById('ctr-'+key+'-'+sfx).textContent=(idx%sec.stories.length+1)+' / '+sec.stories.length;
+}
+window.paintFace = paintFace;
+
+/* Attach broken-image fallbacks to all <img> elements used in the app */
+(function attachAllImgFallbacks() {
+  attachImgFallback(document.getElementById('se-hero'), 'se-hero-placeholder');
+  attachImgFallback(document.getElementById('c-img'), null);
+  /* se-hero src changes dynamically — re-attach onerror each time src is set */
+  var _hero = document.getElementById('se-hero');
+  var _heroPh = document.getElementById('se-hero-placeholder');
+  var _origSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+  /* Use a MutationObserver instead — safer than overriding src setter */
+  var heroObs = new MutationObserver(function() {
+    _hero.classList.remove('img-error');
+    if (_heroPh) _heroPh.classList.remove('show');
+    attachImgFallback(_hero, 'se-hero-placeholder');
+  });
+  heroObs.observe(_hero, { attributes: true, attributeFilter: ['src'] });
+})();
+
+
+KEYS.forEach(function(key){
+  if(!SECS[key]||!SECS[key].stories||!SECS[key].stories.length) return;
+  paintFace(key,'f',0);
+  if(SECS[key].stories.length>1){paintFace(key,'b',1%SECS[key].stories.length);}
+});
+
+function flip(key){
+  var s=ST[key];
+  if(s.busy)return;
+  if(!SECS[key]||!SECS[key].stories||!SECS[key].stories.length) return;
+  s.busy=true;
+  var n=SECS[key].stories.length;
+  var card=document.getElementById('TC-'+key);
+  if(s.isFrontVisible){
+    var ni=(s.front+1)%n; paintFace(key,'b',ni); s.back=ni;
+  } else {
+    var ni=(s.back+1)%n; paintFace(key,'f',ni); s.front=ni;
+  }
+  s.isFrontVisible=!s.isFrontVisible;
+  card.classList.toggle('flipped',!s.isFrontVisible);
+  setTimeout(function(){s.busy=false;},1700);
+}
+
+/* ── AUTO-FLIP RHYTHM ──────────────────────────────────────────────────────
+   Rules:
+   1. One tile from the "first 3" group flips, then one from the "next 3", alternating.
+   2. Within each group the order rotates so no tile repeats back-to-back.
+   3. No two adjacent tiles (side-by-side in the same row, or sharing a row boundary)
+      flip at the same time or directly one after another within a ~2.5s window.
+
+   Layout adjacency (tiles that touch):
+     headlines        — row 1 (full width)
+     politics/wellness — row 2 (side by side)
+     opinions/ipl      — row 3 (side by side)
+     loves             — row 4 (full width)
+     worldNews/thisAndThat — row 5
+     finance/tech          — row 6
+     cityNews/longreads    — row 7
+     lifestyle/entertainment — row 8
+
+   Group A (first 3, visible on load): headlines, politics, wellness
+   Group B (next 3):                   opinions, ipl, loves
+   Group C (next 3):                   worldNews, thisAndThat, finance
+   Group D (next 3):                   tech, cityNews, longreads
+   Group E (last 2):                   lifestyle, entertainment
+
+   The scheduler picks one tile at a time from each group in round-robin,
+   rotating through [0,1,2] order within each group, skipping if the
+   previous flip was an adjacent tile.
+   ────────────────────────────────────────────────────────────────────── */
+(function(){
+  /* Groups — each is an ordered list of keys; the scheduler cycles through them */
+  /* NEW LAYOUT (top → bottom):
+       headlines                 (r1 full)
+       finance | wellness        (r2)
+       opinions | worldNews      (r3)
+       loves                     (r1 full)
+       politics(Nation) | thisAndThat   (r5)
+       tech | ipl(Sports)        (r6)
+       longreads | cityNews      (r7)
+       lifestyle | entertainment (r8)
+  */
+  var GROUPS = [
+    ['headlines', 'finance',  'wellness'],        // A
+    ['opinions',  'worldNews','loves'],           // B
+    ['politics',  'thisAndThat','tech'],          // C
+    ['ipl',       'longreads','cityNews'],        // D
+    ['lifestyle', 'entertainment', null]          // E (only 2)
+  ];
+
+  /* Adjacency: tiles that must not flip back-to-back (touch in the new layout) */
+  var ADJ = {
+    'headlines':   ['finance','wellness'],
+    'finance':     ['headlines','wellness','opinions'],
+    'wellness':    ['headlines','finance','worldNews'],
+    'opinions':    ['finance','worldNews','loves'],
+    'worldNews':   ['wellness','opinions','loves'],
+    'loves':       ['opinions','worldNews','politics','thisAndThat'],
+    'politics':    ['loves','thisAndThat','tech'],
+    'thisAndThat': ['loves','politics','ipl'],
+    'tech':        ['politics','ipl','longreads'],
+    'ipl':         ['thisAndThat','tech','cityNews'],
+    'longreads':   ['tech','cityNews','lifestyle'],
+    'cityNews':    ['ipl','longreads','entertainment'],
+    'lifestyle':   ['longreads','entertainment'],
+    'entertainment':['cityNews','lifestyle']
+  };
+
+  var groupIdx   = 0;          /* which group fires next */
+  var groupPtrs  = [0,0,0,0,0];/* rotation pointer within each group */
+  var lastFlipped = null;      /* key of the most-recently-flipped tile */
+
+  /* Beat interval — how long between each individual tile flip */
+  var BEAT = 2000; /* ms */
+
+  function nextFlip() {
+    /* Find which group fires this beat */
+    var g     = groupIdx % GROUPS.length;
+    var group = GROUPS[g];
+    var tries = 0;
+    var key   = null;
+
+    /* Rotate within the group, skip if adjacent to lastFlipped */
+    while (tries < group.length) {
+      var candidate = group[groupPtrs[g] % group.length];
+      groupPtrs[g]++;
+      if (!candidate) { tries++; continue; } /* null slot (group E) */
+      var isAdj = lastFlipped && (ADJ[lastFlipped]||[]).indexOf(candidate) !== -1;
+      if (!isAdj) { key = candidate; break; }
+      tries++;
+    }
+
+    /* Fallback: if all candidates are adjacent (shouldn't happen), just use the pointer */
+    if (!key) {
+      var fb = group[groupPtrs[g] % group.length];
+      if (fb) { key = fb; groupPtrs[g]++; }
+    }
+
+    if (key) {
+      flip(key);
+      lastFlipped = key;
+    }
+
+    /* Advance to next group */
+    groupIdx++;
+    setTimeout(nextFlip, BEAT);
+  }
+
+  /* Stagger the first beat slightly so initial paint settles */
+  setTimeout(nextFlip, 2200);
+})();
+
+var card=document.getElementById('card'),activeKey=null,activeUrl=null;
+
+/* Fly directions per tile */
+var FLY={
+  'headlines':'fly-up',
+  'politics':'fly-left','wellness':'fly-right',
+  'opinions':'fly-left','ipl':'fly-right',
+  'loves':'fly-down',
+  'worldNews':'fly-left','thisAndThat':'fly-right',
+  'finance':'fly-left','tech':'fly-right',
+  'cityNews':'fly-left','longreads':'fly-right',
+  'lifestyle':'fly-left','entertainment':'fly-right'
+};
+
+var expandKey=null, expandIdx=0;
+/* ── AD STATE — declared early so openExpand can reference them ── */
+var _adSwipeCount = 0;
+var _adCardIdx    = 0;
+var AD_EVERY      = 7;
+
+function hideAdInterstitial() {
+  var p = document.getElementById('se-ad-interstitial');
+  if(p) p.classList.remove('show');
+}
+
+function openExpand(key,st,sec){
+  /* ANALYTICS: story opened */
+  gtrack('open', st, key);
+  /* Reset ad counter each time a new section is opened */
+  _adSwipeCount = 0;
+  hideAdInterstitial();
+  expandKey=key; expandIdx=SECS[key].stories.indexOf(st);
+  if(expandIdx<0) expandIdx=0;
+  KEYS.forEach(function(k){
+    if(k!==key) document.getElementById('TW-'+k).classList.add(FLY[k]||'fly-left');
+  });
+  setTimeout(function(){
+    var expand=document.getElementById('story-expand');
+    var hero=document.getElementById('se-hero');
+    document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
+    document.getElementById('se-section').style.background=sec.color;
+    document.getElementById('se-headline').textContent=st.h;
+    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+    document.getElementById('se-source').textContent=st.source||'';
+    if(st.image){
+    var _ph=document.getElementById('se-hero-placeholder');
+    if(_ph) _ph.classList.remove('show');
+    hero.classList.remove('img-error');
+    hero.alt=st.h; hero.style.display='block';
+    imgWithFallback(hero, st.image, proxyImg(st.image, expandKey), function(){
+      hero.style.display='none';
+      if(_ph) _ph.classList.add('show');
+    });
+  }
+    
+    else if(st.img&&IMGS[st.img]){hero.src=proxyImg(IMGS[st.img]);hero.alt=st.h;hero.style.display='block';}
+    else{hero.style.display='none';}
+    document.getElementById('se-btn-read')._url=st.url||null;
+    document.getElementById('se-close').style.display='flex';
+    expand.classList.add('open');
+    requestAnimationFrame(function(){requestAnimationFrame(function(){expand.classList.add('visible');});});
+  },320);
+}
+
+/* Navigate to adjacent story in expand view */
+function expandGoTo(idx){
+  var sec=SECS[expandKey];
+  var n=sec.stories.length;
+  expandIdx=((idx%n)+n)%n;
+  var st=sec.stories[expandIdx];
+  var hero=document.getElementById('se-hero');
+  /* Animate: slide current content out, new content in */
+  var body=document.querySelector('.story-expand .se-body');
+  body.style.transition='opacity 0.2s ease';
+  body.style.opacity='0';
+  setTimeout(function(){
+    document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
+    document.getElementById('se-section').style.background=sec.color;
+    document.getElementById('se-headline').textContent=st.h;
+    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+    document.getElementById('se-source').textContent=st.source||'';
+    if(st.image){
+    var _ph=document.getElementById('se-hero-placeholder');
+    if(_ph) _ph.classList.remove('show');
+    hero.classList.remove('img-error');
+    hero.alt=st.h; hero.style.display='block';
+    imgWithFallback(hero, st.image, proxyImg(st.image, expandKey), function(){
+      hero.style.display='none';
+      if(_ph) _ph.classList.add('show');
+    });
+  }
+    else if(st.img&&IMGS[st.img]){hero.src=proxyImg(IMGS[st.img]);hero.alt=st.h;hero.style.display='block';}
+    else{hero.style.display='none';}
+    document.getElementById('se-btn-read')._url=st.url||null;
+    body.style.opacity='1';
+    /* scroll back to top */
+    document.getElementById('story-expand').scrollTop=0;
+  },200);
+}
+
+/* Swipe up/down on expand panel — also dismisses ad interstitial */
+(function(){
+  var el  = document.getElementById('story-expand');
+  var adPanel = document.getElementById('se-ad-interstitial');
+  var sy=null, didVSwipe=false;
+
+  el.addEventListener('touchstart', function(e){
+    sy = e.touches[0].clientY;
+    didVSwipe = false;
+  }, {passive:true});
+
+  el.addEventListener('touchmove', function(e){
+    if(sy===null) return;
+    if(Math.abs(e.touches[0].clientY - sy) > 15) didVSwipe = true;
+  }, {passive:true});
+
+  el.addEventListener('touchend', function(e){
+    if(sy===null) return;
+    var dy = e.changedTouches[0].clientY - sy;
+    sy = null;
+    if(Math.abs(dy) > 50 && didVSwipe){
+      /* If ad is showing, ANY swipe dismisses it and continues navigation */
+      if(adPanel.classList.contains('show')){
+        hideAdInterstitial();
+        if(dy < 0) expandGoTo(expandIdx+1);
+        /* swipe down while ad showing just dismisses ad, stays on same story */
+        didVSwipe = false;
+        return;
+      }
+      if(dy < 0){
+        /* swipe UP = next story */
+        _adSwipeCount++;
+        if(_adSwipeCount >= AD_EVERY){ showAdInterstitial(); }
+        else { expandGoTo(expandIdx+1); }
+      } else {
+        expandGoTo(expandIdx-1);
+      }
+    }
+    didVSwipe = false;
+  }, {passive:true});
+
+  /* Desktop mouse wheel */
+  el.addEventListener('wheel', function(e){
+    if(Math.abs(e.deltaY) > 30){
+      if(adPanel.classList.contains('show')){
+        hideAdInterstitial();
+        if(e.deltaY > 0) expandGoTo(expandIdx+1);
+        return;
+      }
+      if(e.deltaY > 0){
+        _adSwipeCount++;
+        if(_adSwipeCount >= AD_EVERY){ showAdInterstitial(); }
+        else { expandGoTo(expandIdx+1); }
+      } else {
+        expandGoTo(expandIdx-1);
+      }
+    }
+  }, {passive:true});
+})();
+
+/* ── AD INTERSTITIAL — every 7 swipes up in story expand ────────────────
+   AD_CARDS: add your real ad objects here. Each has:
+     brand    — advertiser name (uppercase, small caps label)
+     headline — main ad headline (Playfair, large)
+     copy     — one-line body copy
+     cta      — button label
+     url      — click-through URL
+     image    — image URL (optional; placeholder shown if omitted)
+   ─────────────────────────────────────────────────────────────────────── */
+var AD_CARDS = [
+  {
+    brand:    'Corporate Potter',
+    headline: 'Shape yourself. Lead better.',
+    copy:     'Life skills coaching for CXOs. Strictly by invitation.',
+    cta:      'Apply online',
+    url:      'mailto:screen@corporatepotter.com',
+    image:    '',  /* drop hosted image URL here when available */
+    theme: {
+      bg:       '#F5F0E8',  /* warm cream — matches their brand panel */
+      hl:       '#1C1A14',
+      copy:     '#5C5448',
+      brand:    '#B8952A',  /* their gold */
+      ctaBg:    '#1C1A14',
+      ctaColor: '#F5F0E8'
+    }
+  }
+  /* add more ad objects here as they come in */
+];
+
+/* ad vars declared earlier */
+
+function showAdInterstitial() {
+  if (!AD_CARDS.length) return;
+  var ad  = AD_CARDS[_adCardIdx % AD_CARDS.length];
+  _adCardIdx++;
+
+  var panel = document.getElementById('se-ad-interstitial');
+  var body  = panel.querySelector('.se-ad-body');
+  var img   = document.getElementById('se-ad-img');
+  var ph    = document.getElementById('se-ad-placeholder');
+
+  document.getElementById('se-ad-brand').textContent    = ad.brand    || 'Sponsored';
+  document.getElementById('se-ad-headline').textContent = ad.headline || '';
+  document.getElementById('se-ad-copy').textContent     = ad.copy     || '';
+  var cta = document.getElementById('se-ad-cta');
+  cta.textContent = ad.cta || 'Learn More';
+  cta.href        = ad.url || '#';
+
+  /* Per-ad theming via optional `theme` object on each AD_CARD entry
+     e.g. theme: { bg:'#F5F0E8', hl:'#1a1a2a', copy:'#555', brand:'#B8A070', ctaBg:'#1a1a2a', ctaColor:'#fff' } */
+  var t = ad.theme || {};
+  body.style.setProperty('--se-ad-bg',         t.bg       || '#0d0d12');
+  body.style.setProperty('--se-ad-hl-color',   t.hl       || '#fff');
+  body.style.setProperty('--se-ad-copy-color', t.copy     || 'rgba(255,255,255,0.6)');
+  body.style.setProperty('--se-ad-brand-color',t.brand    || 'rgba(255,255,255,0.35)');
+  body.style.setProperty('--se-ad-cta-bg',     t.ctaBg    || '#E8520A');
+  body.style.setProperty('--se-ad-cta-color',  t.ctaColor || '#fff');
+
+  /* Skip button colour adapts to bg */
+  var skip = document.getElementById('se-ad-skip');
+  skip.style.color = t.bg && t.bg !== '#0d0d12' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)';
+
+  if (ad.image && ad.image.trim()) {
+    img.src = ad.image;
+    img.style.display = 'block';
+    ph.style.display  = 'none';
+  } else {
+    img.style.display = 'none';
+    ph.style.display  = 'flex';
+    /* Show brand name large in placeholder */
+    ph.innerHTML = "<div style='font-family:serif;font-size:26px;font-weight:700;color:rgba(255,255,255,0.12);text-align:center;padding:0 24px;line-height:1.3'>" + (ad.brand||"") + "</div><div style='font-family:sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,0.07)'>" + (ad.copy ? ad.copy.split(".")[0] : "") + "</div>";
+  }
+
+  panel.classList.add('show');
+  _adSwipeCount = 0;
+}
+
+/* hideAdInterstitial moved earlier */
+
+document.getElementById('se-ad-skip').addEventListener('click', function(e) {
+  e.stopPropagation();
+  hideAdInterstitial();
+});
+
+/* View All from expand panel */
+document.getElementById('se-btn-all').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(!expandKey)return;
+  var sec=SECS[expandKey];
+  var panel=document.getElementById('va-panel');
+  var list=document.getElementById('va-list');
+  var title=document.getElementById('va-title');
+  title.textContent=sec.label+' — All Stories';
+  list.innerHTML='';
+  sec.stories.forEach(function(st,i){
+    var item=document.createElement('div');
+    item.className='va-item';
+    item.innerHTML='<div class="va-source">'+(st.source||'')+'</div>'
+      +'<div class="va-hl">'+st.h+'</div>'
+      +'<div class="va-sub">'+st.s+'</div>';
+    item.addEventListener('click',function(e){
+      e.stopPropagation();
+      var mc=document.getElementById('va-card');
+      document.getElementById('va-c-hl').textContent=st.h;
+      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+      document.getElementById('va-c-src').textContent=st.source||'';
+      document.getElementById('va-c-hint').textContent=st.url?'Click to open full story ↗':'';
+      var vimg=document.getElementById('va-c-img');
+      if(st.img&&IMGS[st.img]){vimg.src=proxyImg(IMGS[st.img]);vimg.style.display='block';}
+      else{vimg.style.display='none';}
+      mc._url=st.url||null;
+      mc.style.display='block';
+      mc.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+    list.appendChild(item);
+  });
+  /* Close expand first, then show panel */
+  closeExpand();
+  setTimeout(function(){ panel.classList.add('open'); },450);
+});
+
+function closeExpand(){
+  var expand=document.getElementById('story-expand');
+  expand.classList.remove('visible');
+  KEYS.forEach(function(k){
+    var tw=document.getElementById('TW-'+k);
+    tw.style.transition='transform 0.4s cubic-bezier(0,0,0.2,1),opacity 0.4s ease';
+    tw.classList.remove('fly-left','fly-right','fly-up','fly-down');
+  });
+  setTimeout(function(){
+    expand.classList.remove('open');
+    document.getElementById('se-close').style.display='none';
+    KEYS.forEach(function(k){document.getElementById('TW-'+k).style.transition='';});
+  },420);
+}
+
+document.getElementById('se-close').addEventListener('click',function(e){e.stopPropagation();closeExpand();});
+document.getElementById('se-btn-read').addEventListener('click',function(e){
+  e.stopPropagation();
+  /* ANALYTICS: outbound full-story click */
+  try {
+    var _sec = SECS[expandKey];
+    var _st  = _sec && _sec.stories ? _sec.stories[expandIdx] : null;
+    gtrack('fullstory_click', _st, expandKey);
+  } catch(_e){}
+  if(this._url) openReader(this._url,'',document.getElementById('se-source').textContent,'',null);
+});
+document.getElementById('se-close').style.display='none';
+
+KEYS.forEach(function(key){
+  document.getElementById('TW-'+key).addEventListener('click',function(){
+    var s=ST[key],sec=SECS[key];
+    if(!sec||!sec.stories||sec.stories.length===0) return;
+    var idx=s.isFrontVisible?s.front:s.back;
+    if(typeof idx!=='number'||isNaN(idx)) idx=0;
+    var st=sec.stories[((idx%sec.stories.length)+sec.stories.length)%sec.stories.length];
+    if(!st) return;
+    openExpand(key,st,sec);
+  });
+});;
+
+card.addEventListener('click',function(e){
+  if(e.target.id==='c-close'||(e.target.closest&&e.target.closest('#c-close')))return;
+  if(e.target.id==='btn-viewall'||(e.target.closest&&e.target.closest('#btn-viewall')))return;
+  if(activeUrl) openReader(activeUrl,'',document.getElementById('c-src').textContent,'',null);
+});
+document.getElementById('c-close').addEventListener('click',function(e){
+  e.stopPropagation();card.classList.remove('open');activeKey=null;activeUrl=null;
+});
+
+/* ── VIEW ALL panel ── */
+document.getElementById('btn-viewall').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(!activeKey)return;
+  var sec=SECS[activeKey];
+  var panel=document.getElementById('va-panel');
+  var list=document.getElementById('va-list');
+  var title=document.getElementById('va-title');
+  title.textContent=sec.label+' — All Stories';
+  list.innerHTML='';
+  sec.stories.forEach(function(st,i){
+    var item=document.createElement('div');
+    item.className='va-item';
+    item.innerHTML='<div class="va-source">'+( st.source||'' )+'</div>'
+      +'<div class="va-hl">'+st.h+'</div>'
+      +'<div class="va-sub">'+st.s+'</div>';
+    item.addEventListener('click',function(e){ e.stopPropagation();
+      /* show mini-card inside view-all */
+      var mc=document.getElementById('va-card');
+      document.getElementById('va-c-hl').textContent=st.h;
+      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+      document.getElementById('va-c-src').textContent=st.source||'';
+      document.getElementById('va-c-hint').textContent=st.url?'Click to open full story ↗':'';
+      var vimg=document.getElementById('va-c-img');
+      if(st.img&&IMGS[st.img]){vimg.src=proxyImg(IMGS[st.img]);vimg.style.display='block';}
+      else{vimg.style.display='none';}
+      mc._url=st.url||null;
+      mc.style.display='block';
+      mc.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+    list.appendChild(item);
+  });
+  card.classList.remove('open');
+  panel.classList.add('open');
+});
+
+document.getElementById('va-back').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('va-panel').classList.remove('open');
+  document.getElementById('va-card').style.display='none';
+});
+
+document.getElementById('va-card').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(e.target.id==='va-c-close'||(e.target.closest&&e.target.closest('#va-c-close'))){
+    e.stopPropagation();
+    document.getElementById('va-card').style.display='none'; return;
+  }
+  if(this._url) window.open(this._url,'_blank');
+});
+
+/* ── SWIPE to flip tiles ── */
+KEYS.forEach(function(key){
+  var el=document.getElementById('TW-'+key);
+  var tx=null, ty=null, swiped=false;
+
+  el.addEventListener('touchstart',function(e){
+    tx=e.touches[0].clientX;
+    ty=e.touches[0].clientY;
+    swiped=false;
+  },{passive:true});
+
+  el.addEventListener('touchmove',function(e){
+    if(tx===null) return;
+    var dx=e.touches[0].clientX-tx;
+    var dy=e.touches[0].clientY-ty;
+    if(Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)*0.8){ swiped=true; }
+  },{passive:true});
+
+  el.addEventListener('touchend',function(e){
+    if(tx===null) return;
+    var dx=e.changedTouches[0].clientX-tx;
+    var dy=e.changedTouches[0].clientY-ty;
+    tx=null; ty=null;
+    if(swiped && Math.abs(dx)>30 && Math.abs(dx)>Math.abs(dy)*0.8){
+      dx<0 ? flip(key) : flipBack(key);
+    } else {
+      swiped=false;
+    }
+  },{passive:true});
+
+  el.addEventListener('click',function(e){
+    if(swiped){ swiped=false; e.stopImmediatePropagation(); return; }
+  },true);
+
+  var mx=null, mdrag=false;
+  el.addEventListener('mousedown',function(e){ mx=e.clientX; mdrag=false; });
+  el.addEventListener('mousemove',function(e){ if(mx!==null&&Math.abs(e.clientX-mx)>10) mdrag=true; });
+  el.addEventListener('mouseup',function(e){
+    if(mx===null) return;
+    var dx=e.clientX-mx; mx=null;
+    if(Math.abs(dx)>30 && mdrag){ dx<0 ? flip(key) : flipBack(key); mdrag=false; }
+  });
+});
+
+/* ── FLIP BACK/* ── FLIP BACK (previous story) ── */
+function flipBack(key){
+  var s=ST[key];
+  if(s.busy)return;
+  if(!SECS[key]||!SECS[key].stories||!SECS[key].stories.length) return;
+  s.busy=true;
+  var n=SECS[key].stories.length;
+  var card=document.getElementById('TC-'+key);
+  if(s.isFrontVisible){
+    var ni=(s.front-1+n)%n; paintFace(key,'b',ni); s.back=ni;
+  } else {
+    var ni=(s.back-1+n)%n; paintFace(key,'f',ni); s.front=ni;
+  }
+  s.isFrontVisible=!s.isFrontVisible;
+  card.classList.toggle('flipped',!s.isFrontVisible);
+  setTimeout(function(){s.busy=false;},1700);
+}
+
+
+
+
+  /* ─── WELCOME + PROFILE + SEARCH + SAVED ─── */
+  var GRIDDS_PROFILE = null;
+  var GRIDDS_SAVED   = [];
+
+  function loadProfile() {
+    try {
+      var p = localStorage.getItem('gridds_profile');
+      if (p) GRIDDS_PROFILE = JSON.parse(p);
+      var s = localStorage.getItem('gridds_saved');
+      if (s) GRIDDS_SAVED = JSON.parse(s);
+    } catch(e){}
+  }
+
+  function saveProfile() {
+    try { localStorage.setItem('gridds_profile', JSON.stringify(GRIDDS_PROFILE)); } catch(e){}
+  }
+  function saveStories() {
+    try { localStorage.setItem('gridds_saved', JSON.stringify(GRIDDS_SAVED)); } catch(e){}
+  }
+
+  function ageFromDOB(dob) {
+    if (!dob) return '—';
+    var d = new Date(dob);
+    if (isNaN(d)) return '—';
+    var now = new Date();
+    var age = now.getFullYear() - d.getFullYear();
+    var m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age >= 0 && age < 150 ? age : '—';
+  }
+
+  function showWelcome() {
+    document.getElementById('welcome-overlay').classList.add('show');
+  }
+  function hideWelcome() {
+    document.getElementById('welcome-overlay').classList.remove('show');
+  }
+
+  /* Show welcome on first launch */
+  loadProfile();
+  if (!GRIDDS_PROFILE) showWelcome();
+
+  document.getElementById('w-submit').addEventListener('click', function(){
+    var name = document.getElementById('w-name').value.trim();
+    if (!name) { document.getElementById('w-name').focus(); return; }
+    GRIDDS_PROFILE = {
+      name: name,
+      contact: document.getElementById('w-contact').value.trim(),
+      dob: document.getElementById('w-dob').value,
+      sex: document.getElementById('w-sex').value,
+      location: document.getElementById('w-location').value.trim(),
+      joined: new Date().toISOString()
+    };
+    saveProfile();
+    hideWelcome();
+  });
+  document.getElementById('w-skip').addEventListener('click', function(){
+    GRIDDS_PROFILE = { name: 'Reader', joined: new Date().toISOString() };
+    saveProfile();
+    hideWelcome();
+  });
+
+  /* ─── PROFILE PANEL ─── */
+  function openProfile() {
+    loadProfile();
+    var p = GRIDDS_PROFILE || { name: 'Reader' };
+    document.getElementById('profile-name').textContent = p.name || 'Reader';
+    document.getElementById('profile-avatar').textContent = (p.name||'R').charAt(0).toUpperCase();
+    document.getElementById('pd-dob').textContent = p.dob || '—';
+    document.getElementById('pd-age').textContent = ageFromDOB(p.dob);
+    document.getElementById('pd-sex').textContent = p.sex || '—';
+    document.getElementById('pd-loc').textContent = p.location || '—';
+    renderSavedList();
+    document.getElementById('profile-panel').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProfile() {
+    document.getElementById('profile-panel').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('profile-back').addEventListener('click', closeProfile);
+  document.getElementById('profile-edit').addEventListener('click', function(){
+    /* Pre-fill welcome form with current values and reopen */
+    var p = GRIDDS_PROFILE || {};
+    document.getElementById('w-name').value = p.name || '';
+    document.getElementById('w-contact').value = p.contact || '';
+    document.getElementById('w-dob').value = p.dob || '';
+    document.getElementById('w-sex').value = p.sex || '';
+    document.getElementById('w-location').value = p.location || '';
+    closeProfile();
+    showWelcome();
+  });
+
+  function renderSavedList() {
+    var list = document.getElementById('saved-list');
+    if (!GRIDDS_SAVED.length) {
+      list.innerHTML = '<div class="saved-empty">No saved stories yet. Tap the bookmark icon on any story to save it for later.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    GRIDDS_SAVED.forEach(function(s, idx) {
+      var item = document.createElement('div');
+      item.className = 'saved-story-item';
+      var color = (SECS[s.section] && SECS[s.section].color) || '#37474F';
+      var label = (SECS[s.section] && SECS[s.section].label) || s.section;
+      item.innerHTML =
+        '<div class="saved-story-section" style="background:'+color+'">'+label+'</div>'+
+        '<div class="saved-story-hl">'+s.headline+'</div>'+
+        '<div class="saved-story-meta">'+s.source+' · Saved '+new Date(s.savedAt).toLocaleDateString()+'</div>';
+      item.addEventListener('click', function(){
+        if (SECS[s.section]) {
+          closeProfile();
+          var section = SECS[s.section];
+          var story = section.stories.find(function(st){ return st.h === s.headline; }) || s;
+          if (typeof openExpand === 'function') openExpand(s.section, story, section);
+        }
+      });
+      list.appendChild(item);
+    });
+  }
+
+  /* ─── SAVE STORY ─── */
+  document.getElementById('se-btn-save').addEventListener('click', function(e){
+    e.stopPropagation();
+    var btn = this;
+    var headline = document.getElementById('se-headline').textContent;
+    var summary = document.getElementById('se-summary').textContent;
+    var source = document.getElementById('se-source').textContent;
+    var section = btn._section || 'headlines';
+    var url = document.getElementById('se-btn-read')._url || '';
+
+    var existingIdx = GRIDDS_SAVED.findIndex(function(s){ return s.headline === headline; });
+    if (existingIdx >= 0) {
+      GRIDDS_SAVED.splice(existingIdx, 1);
+      btn.classList.remove('saved');
+    } else {
+      GRIDDS_SAVED.unshift({
+        headline: headline,
+        summary: summary,
+        source: source,
+        section: section,
+        url: url,
+        savedAt: new Date().toISOString()
+      });
+      btn.classList.add('saved');
+    }
+    saveStories();
+  });
+
+  /* ─── SEARCH ─── */
+  function openSearch() {
+    document.getElementById('search-panel').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ document.getElementById('search-input').focus(); }, 100);
+  }
+  function closeSearch() {
+    document.getElementById('search-panel').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('search-back').addEventListener('click', closeSearch);
+
+  document.getElementById('search-input').addEventListener('input', function(){
+    var q = this.value.toLowerCase().trim();
+    var list = document.getElementById('search-list');
+    var countEl = document.getElementById('search-count');
+
+    if (!q) {
+      list.innerHTML = '';
+      countEl.textContent = 'Type to start searching';
+      return;
+    }
+
+    var matches = [];
+    KEYS.forEach(function(key) {
+      var sec = SECS[key];
+      if (!sec) return;
+      sec.stories.forEach(function(story) {
+        var hay = (story.h + ' ' + (story.summary||story.s||'')).toLowerCase();
+        if (hay.indexOf(q) !== -1) {
+          matches.push({ key: key, story: story, section: sec });
+        }
+      });
+    });
+
+    countEl.textContent = matches.length + ' RESULT' + (matches.length===1?'':'S');
+    list.innerHTML = '';
+    matches.forEach(function(m) {
+      var item = document.createElement('div');
+      item.className = 'saved-story-item';
+      item.innerHTML =
+        '<div class="saved-story-section" style="background:'+m.section.color+'">'+m.section.label+'</div>'+
+        '<div class="saved-story-hl">'+m.story.h+'</div>'+
+        '<div class="saved-story-meta">'+(m.story.source||'')+'</div>';
+      item.addEventListener('click', function(){
+        closeSearch();
+        if (typeof openExpand === 'function') openExpand(m.key, m.story, m.section);
+      });
+      list.appendChild(item);
+    });
+  });
+
+  /* ─── BOTTOM NAV ─── */
+  document.getElementById('nav-home').addEventListener('click', function(){
+    if (typeof closeExpand === 'function') closeExpand();
+    closeProfile(); closeSearch();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+  document.getElementById('nav-search').addEventListener('click', openSearch);
+
+  document.getElementById('nav-profile').addEventListener('click', openProfile);
+
+
+  /* ─── READING TIME ─── */
+  function estimateReadTime(text) {
+    if (!text) return '1 min read';
+    var words = text.trim().split(/\s+/).length;
+    var mins = Math.max(1, Math.round(words / 200));
+    return mins + ' min read';
+  }
+
+
+  /* ─── DARK/LIGHT MODE ─── */
+  function applyTheme() {
+    var t = localStorage.getItem('gridds_theme') || 'dark';
+    if (t === 'light') document.body.classList.add('light-mode');
+    else document.body.classList.remove('light-mode');
+  }
+  applyTheme();
+  document.getElementById('theme-switch').addEventListener('click', function(){
+    var isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('gridds_theme', isLight ? 'light' : 'dark');
+  });
+
+
+  /* ─── PULL TO REFRESH ─── */
+  (function(){
+    var startY = 0, currentY = 0, pulling = false;
+    var indicator = document.getElementById('pull-indicator');
+    var THRESHOLD = 80;
+
+    function start(e) {
+      if (window.scrollY > 0) return;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
+      pulling = true;
+    }
+    function move(e) {
+      if (!pulling) return;
+      currentY = e.touches ? e.touches[0].clientY : e.clientY;
+      var diff = currentY - startY;
+      if (diff > 20 && window.scrollY === 0) {
+        indicator.classList.add('show');
+      }
+    }
+    function end() {
+      if (!pulling) return;
+      var diff = currentY - startY;
+      if (diff > THRESHOLD && window.scrollY === 0) {
+        /* Refresh */
+        setTimeout(function() {
+          window.location.reload();
+        }, 800);
+      } else {
+        indicator.classList.remove('show');
+      }
+      pulling = false;
+      startY = currentY = 0;
+    }
+    document.addEventListener('touchstart', start, {passive:true});
+    document.addEventListener('touchmove', move, {passive:true});
+    document.addEventListener('touchend', end, {passive:true});
+  })();
+
+
+  /* ─── OFFLINE FALLBACK ─── */
+  /* Save current edition data to localStorage every time it loads successfully */
+  try {
+    localStorage.setItem('gridds_last_edition', JSON.stringify({
+      cachedAt: new Date().toISOString(),
+      secsKeys: KEYS
+    }));
+  } catch(e) {}
+
+  /* If offline detected, show a banner */
+  window.addEventListener('offline', function() {
+    var banner = document.getElementById('offline-banner');
+    if (banner) banner.style.display = 'block';
+  });
+  window.addEventListener('online', function() {
+    var banner = document.getElementById('offline-banner');
+    if (banner) banner.style.display = 'none';
+  });
+  /* On load, if offline */
+  if (!navigator.onLine) {
+    var banner = document.getElementById('offline-banner');
+    if (banner) banner.style.display = 'block';
+  }
+
+
+  /* ─── ALL TILES MANDATORY (no delete for now) ─── */
+  var MANDATORY_TILES = ['headlines','finance','wellness','opinions','worldNews','loves','politics','thisAndThat','tech','ipl','longreads','cityNews','lifestyle','entertainment'];
+  var HIDDEN_TILES = [];
+
+  /* Load hidden tiles from localStorage */
+  try {
+    var hidden = localStorage.getItem('gridds_hidden_tiles');
+    if (hidden) HIDDEN_TILES = JSON.parse(hidden);
+  } catch(e) {}
+
+  function applyHiddenTiles() {
+    /* All tiles mandatory — always show every tile, ignore any stored hides */
+    KEYS.forEach(function(key) {
+      var wrap = document.getElementById('TW-' + key);
+      if (!wrap) return;
+      wrap.setAttribute('data-locked', 'true');
+      wrap.style.display = '';
+    });
+  }
+
+  function addDeleteButtons() {
+    KEYS.forEach(function(key) {
+      var wrap = document.getElementById('TW-' + key);
+      if (!wrap || MANDATORY_TILES.indexOf(key) !== -1) return;
+      if (wrap.querySelector('.tile-delete-btn')) return;
+      var btn = document.createElement('button');
+      btn.className = 'tile-delete-btn';
+      btn.innerHTML = '✕';
+      btn.title = 'Hide this tile';
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (HIDDEN_TILES.indexOf(key) === -1) HIDDEN_TILES.push(key);
+        try { localStorage.setItem('gridds_hidden_tiles', JSON.stringify(HIDDEN_TILES)); } catch(err) {}
+        applyHiddenTiles();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  addDeleteButtons();
+  applyHiddenTiles();
+
+  function enterEditMode() {
+    document.body.classList.add('editing-tiles');
+  }
+  function exitEditMode() {
+    document.body.classList.remove('editing-tiles');
+  }
+
+
+  /* ─── NEW WELCOME FLOW (3 steps) ─── */
+  function showWelcomeStep(n) {
+    ['welcome-step-1','welcome-step-2','welcome-step-3'].forEach(function(id, idx) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = (idx+1 === n) ? '' : 'none';
+    });
+  }
+  showWelcomeStep(1);
+
+  // Build tile-toggle list (step 2)
+  (function buildTileToggles(){
+    var box = document.getElementById('welcome-tile-toggles');
+    if (!box) return;
+    // All tiles mandatory for now — no user-hideable tiles
+    var SHOWABLE = (typeof KEYS !== 'undefined' ? KEYS : []).filter(function(k){
+      return MANDATORY_TILES.indexOf(k) === -1;
+    });
+    SHOWABLE.forEach(function(key) {
+      var sec = (typeof SECS !== 'undefined' ? SECS[key] : null);
+      if (!sec) return;
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:10px 14px';
+      var leftDiv = document.createElement('div');
+      leftDiv.style.cssText = 'display:flex;align-items:center;gap:10px';
+      var dot = document.createElement('span');
+      dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:'+sec.color;
+      var labelEl = document.createElement('span');
+      labelEl.textContent = sec.label;
+      labelEl.style.cssText = 'font-size:14px;color:#F5F0E8';
+      leftDiv.appendChild(dot); leftDiv.appendChild(labelEl);
+
+      // Toggle switch
+      var toggle = document.createElement('div');
+      toggle.className = 'theme-switch';
+      toggle.setAttribute('data-key', key);
+      toggle.classList.add('on');
+      toggle.style.cssText = 'position:relative;width:44px;height:24px;background:#E8520A;border-radius:24px;cursor:pointer;transition:background 0.2s';
+      var knob = document.createElement('span');
+      knob.style.cssText = 'position:absolute;top:2px;left:22px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left 0.2s';
+      toggle.appendChild(knob);
+      toggle.addEventListener('click', function(){
+        var isOn = this.classList.contains('on');
+        if (isOn) {
+          this.classList.remove('on');
+          this.style.background = 'rgba(255,255,255,0.15)';
+          knob.style.left = '2px';
+        } else {
+          this.classList.add('on');
+          this.style.background = '#E8520A';
+          knob.style.left = '22px';
+        }
+      });
+
+      row.appendChild(leftDiv);
+      row.appendChild(toggle);
+      box.appendChild(row);
+    });
+  })();
+
+  // Step 1 → 2
+  var s1Next = document.getElementById('w-next-1');
+  if (s1Next) s1Next.addEventListener('click', function(){ showWelcomeStep(2); });
+
+  // Step 2 → 3 (and save chosen tile hides)
+  var s2Next = document.getElementById('w-next-2');
+  if (s2Next) s2Next.addEventListener('click', function(){
+    var hidden = [];
+    document.querySelectorAll('#welcome-tile-toggles .theme-switch').forEach(function(toggle){
+      var key = toggle.getAttribute('data-key');
+      if (!toggle.classList.contains('on')) hidden.push(key);
+    });
+    try { localStorage.setItem('gridds_hidden_tiles', JSON.stringify(hidden)); } catch(e){}
+    if (typeof HIDDEN_TILES !== 'undefined') HIDDEN_TILES = hidden;
+    if (typeof applyHiddenTiles === 'function') applyHiddenTiles();
+    showWelcomeStep(3);
+  });
+
+  document.getElementById('customise-tiles').addEventListener('click', function() {
+    closeProfile();
+    enterEditMode();
+  });
+
+  document.getElementById('edit-mode-banner').addEventListener('click', exitEditMode);
+
+  /* Reset button removed — all tiles are mandatory, nothing to reset */
+
+  /* Position masthead DS bar */
+  (function(){
+    function placeMastBar(){
+      var el=document.getElementById('mast-gridds');
+      var bar=document.getElementById('mast-bar');
+      if(!el||!bar)return;
+      var canvas=document.createElement('canvas');
+      var ctx=canvas.getContext('2d');
+      var styles=window.getComputedStyle(el);
+      ctx.font=styles.fontWeight+' '+styles.fontSize+' '+styles.fontFamily;
+      var ls=1.5;
+      var wGRID=ctx.measureText('GRID').width+ls*4;
+      var wFull=ctx.measureText('GRIDDS').width+ls*5;
+      bar.style.left=Math.round(wGRID+3)+'px';
+      bar.style.width=Math.round(wFull-wGRID-6)+'px';
+    }
+    if(document.fonts){document.fonts.ready.then(function(){setTimeout(placeMastBar,150);});}
+    else{setTimeout(placeMastBar,700);}
+
+/* ── SHARE BUTTON ── */
+document.getElementById('se-btn-share').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var btn      = this;
+  var headline = document.getElementById('se-headline').textContent;
+  var summary  = document.getElementById('se-summary').textContent;
+  var source   = document.getElementById('se-source').textContent;
+  var url      = document.getElementById('se-btn-read')._url || '';
+  /* Inshorts-style share: headline, short summary, source, source link, then GRIDDS plug */
+  var trimmedSummary = summary.length > 200 ? summary.slice(0, 197) + '...' : summary;
+  var shareText = headline + '\n\n' + trimmedSummary + '\n\n— ' + source + '\n' + url + '\n\nShared via GRIDDS.NEWS\nGet the app: https://gridds.news';
+  if (navigator.share) {
+    navigator.share({ title: headline, text: shareText }).catch(function(){});
+    return;
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareText).then(function() {
+      btn.innerHTML = '&#10003; Copied';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.innerHTML = '&#8679; Share';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+});
+
+  })();
+});</script>
+
+<div class="va-panel" id="va-panel">
+  <div class="va-header">
+    <button class="va-back" id="va-back">&#8592; Back</button>
+    <div class="va-title" id="va-title"></div>
+  </div>
+  <div class="va-list" id="va-list"></div>
+  <div class="va-card" id="va-card" style="display:none">
+    <img id="va-c-img" style="width:100%;height:200px;object-fit:cover;display:none;border-radius:6px 6px 0 0">
+    <div class="va-card-body">
+      <div class="va-c-hl" id="va-c-hl"></div>
+      <div class="va-c-sum" id="va-c-sum"></div>
+      <div class="va-c-foot">
+        <div>
+          <div class="va-c-src" id="va-c-src"></div>
+          <div class="va-c-hint" id="va-c-hint"></div>
+        </div>
+        <button class="c-close" id="va-c-close">&#10005; Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="se-close" id="se-close">&#10005;</button>
+<div class="story-expand" id="story-expand">
+
+  <!-- ── AD INTERSTITIAL — shown every 7 swipes ── -->
+  <div class="se-ad-interstitial" id="se-ad-interstitial">
+    <div class="se-ad-top-bar">
+      <span class="se-ad-label-pill">Advertisement</span>
+      <button class="se-ad-skip" id="se-ad-skip">Skip ›</button>
+    </div>
+    <!-- Ad image (swapped by JS from AD_CARDS array) -->
+    <img class="se-ad-image" id="se-ad-img" src="" alt="" style="display:none">
+    <div class="se-ad-image-placeholder" id="se-ad-placeholder">
+      <!-- placeholder shown when no image — replaced by JS -->
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <div class="se-ad-body">
+      <div class="se-ad-brand" id="se-ad-brand">Sponsored</div>
+      <div class="se-ad-headline" id="se-ad-headline">Advertisement</div>
+      <div class="se-ad-copy" id="se-ad-copy"></div>
+      <a class="se-ad-cta" id="se-ad-cta" href="#" target="_blank" rel="noopener">Learn More</a>
+    </div>
+  </div>
+
+  <img class="se-hero" id="se-hero" src="" alt="" style="display:none">
+  <!-- Logo watermark below image, right-aligned — mirrors the masthead style -->
+  <div class="se-card-logo">
+    <div style="display:flex;gap:3px;margin-bottom:2px;align-items:flex-start;flex-shrink:0">
+      <div style="width:7px;height:22px;border-radius:1px;background:#E8520A;flex-shrink:0"></div>
+      <div style="display:flex;flex-direction:column;gap:1.5px;flex-shrink:0">
+        <div style="width:9px;height:6px;border-radius:1px;background:#2B5BA8"></div>
+        <div style="width:9px;height:6px;border-radius:1px;background:#D4860A"></div>
+        <div style="width:9px;height:6px;border-radius:1px;background:#2B5BA8;opacity:0.5"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;flex-shrink:0">
+        <div style="width:7px;height:10px;border-radius:1px;background:#D4860A;opacity:0.75"></div>
+        <div style="height:4px"></div>
+        <div style="width:7px;height:8px;border-radius:1px;background:#E8520A;opacity:0.4"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;line-height:1;margin-left:1px">
+      <span style="font-family:'Libre Baskerville',Georgia,serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:1px;line-height:1">GRIDDS<span style="color:#E8520A">.</span><span style="font-size:8px;color:rgba(255,255,255,0.5);letter-spacing:1px">NEWS</span></span>
+    </div>
+  </div>
+  <div class="se-body">
+    <div class="se-section-badge" id="se-section"></div>
+    <div class="se-headline" id="se-headline"></div>
+    <div class="se-summary" id="se-summary"></div>
+    <div class="se-footer">
+      <div class="se-source" id="se-source"></div><div id="se-readtime" style="font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px"></div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:nowrap">
+        <button class="se-icon-btn" id="se-btn-save" title="Save">
+          <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="se-icon-btn" id="se-btn-share" title="Share">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <button class="se-btn-all" id="se-btn-all" title="All Stories">&#9776; ALL STORIES</button>
+        <button class="se-btn-read" id="se-btn-read">FULL STORY &#8599;</button>
+      </div>
+    </div>
+
+    <!-- Ad space at end of card -->
+    <div class="se-ad-slot" style="padding:0;background:none;border:none;overflow:hidden;border-radius:8px">
+      <div class="se-ad-label" style="text-align:left;padding:0 4px 8px;color:rgba(255,255,255,0.35)">Advertisement</div>
+      <a href="#" onclick="event.preventDefault();event.stopPropagation();return false;" style="display:block;cursor:pointer">
+        <img src="assets/img_6553a66c.png" alt="Clean Foods - Clean Clear Ingredients" style="width:100%;display:block;border-radius:6px">
+      </a>
+    </div>
+
+    <div style="text-align:center;margin-top:20px;color:rgba(255,255,255,.2);font-size:11px;font-family:'DM Sans',sans-serif;letter-spacing:1px">
+      Swipe up for next story &nbsp;&middot;&nbsp; Swipe down for previous
+    </div>
+  </div>
+</div>
+
+<!-- articles open in same tab -->
+
+<div class="pull-indicator" id="pull-indicator"><div class="spinner"></div>Refreshing edition</div>
+
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#8B1538;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;text-align:center;padding:8px 12px;z-index:300;letter-spacing:1px">You're offline — showing cached edition. We'll refresh when you're back online.</div>
+
+<div class="edit-mode-banner" id="edit-mode-banner">Done customising</div>
+
+<!-- BOTTOM NAVIGATION — Search left, Home center, Profile right -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-btn" id="nav-search" title="Search" aria-label="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </button>
+  <button class="bottom-nav-btn nav-home-btn" id="nav-home" title="Home" aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>
+  </button>
+  <button class="bottom-nav-btn" id="nav-profile" title="Profile" aria-label="Profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
+  </button>
+</nav>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-logo">
+    <span class="gridds">GRIDDS</span><span class="dot">.</span><span class="news">NEWS</span>
+    <div class="tagline">Your daily feed for trusted news and stories</div>
+  </div>
+
+  <!-- Step 1: concept intro -->
+  <div id="welcome-step-1">
+    <h1 class="welcome-h1">Welcome</h1>
+    <div class="welcome-sub" style="line-height:1.6">
+      GRIDDS gives you a single page of the day&apos;s essential news, lifestyle, and culture &mdash; hand-curated by humans. No algorithm. No infinite scroll. No noise.
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0">
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#E8520A;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700;font-family:&apos;Libre Baskerville&apos;,serif">14</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Fourteen tiles</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Each tile covers one section &mdash; headlines, finance, lifestyle, tech, and more.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#1976D2;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:700">&#10231;</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Swipe a tile</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Swipe left or right on a tile to flip to the next story.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#FFA000;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700">&#9737;</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Tap to read</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Tap any tile to open the full summary. Save, share, or jump to the source.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="welcome-btn" id="w-next-1">Next &#8594;</button>
+  </div>
+
+  <!-- Step 2: choose tiles -->
+  <div id="welcome-step-2" style="display:none">
+    <h1 class="welcome-h1">Your tiles</h1>
+    <div class="welcome-sub">All sections are on by default. Toggle off any you don&apos;t want.</div>
+    <div id="welcome-tile-toggles" style="display:flex;flex-direction:column;gap:8px;margin:18px 0"></div>
+    <button class="welcome-btn" id="w-next-2">Next &#8594;</button>
+  </div>
+
+  <!-- Step 3: profile -->
+  <div id="welcome-step-3" style="display:none">
+    <h1 class="welcome-h1">About you</h1>
+    <div class="welcome-sub">Helps us improve. All data stays on your device.</div>
+    <div style="background:rgba(232,82,10,0.08);border:1px solid rgba(232,82,10,0.25);border-radius:6px;padding:10px 12px;margin:0 0 18px;font-family:&apos;DM Sans&apos;,sans-serif;font-size:11px;color:rgba(255,255,255,0.65);line-height:1.5">
+      <strong style="color:#E8520A">We don&apos;t track you.</strong> No analytics, no profiling, no third-party sharing.
+    </div>
+    <form class="welcome-form" id="welcome-form" onsubmit="return false;">
+      <div class="welcome-field">
+        <label class="welcome-label">Name</label>
+        <input class="welcome-input" id="w-name" type="text" placeholder="Your full name" required>
+      </div>
+      <div class="welcome-field">
+        <label class="welcome-label">Email or Phone (optional)</label>
+        <input class="welcome-input" id="w-contact" type="text" placeholder="For future sync features">
+      </div>
+      <div class="welcome-row">
+        <div class="welcome-field">
+          <label class="welcome-label">Date of Birth</label>
+          <input class="welcome-input" id="w-dob" type="date">
+        </div>
+        <div class="welcome-field">
+          <label class="welcome-label">Sex</label>
+          <select class="welcome-select" id="w-sex">
+            <option value="">Select</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="welcome-field">
+        <label class="welcome-label">Location (City)</label>
+        <input class="welcome-input" id="w-location" type="text" placeholder="e.g. Delhi">
+      </div>
+      <button class="welcome-btn" id="w-submit">Start Reading &#8594;</button>
+      <button class="welcome-skip" id="w-skip" type="button">Skip for now</button>
+    </form>
+  </div>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="profile-panel" id="profile-panel">
+  <div class="profile-header">
+    <button class="profile-back" id="profile-back">&#8592; Back</button>
+    <div class="profile-title">Profile</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="profile-content">
+    <div class="profile-avatar" id="profile-avatar">A</div>
+    <div class="profile-name" id="profile-name">Reader</div>
+    <div class="profile-section">
+      <div class="profile-section-title">Settings</div>
+      <div class="theme-toggle"><span class="theme-toggle-label">Light Mode</span><div class="theme-switch" id="theme-switch"></div></div>
+      <button class="profile-action-btn" id="customise-tiles" style="margin-top:10px;display:none">Customise My Tiles</button>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">About You</div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Date of Birth</span><span class="profile-detail-value" id="pd-dob">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Age</span><span class="profile-detail-value" id="pd-age">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Sex</span><span class="profile-detail-value" id="pd-sex">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Location</span><span class="profile-detail-value" id="pd-loc">—</span></div>
+      <button class="profile-action-btn" id="profile-edit">Edit Profile</button>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">My Saved Stories</div>
+      <div id="saved-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH PANEL -->
+<div class="search-panel" id="search-panel">
+  <div class="search-header">
+    <button class="profile-back" id="search-back">&#8592; Back</button>
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.5);fill:none;stroke-width:2;margin-right:8px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="search-input" placeholder="Search stories in today's edition" autocomplete="off">
+    </div>
+  </div>
+  <div class="search-results" id="search-results">
+    <div class="search-result-count" id="search-count">Type to start searching</div>
+    <div id="search-list"></div>
+  </div>
+</div>
+  <script src="script.js"></script>
+</body>
+</html>
