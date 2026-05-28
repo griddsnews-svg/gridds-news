@@ -995,14 +995,15 @@ document.getElementById('qs-fetch').addEventListener('click', async () => {
 
   try {
     const { data: { session: _sess } } = await sb.auth.getSession();
-    const res = await fetch('/api/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${_sess?.access_token || ''}`,
-      },
-      body: JSON.stringify({ url, section, action: 'preview' }),
-    });
+    const { data: { session: _sess } } = await sb.auth.getSession();
+const res = await fetch('/api/submit', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${_sess?.access_token || ''}`,
+  },
+  body: JSON.stringify({ url, section, action: 'preview' }),
+});
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.error || 'Fetch failed');
 
