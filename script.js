@@ -1,10 +1,9 @@
-
 /* ──────────────────────────────────────────────────
    GRIDDS.NEWS — Live edition fetcher
    Fetches /api/edition (5 min cached) and replaces hardcoded SECS
    ────────────────────────────────────────────────── */
 var GRIDDS_API_URL = '/api/edition';
- 
+
 /* ── ANALYTICS: fire-and-forget event tracking to /api/track ── */
 function gtrack(eventType, story, sectionKey){
   try {
@@ -24,7 +23,7 @@ function gtrack(eventType, story, sectionKey){
   } catch(e) { /* never let tracking break the app */ }
 }
 window.gtrack = gtrack;
- 
+
 /* ══ ADS — self-served ads pulled from /api/ads, rendered in 3 slots ══ */
 var GRIDDS_ADS_URL = '/api/ads';
 var AD_FEED = { interstitial: [], banner: [], card: [] };
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var bar = document.getElementById('bottom-ad-banner'); if(bar) bar.style.display='none';
   });
 });
- 
+
 function applyLiveEdition(edition) {
   // Update browser tab title with live edition date
   if (edition.meta && edition.meta.editionDate) {
@@ -106,7 +105,7 @@ function applyLiveEdition(edition) {
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     document.title = 'GRIDDS.NEWS — ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
   }
- 
+
   if (!edition || !edition.sections) return false;
   var hasData = false;
   Object.keys(edition.sections).forEach(function(key) {
@@ -128,7 +127,7 @@ function applyLiveEdition(edition) {
   });
   return hasData;
 }
- 
+
 function rerenderTilesIfReady() {
   /* Trigger a re-paint of all tile faces with new data */
   if (typeof window.KEYS === 'undefined' || typeof window.paintFace !== 'function') {
@@ -150,7 +149,7 @@ function rerenderTilesIfReady() {
     }
   });
 }
- 
+
 (function fetchLiveEdition(){
   fetch(GRIDDS_API_URL, { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })
@@ -162,32 +161,32 @@ function rerenderTilesIfReady() {
     })
     .catch(function(){ /* fall back to hardcoded SECS silently */ });
 })();
- 
- 
+
+
 /* ── OPEN ARTICLE IN SAME TAB ── */
 function openReader(url, title, source, summary, imgSrc) {
   if (!url) return;
   window.location.href = url;
 }
 function closeReader() {}
- 
- 
- 
+
+
+
 (function(__ready){ if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', __ready); } else { __ready(); } })(function() {
- 
- 
- 
- 
+
+
+
+
 var IMGS={"image11.png": "assets/img_792bb703.png", "image15.jpeg": "assets/img_38ec1de2.jpeg", "image16.jpeg": "assets/img_be66ec85.jpeg", "image2.jpeg": "assets/img_38ec1de2.jpeg", "image17.jpeg": "assets/img_2fdf8f8e.jpeg", "image24.jpeg": "assets/img_422ce488.jpeg", "image8.jpeg": "assets/img_4dc6aeb7.jpeg", "image9.jpeg": "assets/img_485a7b78.jpeg", "image4.jpeg": "assets/img_354a5239.jpeg", "image25.jpeg": "assets/img_87f1e594.jpeg", "image13.jpeg": "assets/img_38ec1de2.jpeg", "image26.jpeg": "assets/img_87f1e594.jpeg", "image18.jpeg": "assets/img_76efa1b9.jpeg", "image1.jpeg": "assets/img_38ec1de2.jpeg", "image20.jpeg": "assets/img_7df334c5.jpeg", "image14.jpeg": "assets/img_75b3219c.jpeg", "image3.jpeg": "assets/img_fbc91a89.jpeg", "image10.png": "assets/img_de8a4a05.png", "image5.jpeg": "assets/img_354a5239.jpeg", "image23.jpeg": "assets/img_a9695616.jpeg", "image19.jpeg": "assets/img_38ec1de2.jpeg", "image22.jpeg": "assets/img_05dfbcc0.jpeg", "image21.jpeg": "assets/img_38ec1de2.jpeg", "image7.png": "assets/img_96ab4164.png", "image6.png": "assets/img_a34245ea.png", "image12.jpeg": "assets/img_38ec1de2.jpeg"};
 var SECS={"headlines":{"label":"Headlines","color":"#E8520A","stories":[]},"finance":{"label":"Finance","color":"#1B5E20","stories":[]},"wellness":{"label":"Wellness","color":"#6A1B9A","stories":[]},"politics":{"label":"Nation","color":"#8B1538","stories":[]},"ipl":{"label":"Sports","color":"#FFA000","stories":[]},"loves":{"label":"✶ GRIDD Loves","color":"#7B5EA7","stories":[]},"cityNews":{"label":"City News","color":"#37474F","stories":[]},"worldNews":{"label":"World News","color":"#1565C0","stories":[]},"entertainment":{"label":"Entertainment","color":"#C2185B","stories":[]},"tech":{"label":"Tech","color":"#1976D2","stories":[]},"longreads":{"label":"Long Reads","color":"#5D4037","stories":[]},"opinions":{"label":"Opinions","color":"#455A64","stories":[]},"thisAndThat":{"label":"This & That","color":"#00695C","stories":[]},"lifestyle":{"label":"Lifestyle","color":"#006064","stories":[]}};
 var KEYS=["headlines","finance","wellness","politics","ipl","loves","cityNews","worldNews","entertainment","tech","longreads","opinions","thisAndThat","lifestyle"];
 window.SECS = SECS; window.KEYS = KEYS;
- 
+
 var ST={};
 window.ST = ST;
 ;
 KEYS.forEach(function(k){ST[k]={front:0,back:1,isFrontVisible:true,busy:false};});
- 
+
 function tick(){
   var n=new Date(),h=n.getHours(),m=n.getMinutes(),ap=h>=12?'PM':'AM';
   h=h%12||12;
@@ -197,7 +196,7 @@ function tick(){
   var dt=document.getElementById('date'); if(dt) dt.textContent=D[n.getDay()]+', '+n.getDate()+' '+Mo[n.getMonth()]+' '+n.getFullYear();
 }
 tick();setInterval(tick,1000);
- 
+
 /* ── IMAGE PROXY — routes all images through /api/img to fix iOS Safari hotlink blocks ── */
 function proxyImg(url, section) {
   if (!url) return '';
@@ -205,7 +204,7 @@ function proxyImg(url, section) {
   var s = section ? '&section=' + encodeURIComponent(section) : '';
   return '/api/img?url=' + encodeURIComponent(url) + s;
 }
- 
+
 /* imgWithFallback: sets src via proxy; if proxy fails, tries original URL */
 function imgWithFallback(imgEl, url, proxiedUrl, onBothFail) {
   /* Support old 3-arg call: imgWithFallback(el, url, callback) */
@@ -224,7 +223,7 @@ function imgWithFallback(imgEl, url, proxiedUrl, onBothFail) {
   };
   imgEl.src = pUrl;
 }
- 
+
 /* Attach onerror handler to an <img> element.
    On first error: hides the broken icon, adds img-error class.
    For .se-hero: also shows the placeholder div instead. */
@@ -239,7 +238,7 @@ function attachImgFallback(imgEl, placeholderId) {
     }
   };
 }
- 
+
 function paintFace(key,sfx,idx){
   var sec=SECS[key];
   if(!sec||!sec.stories||!sec.stories.length) return;
@@ -294,7 +293,7 @@ function paintFace(key,sfx,idx){
   document.getElementById('ctr-'+key+'-'+sfx).textContent=(idx%sec.stories.length+1)+' / '+sec.stories.length;
 }
 window.paintFace = paintFace;
- 
+
 /* Attach broken-image fallbacks to all <img> elements used in the app */
 (function attachAllImgFallbacks() {
   attachImgFallback(document.getElementById('se-hero'), 'se-hero-placeholder');
@@ -311,14 +310,14 @@ window.paintFace = paintFace;
   });
   heroObs.observe(_hero, { attributes: true, attributeFilter: ['src'] });
 })();
- 
- 
+
+
 KEYS.forEach(function(key){
   if(!SECS[key]||!SECS[key].stories||!SECS[key].stories.length) return;
   paintFace(key,'f',0);
   if(SECS[key].stories.length>1){paintFace(key,'b',1%SECS[key].stories.length);}
 });
- 
+
 function flip(key){
   var s=ST[key];
   if(s.busy)return;
@@ -335,14 +334,14 @@ function flip(key){
   card.classList.toggle('flipped',!s.isFrontVisible);
   setTimeout(function(){s.busy=false;},1700);
 }
- 
+
 /* ── AUTO-FLIP RHYTHM ──────────────────────────────────────────────────────
    Rules:
    1. One tile from the "first 3" group flips, then one from the "next 3", alternating.
    2. Within each group the order rotates so no tile repeats back-to-back.
    3. No two adjacent tiles (side-by-side in the same row, or sharing a row boundary)
       flip at the same time or directly one after another within a ~2.5s window.
- 
+
    Layout adjacency (tiles that touch):
      headlines        — row 1 (full width)
      politics/wellness — row 2 (side by side)
@@ -352,13 +351,13 @@ function flip(key){
      finance/tech          — row 6
      cityNews/longreads    — row 7
      lifestyle/entertainment — row 8
- 
+
    Group A (first 3, visible on load): headlines, politics, wellness
    Group B (next 3):                   opinions, ipl, loves
    Group C (next 3):                   worldNews, thisAndThat, finance
    Group D (next 3):                   tech, cityNews, longreads
    Group E (last 2):                   lifestyle, entertainment
- 
+
    The scheduler picks one tile at a time from each group in round-robin,
    rotating through [0,1,2] order within each group, skipping if the
    previous flip was an adjacent tile.
@@ -382,7 +381,7 @@ function flip(key){
     ['ipl',       'longreads','cityNews'],        // D
     ['lifestyle', 'entertainment', null]          // E (only 2)
   ];
- 
+
   /* Adjacency: tiles that must not flip back-to-back (touch in the new layout) */
   var ADJ = {
     'headlines':   ['finance','wellness'],
@@ -400,21 +399,21 @@ function flip(key){
     'lifestyle':   ['longreads','entertainment'],
     'entertainment':['cityNews','lifestyle']
   };
- 
+
   var groupIdx   = 0;          /* which group fires next */
   var groupPtrs  = [0,0,0,0,0];/* rotation pointer within each group */
   var lastFlipped = null;      /* key of the most-recently-flipped tile */
- 
+
   /* Beat interval — how long between each individual tile flip */
   var BEAT = 2000; /* ms */
- 
+
   function nextFlip() {
     /* Find which group fires this beat */
     var g     = groupIdx % GROUPS.length;
     var group = GROUPS[g];
     var tries = 0;
     var key   = null;
- 
+
     /* Rotate within the group, skip if adjacent to lastFlipped */
     while (tries < group.length) {
       var candidate = group[groupPtrs[g] % group.length];
@@ -424,29 +423,29 @@ function flip(key){
       if (!isAdj) { key = candidate; break; }
       tries++;
     }
- 
+
     /* Fallback: if all candidates are adjacent (shouldn't happen), just use the pointer */
     if (!key) {
       var fb = group[groupPtrs[g] % group.length];
       if (fb) { key = fb; groupPtrs[g]++; }
     }
- 
+
     if (key) {
       flip(key);
       lastFlipped = key;
     }
- 
+
     /* Advance to next group */
     groupIdx++;
     setTimeout(nextFlip, BEAT);
   }
- 
+
   /* Stagger the first beat slightly so initial paint settles */
   setTimeout(nextFlip, 2200);
 })();
- 
+
 var card=document.getElementById('card'),activeKey=null,activeUrl=null;
- 
+
 /* Fly directions per tile */
 var FLY={
   'headlines':'fly-up',
@@ -458,17 +457,17 @@ var FLY={
   'cityNews':'fly-left','longreads':'fly-right',
   'lifestyle':'fly-left','entertainment':'fly-right'
 };
- 
+
 var expandKey=null, expandIdx=0;
 /* ── AD STATE — declared early so openExpand can reference them ── */
 var _adSwipeCount = 0;
 var _adCardIdx    = 0;
 var AD_EVERY      = 3;
- 
+
 /* ── SNAKE break: pop the game every N swipes, or at the end of a section ── */
 var _snakeSwipeCount = 0;
 var SNAKE_EVERY       = 8;
- 
+
 /* Decide what happens on a swipe-up: next story, an ad, or the game.
    At the end of a section (no more stories) we always pop the game. */
 function advanceStory(){
@@ -481,12 +480,12 @@ function advanceStory(){
   else { expandGoTo(expandIdx + 1); }
 }
 window.advanceStory = advanceStory;
- 
+
 function hideAdInterstitial() {
   var p = document.getElementById('se-ad-interstitial');
   if(p) p.classList.remove('show');
 }
- 
+
 function openExpand(key,st,sec){
   /* ANALYTICS: story opened */
   gtrack('open', st, key);
@@ -528,7 +527,7 @@ function openExpand(key,st,sec){
     renderCardAd();
   },320);
 }
- 
+
 /* Navigate to adjacent story in expand view */
 function expandGoTo(idx){
   var sec=SECS[expandKey];
@@ -566,23 +565,23 @@ function expandGoTo(idx){
     renderCardAd();
   },200);
 }
- 
+
 /* Swipe up/down on expand panel — also dismisses ad interstitial */
 (function(){
   var el  = document.getElementById('story-expand');
   var adPanel = document.getElementById('se-ad-interstitial');
   var sy=null, didVSwipe=false;
- 
+
   el.addEventListener('touchstart', function(e){
     sy = e.touches[0].clientY;
     didVSwipe = false;
   }, {passive:true});
- 
+
   el.addEventListener('touchmove', function(e){
     if(sy===null) return;
     if(Math.abs(e.touches[0].clientY - sy) > 15) didVSwipe = true;
   }, {passive:true});
- 
+
   el.addEventListener('touchend', function(e){
     if(sy===null) return;
     var dy = e.changedTouches[0].clientY - sy;
@@ -601,7 +600,7 @@ function expandGoTo(idx){
     }
     didVSwipe = false;
   }, {passive:true});
- 
+
   /* Desktop mouse wheel */
   el.addEventListener('wheel', function(e){
     if(Math.abs(e.deltaY) > 30){
@@ -615,7 +614,7 @@ function expandGoTo(idx){
     }
   }, {passive:true});
 })();
- 
+
 /* ── AD INTERSTITIAL — every 7 swipes up in story expand ────────────────
    AD_CARDS: add your real ad objects here. Each has:
      brand    — advertiser name (uppercase, small caps label)
@@ -644,18 +643,18 @@ var AD_CARDS = [
   }
   /* add more ad objects here as they come in */
 ];
- 
+
 /* ad vars declared earlier */
- 
+
 function showAdInterstitial() {
   var ad = nextAd('interstitial', expandKey);
   if (!ad) { _adSwipeCount = 0; expandGoTo(expandIdx + 1); return; }  /* no ad → just advance */
- 
+
   var panel = document.getElementById('se-ad-interstitial');
   var body  = panel.querySelector('.se-ad-body');
   var img   = document.getElementById('se-ad-img');
   var ph    = document.getElementById('se-ad-placeholder');
- 
+
   document.getElementById('se-ad-brand').textContent    = ad.brand    || 'Sponsored';
   document.getElementById('se-ad-headline').textContent = ad.headline || '';
   document.getElementById('se-ad-copy').textContent     = ad.copy     || '';
@@ -663,7 +662,7 @@ function showAdInterstitial() {
   cta.textContent = ad.cta || 'Learn More';
   cta.href        = ad.url || '#';
   cta.onclick     = function(){ gtrackAd(ad.id, 'click'); };
- 
+
   /* Per-ad theming via optional `theme` object on each AD_CARD entry
      e.g. theme: { bg:'#F5F0E8', hl:'#1a1a2a', copy:'#555', brand:'#B8A070', ctaBg:'#1a1a2a', ctaColor:'#fff' } */
   var t = ad.theme || {};
@@ -673,11 +672,11 @@ function showAdInterstitial() {
   body.style.setProperty('--se-ad-brand-color',t.brand    || 'rgba(255,255,255,0.35)');
   body.style.setProperty('--se-ad-cta-bg',     t.ctaBg    || '#E8520A');
   body.style.setProperty('--se-ad-cta-color',  t.ctaColor || '#fff');
- 
+
   /* Skip button colour adapts to bg */
   var skip = document.getElementById('se-ad-skip');
   skip.style.color = t.bg && t.bg !== '#0d0d12' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)';
- 
+
   if (ad.image && ad.image.trim()) {
     img.src = ad.image;
     img.style.display = 'block';
@@ -688,19 +687,19 @@ function showAdInterstitial() {
     /* Show brand name large in placeholder */
     ph.innerHTML = "<div style='font-family:serif;font-size:26px;font-weight:700;color:rgba(255,255,255,0.12);text-align:center;padding:0 24px;line-height:1.3'>" + (ad.brand||"") + "</div><div style='font-family:sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,0.07)'>" + (ad.copy ? ad.copy.split(".")[0] : "") + "</div>";
   }
- 
+
   panel.classList.add('show');
   gtrackAd(ad.id, 'impression');
   _adSwipeCount = 0;
 }
- 
+
 /* hideAdInterstitial moved earlier */
- 
+
 document.getElementById('se-ad-skip').addEventListener('click', function(e) {
   e.stopPropagation();
   hideAdInterstitial();
 });
- 
+
 /* View All from expand panel */
 document.getElementById('se-btn-all').addEventListener('click',function(e){
   e.stopPropagation();
@@ -737,7 +736,7 @@ document.getElementById('se-btn-all').addEventListener('click',function(e){
   closeExpand();
   setTimeout(function(){ panel.classList.add('open'); },450);
 });
- 
+
 function closeExpand(){
   var expand=document.getElementById('story-expand');
   expand.classList.remove('visible');
@@ -752,7 +751,7 @@ function closeExpand(){
     KEYS.forEach(function(k){document.getElementById('TW-'+k).style.transition='';});
   },420);
 }
- 
+
 document.getElementById('se-close').addEventListener('click',function(e){e.stopPropagation();closeExpand();});
 document.getElementById('se-btn-read').addEventListener('click',function(e){
   e.stopPropagation();
@@ -765,7 +764,7 @@ document.getElementById('se-btn-read').addEventListener('click',function(e){
   if(this._url) openReader(this._url,'',document.getElementById('se-source').textContent,'',null);
 });
 document.getElementById('se-close').style.display='none';
- 
+
 KEYS.forEach(function(key){
   document.getElementById('TW-'+key).addEventListener('click',function(){
     var s=ST[key],sec=SECS[key];
@@ -777,7 +776,7 @@ KEYS.forEach(function(key){
     openExpand(key,st,sec);
   });
 });;
- 
+
 card.addEventListener('click',function(e){
   if(e.target.id==='c-close'||(e.target.closest&&e.target.closest('#c-close')))return;
   if(e.target.id==='btn-viewall'||(e.target.closest&&e.target.closest('#btn-viewall')))return;
@@ -786,7 +785,7 @@ card.addEventListener('click',function(e){
 document.getElementById('c-close').addEventListener('click',function(e){
   e.stopPropagation();card.classList.remove('open');activeKey=null;activeUrl=null;
 });
- 
+
 /* ── VIEW ALL panel ── */
 document.getElementById('btn-viewall').addEventListener('click',function(e){
   e.stopPropagation();
@@ -822,13 +821,13 @@ document.getElementById('btn-viewall').addEventListener('click',function(e){
   card.classList.remove('open');
   panel.classList.add('open');
 });
- 
+
 document.getElementById('va-back').addEventListener('click',function(e){
   e.stopPropagation();
   document.getElementById('va-panel').classList.remove('open');
   document.getElementById('va-card').style.display='none';
 });
- 
+
 document.getElementById('va-card').addEventListener('click',function(e){
   e.stopPropagation();
   if(e.target.id==='va-c-close'||(e.target.closest&&e.target.closest('#va-c-close'))){
@@ -837,25 +836,25 @@ document.getElementById('va-card').addEventListener('click',function(e){
   }
   if(this._url) window.open(this._url,'_blank');
 });
- 
+
 /* ── SWIPE to flip tiles ── */
 KEYS.forEach(function(key){
   var el=document.getElementById('TW-'+key);
   var tx=null, ty=null, swiped=false;
- 
+
   el.addEventListener('touchstart',function(e){
     tx=e.touches[0].clientX;
     ty=e.touches[0].clientY;
     swiped=false;
   },{passive:true});
- 
+
   el.addEventListener('touchmove',function(e){
     if(tx===null) return;
     var dx=e.touches[0].clientX-tx;
     var dy=e.touches[0].clientY-ty;
     if(Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)*0.8){ swiped=true; }
   },{passive:true});
- 
+
   el.addEventListener('touchend',function(e){
     if(tx===null) return;
     var dx=e.changedTouches[0].clientX-tx;
@@ -867,11 +866,11 @@ KEYS.forEach(function(key){
       swiped=false;
     }
   },{passive:true});
- 
+
   el.addEventListener('click',function(e){
     if(swiped){ swiped=false; e.stopImmediatePropagation(); return; }
   },true);
- 
+
   var mx=null, mdrag=false;
   el.addEventListener('mousedown',function(e){ mx=e.clientX; mdrag=false; });
   el.addEventListener('mousemove',function(e){ if(mx!==null&&Math.abs(e.clientX-mx)>10) mdrag=true; });
@@ -881,7 +880,7 @@ KEYS.forEach(function(key){
     if(Math.abs(dx)>30 && mdrag){ dx<0 ? flip(key) : flipBack(key); mdrag=false; }
   });
 });
- 
+
 /* ── FLIP BACK/* ── FLIP BACK (previous story) ── */
 function flipBack(key){
   var s=ST[key];
@@ -899,14 +898,14 @@ function flipBack(key){
   card.classList.toggle('flipped',!s.isFrontVisible);
   setTimeout(function(){s.busy=false;},1700);
 }
- 
- 
- 
- 
+
+
+
+
   /* ─── WELCOME + PROFILE + SEARCH + SAVED ─── */
   var GRIDDS_PROFILE = null;
   var GRIDDS_SAVED   = [];
- 
+
   function loadProfile() {
     try {
       var p = localStorage.getItem('gridds_profile');
@@ -915,14 +914,14 @@ function flipBack(key){
       if (s) GRIDDS_SAVED = JSON.parse(s);
     } catch(e){}
   }
- 
+
   function saveProfile() {
     try { localStorage.setItem('gridds_profile', JSON.stringify(GRIDDS_PROFILE)); } catch(e){}
   }
   function saveStories() {
     try { localStorage.setItem('gridds_saved', JSON.stringify(GRIDDS_SAVED)); } catch(e){}
   }
- 
+
   function ageFromDOB(dob) {
     if (!dob) return '—';
     var d = new Date(dob);
@@ -933,18 +932,18 @@ function flipBack(key){
     if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
     return age >= 0 && age < 150 ? age : '—';
   }
- 
+
   function showWelcome() {
     document.getElementById('welcome-overlay').classList.add('show');
   }
   function hideWelcome() {
     document.getElementById('welcome-overlay').classList.remove('show');
   }
- 
+
   /* Show welcome on first launch */
   loadProfile();
   if (!GRIDDS_PROFILE) showWelcome();
- 
+
   document.getElementById('w-submit').addEventListener('click', function(){
     var name = document.getElementById('w-name').value.trim();
     if (!name) { document.getElementById('w-name').focus(); return; }
@@ -964,7 +963,7 @@ function flipBack(key){
     saveProfile();
     hideWelcome();
   });
- 
+
   /* ─── PROFILE PANEL ─── */
   function openProfile() {
     loadProfile();
@@ -995,7 +994,7 @@ function flipBack(key){
     closeProfile();
     showWelcome();
   });
- 
+
   function renderSavedList() {
     var list = document.getElementById('saved-list');
     if (!GRIDDS_SAVED.length) {
@@ -1023,7 +1022,7 @@ function flipBack(key){
       list.appendChild(item);
     });
   }
- 
+
   /* ─── SAVE STORY ─── */
   document.getElementById('se-btn-save').addEventListener('click', function(e){
     e.stopPropagation();
@@ -1033,7 +1032,7 @@ function flipBack(key){
     var source = document.getElementById('se-source').textContent;
     var section = btn._section || 'headlines';
     var url = document.getElementById('se-btn-read')._url || '';
- 
+
     var existingIdx = GRIDDS_SAVED.findIndex(function(s){ return s.headline === headline; });
     if (existingIdx >= 0) {
       GRIDDS_SAVED.splice(existingIdx, 1);
@@ -1051,7 +1050,7 @@ function flipBack(key){
     }
     saveStories();
   });
- 
+
   /* ─── SEARCH ─── */
   function openSearch() {
     document.getElementById('search-panel').classList.add('show');
@@ -1063,18 +1062,18 @@ function flipBack(key){
     document.body.style.overflow = '';
   }
   document.getElementById('search-back').addEventListener('click', closeSearch);
- 
+
   document.getElementById('search-input').addEventListener('input', function(){
     var q = this.value.toLowerCase().trim();
     var list = document.getElementById('search-list');
     var countEl = document.getElementById('search-count');
- 
+
     if (!q) {
       list.innerHTML = '';
       countEl.textContent = 'Type to start searching';
       return;
     }
- 
+
     var matches = [];
     KEYS.forEach(function(key) {
       var sec = SECS[key];
@@ -1086,7 +1085,7 @@ function flipBack(key){
         }
       });
     });
- 
+
     countEl.textContent = matches.length + ' RESULT' + (matches.length===1?'':'S');
     list.innerHTML = '';
     matches.forEach(function(m) {
@@ -1103,7 +1102,7 @@ function flipBack(key){
       list.appendChild(item);
     });
   });
- 
+
   /* ─── BOTTOM NAV ─── */
   document.getElementById('nav-home').addEventListener('click', function(){
     if (typeof closeExpand === 'function') closeExpand();
@@ -1111,10 +1110,10 @@ function flipBack(key){
     window.scrollTo({top:0, behavior:'smooth'});
   });
   document.getElementById('nav-search').addEventListener('click', openSearch);
- 
+
   document.getElementById('nav-profile').addEventListener('click', openProfile);
- 
- 
+
+
   /* ─── READING TIME ─── */
   function estimateReadTime(text) {
     if (!text) return '1 min read';
@@ -1122,8 +1121,8 @@ function flipBack(key){
     var mins = Math.max(1, Math.round(words / 200));
     return mins + ' min read';
   }
- 
- 
+
+
   /* ─── DARK/LIGHT MODE ─── */
   function applyTheme() {
     var t = localStorage.getItem('gridds_theme') || 'dark';
@@ -1135,14 +1134,14 @@ function flipBack(key){
     var isLight = document.body.classList.toggle('light-mode');
     localStorage.setItem('gridds_theme', isLight ? 'light' : 'dark');
   });
- 
- 
+
+
   /* ─── PULL TO REFRESH ─── */
   (function(){
     var startY = 0, currentY = 0, pulling = false;
     var indicator = document.getElementById('pull-indicator');
     var THRESHOLD = 80;
- 
+
     function start(e) {
       if (window.scrollY > 0) return;
       startY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -1174,8 +1173,8 @@ function flipBack(key){
     document.addEventListener('touchmove', move, {passive:true});
     document.addEventListener('touchend', end, {passive:true});
   })();
- 
- 
+
+
   /* ─── OFFLINE FALLBACK ─── */
   /* Save current edition data to localStorage every time it loads successfully */
   try {
@@ -1184,7 +1183,7 @@ function flipBack(key){
       secsKeys: KEYS
     }));
   } catch(e) {}
- 
+
   /* If offline detected, show a banner */
   window.addEventListener('offline', function() {
     var banner = document.getElementById('offline-banner');
@@ -1199,18 +1198,18 @@ function flipBack(key){
     var banner = document.getElementById('offline-banner');
     if (banner) banner.style.display = 'block';
   }
- 
- 
+
+
   /* ─── ALL TILES MANDATORY (no delete for now) ─── */
   var MANDATORY_TILES = ['headlines','finance','wellness','opinions','worldNews','loves','politics','thisAndThat','tech','ipl','longreads','cityNews','lifestyle','entertainment'];
   var HIDDEN_TILES = [];
- 
+
   /* Load hidden tiles from localStorage */
   try {
     var hidden = localStorage.getItem('gridds_hidden_tiles');
     if (hidden) HIDDEN_TILES = JSON.parse(hidden);
   } catch(e) {}
- 
+
   function applyHiddenTiles() {
     /* All tiles mandatory — always show every tile, ignore any stored hides */
     KEYS.forEach(function(key) {
@@ -1220,7 +1219,7 @@ function flipBack(key){
       wrap.style.display = '';
     });
   }
- 
+
   function addDeleteButtons() {
     KEYS.forEach(function(key) {
       var wrap = document.getElementById('TW-' + key);
@@ -1239,18 +1238,18 @@ function flipBack(key){
       wrap.appendChild(btn);
     });
   }
- 
+
   addDeleteButtons();
   applyHiddenTiles();
- 
+
   function enterEditMode() {
     document.body.classList.add('editing-tiles');
   }
   function exitEditMode() {
     document.body.classList.remove('editing-tiles');
   }
- 
- 
+
+
   /* ─── NEW WELCOME FLOW (3 steps) ─── */
   function showWelcomeStep(n) {
     ['welcome-step-1','welcome-step-2','welcome-step-3'].forEach(function(id, idx) {
@@ -1259,7 +1258,7 @@ function flipBack(key){
     });
   }
   showWelcomeStep(1);
- 
+
   // Build tile-toggle list (step 2)
   (function buildTileToggles(){
     var box = document.getElementById('welcome-tile-toggles');
@@ -1281,7 +1280,7 @@ function flipBack(key){
       labelEl.textContent = sec.label;
       labelEl.style.cssText = 'font-size:14px;color:#F5F0E8';
       leftDiv.appendChild(dot); leftDiv.appendChild(labelEl);
- 
+
       // Toggle switch
       var toggle = document.createElement('div');
       toggle.className = 'theme-switch';
@@ -1303,17 +1302,17 @@ function flipBack(key){
           knob.style.left = '22px';
         }
       });
- 
+
       row.appendChild(leftDiv);
       row.appendChild(toggle);
       box.appendChild(row);
     });
   })();
- 
+
   // Step 1 → 2
   var s1Next = document.getElementById('w-next-1');
   if (s1Next) s1Next.addEventListener('click', function(){ showWelcomeStep(2); });
- 
+
   // Step 2 → 3 (and save chosen tile hides)
   var s2Next = document.getElementById('w-next-2');
   if (s2Next) s2Next.addEventListener('click', function(){
@@ -1327,16 +1326,16 @@ function flipBack(key){
     if (typeof applyHiddenTiles === 'function') applyHiddenTiles();
     showWelcomeStep(3);
   });
- 
+
   document.getElementById('customise-tiles').addEventListener('click', function() {
     closeProfile();
     enterEditMode();
   });
- 
+
   document.getElementById('edit-mode-banner').addEventListener('click', exitEditMode);
- 
+
   /* Reset button removed — all tiles are mandatory, nothing to reset */
- 
+
   /* Position masthead DS bar */
   (function(){
     function placeMastBar(){
@@ -1355,7 +1354,7 @@ function flipBack(key){
     }
     if(document.fonts){document.fonts.ready.then(function(){setTimeout(placeMastBar,150);});}
     else{setTimeout(placeMastBar,700);}
- 
+
 /* ── SHARE BUTTON — shares the rendered card image, Inshorts-style ── */
 document.getElementById('se-btn-share').addEventListener('click', function(e) {
   e.stopPropagation();
@@ -1363,14 +1362,14 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   var headline = document.getElementById('se-headline').textContent;
   var summary  = document.getElementById('se-summary').textContent;
   var storyId  = btn._storyId || null;
- 
+
   var origin   = location.origin || 'https://gridds.news';
   var shareUrl = storyId ? (origin + '/s/' + storyId) : (document.getElementById('se-btn-read')._url || origin);
   var teaser   = summary.length > 160 ? summary.slice(0, 157) + '…' : summary;
   var caption  = headline + '\n\n' + teaser +
                  '\n\n📲 Read more on GRIDDS — all the world, distilled daily:\n' + shareUrl +
                  '\n\nGet the app → ' + origin + '/app';
- 
+
   function flash(msg) {
     var old = btn.innerHTML;
     btn.innerHTML = msg; btn.classList.add('copied');
@@ -1380,7 +1379,7 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
     if (navigator.share) { navigator.share({ title: headline, text: caption, url: shareUrl }).catch(function(){}); return; }
     if (navigator.clipboard) { navigator.clipboard.writeText(caption).then(function(){ flash('&#10003; Copied'); }); }
   }
- 
+
   /* Best path: share the actual card image file (works on mobile Safari/Chrome
      and inside the Capacitor WebView). Falls back to text+link, then clipboard. */
   if (storyId && navigator.canShare) {
@@ -1398,9 +1397,9 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   }
   textShare();
 });
- 
+
   })();
- 
+
 /* ═══════════════ SNAKE BREAK GAME ═══════════════ */
 (function(){
   var overlay = document.getElementById('snake-overlay');
@@ -1412,14 +1411,14 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   var goPanel = document.getElementById('snake-gameover');
   var goScore = document.getElementById('snake-go-score');
   var startPanel = document.getElementById('snake-start');
- 
+
   var GRID = 15;                 // 15x15 cells
   var CELL = canvas.width / GRID;
   var snake, dir, nextDir, food, score, best = 0, loop = null, running = false;
- 
+
   try { best = parseInt(localStorage.getItem('gridds_snake_best')||'0',10) || 0; } catch(e){}
   bestEl.textContent = best;
- 
+
   function reset(){
     snake = [{x:7,y:7},{x:6,y:7},{x:5,y:7}];
     dir = {x:1,y:0}; nextDir = {x:1,y:0};
@@ -1501,7 +1500,7 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
     startPanel.style.display = 'none';
     goPanel.style.display = 'none';
     running = true;
-    loop = setInterval(step, 130);
+    loop = setInterval(step, 190);
   }
   function stop(){
     running = false;
@@ -1520,7 +1519,7 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
     nextDir = {x:nx, y:ny};
     if(!running) start();
   }
- 
+
   // ── swipe controls on the canvas ──
   var sx=null, sy=null;
   canvas.addEventListener('touchstart', function(e){
@@ -1536,10 +1535,10 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
     sx=t.clientX; sy=t.clientY;
   }, {passive:true});
   canvas.addEventListener('touchend', function(){ sx=null; sy=null; }, {passive:true});
- 
+
   // tap to start
   startPanel.addEventListener('click', start);
- 
+
   // ── keyboard (desktop) ──
   function onKey(e){
     if(!overlay.classList.contains('show')) return;
@@ -1551,20 +1550,44 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
     else if(k==='Escape'){ closeSnake(); }
   }
   document.addEventListener('keydown', onKey);
- 
-  // ── D-pad buttons (primary mobile control) ──
-  function bindDpad(id, nx, ny){
-    var btn = document.getElementById(id);
-    if(!btn) return;
-    function go(e){ e.preventDefault(); e.stopPropagation(); setDir(nx,ny); }
-    btn.addEventListener('touchstart', go, {passive:false});
-    btn.addEventListener('click', go);
-  }
-  bindDpad('snake-up',    0,-1);
-  bindDpad('snake-down',  0, 1);
-  bindDpad('snake-left', -1, 0);
-  bindDpad('snake-right', 1, 0);
- 
+
+  // ── Joystick (primary mobile control) ──
+  (function initJoystick(){
+    var base  = document.getElementById('snake-joy-base');
+    var thumb = document.getElementById('snake-joy-thumb');
+    if(!base || !thumb) return;
+    var active=false, cx=0, cy=0, R=64;
+    function recenter(){
+      var r = base.getBoundingClientRect();
+      cx = r.left + r.width/2; cy = r.top + r.height/2; R = r.width/2 || 64;
+    }
+    function point(e){ var t = (e.touches && e.touches[0]) ? e.touches[0] : e; return {x:t.clientX, y:t.clientY}; }
+    function place(dx,dy){
+      var d = Math.hypot(dx,dy), max = R*0.55;
+      if(d>max && d>0){ dx = dx/d*max; dy = dy/d*max; }
+      thumb.style.transition = 'none';
+      thumb.style.transform = 'translate(' + dx.toFixed(0) + 'px,' + dy.toFixed(0) + 'px)';
+    }
+    function steer(dx,dy){
+      if(Math.hypot(dx,dy) < R*0.30) return;        // deadzone — ignore tiny nudges
+      if(Math.abs(dx) > Math.abs(dy)) setDir(dx>0?1:-1, 0);
+      else setDir(0, dy>0?1:-1);
+    }
+    function begin(e){ active=true; recenter(); if(!running) start(); move(e); }
+    function move(e){ if(!active) return; if(e.cancelable) e.preventDefault(); var p=point(e); var dx=p.x-cx, dy=p.y-cy; place(dx,dy); steer(dx,dy); }
+    function end(){ active=false; thumb.style.transition=''; thumb.style.transform='translate(0,0)'; }
+    base.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); begin(e); }, {passive:false});
+    base.addEventListener('touchmove',  move, {passive:false});
+    base.addEventListener('touchend',   end,  {passive:true});
+    base.addEventListener('mousedown', function(e){
+      begin(e);
+      function mm(ev){ move(ev); }
+      function mu(){ end(); document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); }
+      document.addEventListener('mousemove', mm);
+      document.addEventListener('mouseup', mu);
+    });
+  })();
+
   // ── open / close ──
   window.showSnakeBreak = function(){
     _snakeSwipeCount = 0;
@@ -1586,4 +1609,3 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   });
 })();
 });
- 
