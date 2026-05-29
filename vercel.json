@@ -3,6 +3,10 @@
     {
       "source": "/submit",
       "destination": "/editor.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/api/app"
     }
   ],
   "crons": [
