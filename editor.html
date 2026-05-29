@@ -612,7 +612,7 @@ async function loadStories() {
     q = q.eq('section_id', activeSection);
   }
 
-  q = q.order('section_id').order('sort_order', { ascending: true }).limit(500);
+  q = q.order('section_id').order('created_at', { ascending: false }).limit(2000);
 
   const { data: stories, error } = await q;
   if (error) { list.innerHTML = '<div class="empty">Error: ' + error.message + '</div>'; return; }
@@ -669,7 +669,7 @@ function renderStory(story, sec) {
         <span class="status-pill st-${story.status}">${story.status}</span>
         ${scoreBadge}
         <span>${escapeHtml(story.source || '')}</span>
-        ${story.source_published_at ? '<span style="color:var(--text-faint)">' + new Date(story.source_published_at).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) + '</span>' : ''}
+        ${(() => { const t = story.source_published_at || story.created_at; if (!t) return ''; const lbl = new Date(t).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); const tag = story.source_published_at ? 'Published by source' : 'Fetched by GRIDDS'; const suffix = story.source_published_at ? '' : ' (fetched)'; return '<span style="color:var(--text-faint)" title="' + tag + '">' + lbl + suffix + '</span>'; })()}
         <a href="${story.url}" target="_blank" rel="noopener">source ↗</a>
       </div>
     </div>
