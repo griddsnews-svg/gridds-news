@@ -331,6 +331,9 @@
         <button class="chip" data-status="ALL">All</button>
       </div>
       <div class="filterbar-spacer"></div>
+      <select id="source-filter" style="background:var(--panel);border:1px solid var(--border);color:var(--text-dim);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;max-width:180px">
+        <option value="ALL">All sources</option>
+      </select>
       <div class="filter-group" id="section-filters"></div>
       <button class="refresh-btn" id="refresh">↻ Refresh</button>
     </div>
@@ -464,6 +467,8 @@ let MY_SECTIONS = [];      // section ids this user owns (admin = all)
 let SECTIONS = [];         // all sections
 let activeStatus = 'PENDING';
 let activeSection = 'MINE';
+let activeSource = 'ALL';
+let cachedStories = [];   // stories from the last DB fetch — re-rendered when source filter changes
 
 // ── AUTH ──
 document.getElementById('google-login').addEventListener('click', async () => {
@@ -597,6 +602,12 @@ document.querySelectorAll('#status-filters .chip').forEach(chip => {
 
 document.getElementById('refresh').addEventListener('click', loadStories);
 
+// Source filter — changing this only re-renders the cached results (no DB hit)
+document.getElementById('source-filter').addEventListener('change', (e) => {
+  activeSource = e.target.value;
+  renderStories();
+});
+
 // ── LOAD + RENDER STORIES ──
 async function loadStories() {
   const list = document.getElementById('list');
@@ -615,8 +626,46 @@ async function loadStories() {
   q = q.order('section_id').order('created_at', { ascending: false }).limit(2000);
 
   const { data: stories, error } = await q;
-  if (error) { list.innerHTML = '<div class="empty">Error: ' + error.message + '</div>'; return; }
-  if (!stories || !stories.length) { list.innerHTML = '<div class="empty">No stories match these filters.</div>'; return; }
+  if (error) { cachedStories = []; list.innerHTML = '<div class="empty">Error: ' + error.message + '</div>'; populateSourceDropdown(); return; }
+  cachedStories = stories || [];
+  populateSourceDropdown();
+  renderStories();
+}
+
+// Build the source dropdown options from the sources actually present in the
+// current result set. Preserves the user's current selection if still valid.
+function populateSourceDropdown() {
+  const sel = document.getElementById('source-filter');
+  if (!sel) return;
+  const counts = {};
+  cachedStories.forEach(s => {
+    const src = (s.source || '').trim();
+    if (!src) return;
+    counts[src] = (counts[src] || 0) + 1;
+  });
+  const sources = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+  // If the previously-selected source is no longer present, fall back to ALL
+  if (activeSource !== 'ALL' && !counts[activeSource]) activeSource = 'ALL';
+  const total = cachedStories.length;
+  let html = '<option value="ALL">All sources (' + total + ')</option>';
+  sources.forEach(src => {
+    html += '<option value="' + src.replace(/"/g, '&quot;') + '"' + (src === activeSource ? ' selected' : '') + '>' + escapeHtml(src) + ' (' + counts[src] + ')</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// Render the cached stories, applying the source filter.
+function renderStories() {
+  const list = document.getElementById('list');
+  // Apply source filter to cached stories
+  const stories = activeSource === 'ALL'
+    ? cachedStories
+    : cachedStories.filter(s => (s.source || '').trim() === activeSource);
+
+  if (!stories.length) {
+    list.innerHTML = '<div class="empty">No stories match these filters.</div>';
+    return;
+  }
 
   // Group by section
   const grouped = {};
