@@ -1123,3 +1123,33 @@ body.light-mode #snake-close{ color:#444; border-color:rgba(0,0,0,0.2); }
 body.light-mode .snake-dbtn{
   background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.15);
 }
+
+/* ── BOTTOM BANNER AD — slim, pinned above the floating nav ── */
+#bottom-ad-banner{
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 240;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(13,13,18,0.92);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+#bottom-ad-banner .bottom-ad-tag{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 8px; text-transform: uppercase; letter-spacing: 1px;
+  color: rgba(255,255,255,0.35); flex-shrink: 0;
+}
+#bottom-ad-banner a{ flex: 1; min-width: 0; display: flex; justify-content: center; overflow: hidden; }
+#bottom-ad-banner img{ max-height: 48px; width: auto; max-width: 100%; display: block; border-radius: 4px; }
+#bottom-ad-banner #bottom-ad-close{
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  font-size: 13px; cursor: pointer; flex-shrink: 0; padding: 2px 4px; line-height: 1;
+}
+body.light-mode #bottom-ad-banner{ background: rgba(245,240,232,0.95); border-top-color: rgba(0,0,0,0.08); }
+body.light-mode #bottom-ad-banner .bottom-ad-tag,
+body.light-mode #bottom-ad-banner #bottom-ad-close{ color: rgba(0,0,0,0.4); }
