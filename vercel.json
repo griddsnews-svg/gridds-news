@@ -7,6 +7,10 @@
     {
       "source": "/app",
       "destination": "/api/app"
+    },
+    {
+      "source": "/s/:id",
+      "destination": "/api/s?id=:id"
     }
   ],
   "crons": [
