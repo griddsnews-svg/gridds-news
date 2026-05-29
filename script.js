@@ -433,6 +433,7 @@ function openExpand(key,st,sec){
     else if(st.img&&IMGS[st.img]){hero.src=proxyImg(IMGS[st.img]);hero.alt=st.h;hero.style.display='block';}
     else{hero.style.display='none';}
     document.getElementById('se-btn-read')._url=st.url||null;
+    var _sb=document.getElementById('se-btn-share'); _sb._storyId=st.id||null; _sb._image=st.image||null;
     document.getElementById('se-close').style.display='flex';
     expand.classList.add('open');
     requestAnimationFrame(function(){requestAnimationFrame(function(){expand.classList.add('visible');});});
@@ -469,6 +470,7 @@ function expandGoTo(idx){
     else if(st.img&&IMGS[st.img]){hero.src=proxyImg(IMGS[st.img]);hero.alt=st.h;hero.style.display='block';}
     else{hero.style.display='none';}
     document.getElementById('se-btn-read')._url=st.url||null;
+    var _sb2=document.getElementById('se-btn-share'); _sb2._storyId=st.id||null; _sb2._image=st.image||null;
     body.style.opacity='1';
     /* scroll back to top */
     document.getElementById('story-expand').scrollTop=0;
@@ -1278,31 +1280,47 @@ function flipBack(key){
     if(document.fonts){document.fonts.ready.then(function(){setTimeout(placeMastBar,150);});}
     else{setTimeout(placeMastBar,700);}
 
-/* ── SHARE BUTTON ── */
+/* ── SHARE BUTTON — shares the rendered card image, Inshorts-style ── */
 document.getElementById('se-btn-share').addEventListener('click', function(e) {
   e.stopPropagation();
   var btn      = this;
   var headline = document.getElementById('se-headline').textContent;
   var summary  = document.getElementById('se-summary').textContent;
-  var source   = document.getElementById('se-source').textContent;
-  var url      = document.getElementById('se-btn-read')._url || '';
-  /* Inshorts-style share: headline, short summary, source, source link, then GRIDDS plug */
-  var trimmedSummary = summary.length > 200 ? summary.slice(0, 197) + '...' : summary;
-  var shareText = headline + '\n\n' + trimmedSummary + '\n\n— ' + source + '\n' + url + '\n\nShared via GRIDDS.NEWS\nGet the app: https://gridds.news';
-  if (navigator.share) {
-    navigator.share({ title: headline, text: shareText }).catch(function(){});
+  var storyId  = btn._storyId || null;
+
+  var origin   = location.origin || 'https://gridds.news';
+  var shareUrl = storyId ? (origin + '/s/' + storyId) : (document.getElementById('se-btn-read')._url || origin);
+  var teaser   = summary.length > 160 ? summary.slice(0, 157) + '…' : summary;
+  var caption  = headline + '\n\n' + teaser +
+                 '\n\n📲 Read more on GRIDDS — all the world, distilled daily:\n' + shareUrl +
+                 '\n\nGet the app → ' + origin + '/app';
+
+  function flash(msg) {
+    var old = btn.innerHTML;
+    btn.innerHTML = msg; btn.classList.add('copied');
+    setTimeout(function(){ btn.innerHTML = old; btn.classList.remove('copied'); }, 2000);
+  }
+  function textShare() {
+    if (navigator.share) { navigator.share({ title: headline, text: caption, url: shareUrl }).catch(function(){}); return; }
+    if (navigator.clipboard) { navigator.clipboard.writeText(caption).then(function(){ flash('&#10003; Copied'); }); }
+  }
+
+  /* Best path: share the actual card image file (works on mobile Safari/Chrome
+     and inside the Capacitor WebView). Falls back to text+link, then clipboard. */
+  if (storyId && navigator.canShare) {
+    fetch('/api/share-card?id=' + encodeURIComponent(storyId))
+      .then(function(r){ if (!r.ok) throw new Error('card'); return r.blob(); })
+      .then(function(blob){
+        var file = new File([blob], 'gridds-' + storyId + '.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          return navigator.share({ files: [file], text: caption, title: headline });
+        }
+        textShare();
+      })
+      .catch(function(){ textShare(); });
     return;
   }
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(shareText).then(function() {
-      btn.innerHTML = '&#10003; Copied';
-      btn.classList.add('copied');
-      setTimeout(function() {
-        btn.innerHTML = '&#8679; Share';
-        btn.classList.remove('copied');
-      }, 2000);
-    });
-  }
+  textShare();
 });
 
   })();
