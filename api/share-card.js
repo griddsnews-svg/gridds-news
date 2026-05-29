@@ -128,7 +128,9 @@ async function fetchImageDataUri(imageUrl) {
 }
  
 export default async function handler(req, res) {
-  const id = req.query?.id;
+  let id = req.query?.id;
+  if (Array.isArray(id)) id = id[0];
+  id = (id || '').trim().replace(/^["']+|["']+$/g, '');   // tolerate copied quotes
   if (!id) return res.status(400).json({ error: 'Missing ?id' });
   if (!SUPABASE_URL || !SUPABASE_ANON) return res.status(500).json({ error: 'Supabase env not set' });
  
