@@ -25,15 +25,19 @@ const LOGO_DATA_URI = 'data:image/png;base64,' + LOGO_PNG.toString('base64');
 const SUPABASE_URL  = process.env.SUPABASE_URL;
 const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY;
  
-// ── Section id → { label, colour } (mirrors the public app's SECS) ──
+// ── section_id → { label, colour }. Keyed by the DB's section_id values
+//    (see edition.js), with camelCase aliases so it resolves either way. ──
 const SECTIONS = {
   headlines:{label:'Headlines',color:'#E8520A'}, finance:{label:'Finance',color:'#1B5E20'},
   wellness:{label:'Wellness',color:'#6A1B9A'},    politics:{label:'Nation',color:'#8B1538'},
-  ipl:{label:'Sports',color:'#FFA000'},           loves:{label:'GRIDD Loves',color:'#7B5EA7'},
-  cityNews:{label:'City News',color:'#37474F'},   worldNews:{label:'World News',color:'#1565C0'},
+  ipl:{label:'Sports',color:'#FFA000'},
+  griddloves:{label:'GRIDD Loves',color:'#7B5EA7'}, loves:{label:'GRIDD Loves',color:'#7B5EA7'},
+  citynews:{label:'City News',color:'#37474F'},   cityNews:{label:'City News',color:'#37474F'},
+  worldnews:{label:'World News',color:'#1565C0'}, worldNews:{label:'World News',color:'#1565C0'},
   entertainment:{label:'Entertainment',color:'#C2185B'}, tech:{label:'Tech',color:'#1976D2'},
-  longreads:{label:'Long Reads',color:'#5D4037'}, opinions:{label:'Opinions',color:'#455A64'},
-  thisAndThat:{label:'This & That',color:'#00695C'}, lifestyle:{label:'Lifestyle',color:'#006064'},
+  opinions:{label:'Opinions',color:'#455A64'},    longreads:{label:'Long Reads',color:'#5D4037'},
+  thisandthat:{label:'This & That',color:'#00695C'}, thisAndThat:{label:'This & That',color:'#00695C'},
+  lifestyle:{label:'Lifestyle',color:'#006064'},
 };
  
 const LOGO_W = Math.round(457 / 103 * 50); // keep logo aspect ratio at 50px tall
@@ -158,3 +162,4 @@ export default async function handler(req, res) {
 }
  
 export const config = { maxDuration: 15 };
+ 
