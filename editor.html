@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRIDDS.NEWS — Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg:        #0e0e12;
+    --panel:     #16161d;
+    --panel-2:   #1c1c25;
+    --border:    rgba(255,255,255,0.08);
+    --border-2:  rgba(255,255,255,0.14);
+    --text:      #ececf0;
+    --text-dim:  rgba(236,236,240,0.55);
+    --text-faint:rgba(236,236,240,0.3);
+    --accent:    #E8520A;
+    --green:     #3DA35D;
+    --amber:     #D4860A;
+    --blue:      #2B7CD3;
+    --red:       #C8453C;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+  }
+  .login-logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .login-logo .dot { color: var(--accent); }
+  .login-logo .news { font-size: 16px; color: var(--text-dim); letter-spacing: 2px; }
+  .login-sub { color: var(--text-dim); font-size: 13px; letter-spacing: 0.5px; }
+  .google-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; color: #1a1a1a;
+    border: none; border-radius: 6px;
+    padding: 11px 22px; font-size: 14px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .google-btn:hover { transform: translateY(-1px); }
+  .google-btn svg { width: 18px; height: 18px; }
+
+  /* ── APP SHELL ── */
+  #app { display: none; min-height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .topbar-logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .topbar-logo .dot { color: var(--accent); }
+  .topbar-logo .news { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
+  .user-chip .role {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    padding: 2px 7px; border-radius: 3px; font-weight: 600;
+  }
+  .role-admin  { background: rgba(232,82,10,0.15); color: var(--accent); }
+  .role-editor { background: rgba(43,124,211,0.15); color: var(--blue); }
+  .logout-btn {
+    background: none; border: 1px solid var(--border-2);
+    color: var(--text-dim); border-radius: 5px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .logout-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* ── FILTER BAR ── */
+  .filterbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 22px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 53px; z-index: 15;
+  }
+  .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip {
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--text-dim); border-radius: 20px;
+    padding: 5px 13px; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    transition: all 0.12s;
+  }
+  .chip:hover { border-color: var(--border-2); color: var(--text); }
+  .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+  .filterbar-spacer { flex: 1; }
+  .refresh-btn {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 5px; padding: 6px 14px; font-size: 12px;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .refresh-btn:hover { opacity: 0.9; }
+
+  /* ── STORY LIST ── */
+  .list-wrap { padding: 16px 22px 60px; max-width: 1100px; margin: 0 auto; }
+  .section-header {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 15px; font-weight: 700;
+    margin: 24px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header .count { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-faint); font-weight: 400; }
+  .section-header .sec-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .story {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+    transition: border-color 0.12s;
+  }
+  .story:hover { border-color: var(--border-2); }
+  .story-thumb {
+    width: 64px; height: 64px; border-radius: 6px;
+    object-fit: cover; flex-shrink: 0; background: var(--panel-2);
+  }
+  .story-main { flex: 1; min-width: 0; }
+  .story-headline { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+  .story-summary { font-size: 12px; color: var(--text-dim); line-height: 1.45; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .story-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-faint); flex-wrap: wrap; }
+  .story-meta a { color: var(--blue); text-decoration: none; }
+  .story-meta a:hover { text-decoration: underline; }
+  .score-badge { padding: 1px 6px; border-radius: 3px; font-weight: 600; font-size: 10px; }
+  .score-high { background: rgba(61,163,93,0.18); color: var(--green); }
+  .score-mid  { background: rgba(212,134,10,0.18); color: var(--amber); }
+  .score-low  { background: rgba(200,69,60,0.18); color: var(--red); }
+
+  .status-pill {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 2px 8px; border-radius: 3px; font-weight: 600;
+  }
+  .st-DRAFT    { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+  .st-PENDING  { background: rgba(212,134,10,0.18); color: var(--amber); }
+  .st-LIVE     { background: rgba(61,163,93,0.2); color: var(--green); }
+  .st-ARCHIVED { background: rgba(255,255,255,0.05); color: var(--text-faint); }
+  .st-REJECTED { background: rgba(200,69,60,0.15); color: var(--red); }
+
+  .story-actions { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .act-btn {
+    border: none; border-radius: 5px; padding: 5px 12px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    transition: opacity 0.12s;
+  }
+  .act-btn:hover { opacity: 0.85; }
+  .act-publish { background: var(--green); color: #fff; }
+  .act-pending { background: var(--amber); color: #fff; }
+  .act-reject  { background: var(--panel-2); color: var(--red); border: 1px solid var(--border); }
+  .act-edit    { background: var(--red); color: #fff; border: 1px solid var(--red); }
+  .act-archive { background: #555; color: #ddd; border: 1px solid #666; }
+  .act-disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .empty { text-align: center; color: var(--text-faint); padding: 60px 20px; font-size: 13px; }
+  .loading { text-align: center; color: var(--text-dim); padding: 40px; font-size: 13px; }
+
+  /* ── EDIT MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border-2);
+    border-radius: 10px; width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto; padding: 22px;
+  }
+  .modal h3 { font-family: 'Libre Baskerville', serif; font-size: 16px; margin-bottom: 16px; }
+  .modal label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); margin: 12px 0 5px; }
+  .modal input, .modal textarea, .modal select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border-2);
+    border-radius: 6px; padding: 9px 11px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+  }
+  .modal select { cursor: pointer; }
+  .modal textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+  .modal-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .modal-cancel { background: none; border: 1px solid var(--border-2); color: var(--text-dim); border-radius: 6px; padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ── IMAGE ADD POPOVER ── */
+  .img-popover {
+    position: absolute; z-index: 50;
+    background: var(--panel); border: 1px solid var(--border-2);
+    border-radius: 10px; padding: 14px; width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    left: 80px; top: 0;
+  }
+  .img-popover-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .img-popover input[type="text"] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border-2);
+    border-radius: 6px; padding: 8px 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+  }
+  .img-popover-preview {
+    width: 100%; height: 100px; object-fit: cover; border-radius: 6px;
+    margin-top: 8px; display: none; background: var(--panel-2);
+  }
+  .img-popover-actions {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .img-popover-actions button {
+    border: none; border-radius: 5px; padding: 6px 14px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .img-pop-save { background: var(--green); color: #fff; }
+  .img-pop-upload { background: var(--blue); color: #fff; }
+  .img-pop-cancel { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border) !important; }
+  .img-upload-zone {
+    border: 2px dashed var(--border-2); border-radius: 6px;
+    padding: 12px; text-align: center; margin-top: 8px;
+    color: var(--text-faint); font-size: 11px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .img-upload-zone:hover, .img-upload-zone.dragover {
+    border-color: var(--blue); background: rgba(43,124,211,0.06);
+  }
+  .img-upload-zone input { display: none; }
+  .img-upload-progress {
+    display: none; margin-top: 6px; font-size: 11px; color: var(--amber);
+  }
+
+  .story-thumb.noimg {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); font-size: 9px; text-align: center;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    border: 2px dashed transparent; position: relative;
+  }
+  .story-thumb.noimg:hover {
+    border-color: var(--blue); background: rgba(43,124,211,0.08);
+    color: var(--blue);
+  }
+  .story { position: relative; }
+
+  /* ── EDIT MODAL IMAGE PREVIEW ── */
+  .edit-img-preview {
+    width: 100%; height: 140px; object-fit: cover; border-radius: 6px;
+    margin-top: 6px; background: var(--panel-2); display: none;
+  }
+  .edit-img-upload-zone {
+    border: 2px dashed var(--border-2); border-radius: 6px;
+    padding: 14px; text-align: center; margin-top: 8px;
+    color: var(--text-faint); font-size: 12px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .edit-img-upload-zone:hover {
+    border-color: var(--blue); background: rgba(43,124,211,0.06);
+  }
+  .edit-img-upload-zone input { display: none; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--panel-2); border: 1px solid var(--border-2);
+    color: var(--text); padding: 10px 18px; border-radius: 6px;
+    font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login">
+  <div class="login-logo">GRIDDS<span class="dot">.</span><span class="news">NEWS</span></div>
+  <div class="login-sub">Editorial Console</div>
+  <button class="google-btn" id="google-login">
+    <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Sign in with Google
+  </button>
+  <div class="login-sub" id="login-error" style="color:var(--red);display:none"></div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">GRIDDS<span class="dot">.</span><span class="news">NEWS</span></div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <span id="user-email"></span>
+        <span class="role" id="user-role"></span>
+      </div>
+      <button class="logout-btn" id="logout">Sign out</button>
+    </div>
+  </div>
+
+  <div class="filterbar">
+    <!-- Tab nav -->
+    <div class="filter-group" id="tab-nav" style="margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:8px;width:100%">
+      <button class="chip active" data-tab="stories">Stories</button>
+      <button class="chip" data-tab="submit" id="tab-submit">Quick Submit</button>
+      <button class="chip" data-tab="submit" id="tab-ready" style="display:none">Quick Ready</button>
+      <button class="chip" data-tab="manual" id="tab-manual" style="display:none">Manual Submit</button>
+      <button class="chip" data-tab="rss" id="tab-rss">RSS Feeds</button>
+      <button class="chip" data-tab="ads" id="tab-ads">Ads</button>
+      <button class="chip" data-tab="team" id="tab-team" style="display:none">Team</button>
+    </div>
+    <div id="stories-filters" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%">
+      <div class="filter-group" id="status-filters">
+        <button class="chip active" data-status="PENDING">Pending</button>
+        <button class="chip" data-status="DRAFT">Draft</button>
+        <button class="chip" data-status="LIVE">Live</button>
+        <button class="chip" data-status="ARCHIVED">Archived</button>
+        <button class="chip" data-status="REJECTED">Rejected</button>
+        <button class="chip" data-status="ALL">All</button>
+      </div>
+      <div class="filterbar-spacer"></div>
+      <select id="source-filter" style="background:var(--panel);border:1px solid var(--border);color:var(--text-dim);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;max-width:180px">
+        <option value="ALL">All sources</option>
+      </select>
+      <div class="filter-group" id="section-filters"></div>
+      <button class="refresh-btn" id="refresh">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="list-wrap" id="list">
+    <div class="loading">Loading stories…</div>
+  </div>
+
+  <!-- ══ QUICK SUBMIT PANEL (issue #11b) ══ -->
+  <div class="list-wrap" id="submit-panel" style="display:none">
+    <div style="max-width:600px;margin:30px auto">
+      <h2 id="qs-heading" style="font-family:'Libre Baskerville',serif;font-size:20px;margin-bottom:16px">Quick Submit</h2>
+      <p id="qs-desc" style="color:var(--text-dim);font-size:13px;margin-bottom:20px">Paste any article URL. We'll fetch the headline, image and generate an AI summary. You can edit everything before publishing.</p>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:5px">Article URL</label>
+        <input type="url" id="qs-url" placeholder="https://..." style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:5px">Section</label>
+        <select id="qs-section" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer"></select>
+      </div>
+      <button id="qs-fetch" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Fetch & Preview</button>
+      <div id="qs-loading" style="display:none;color:var(--text-dim);padding:20px 0;font-size:13px">Fetching article and generating summary…</div>
+
+      <!-- Preview card -->
+      <div id="qs-preview" style="display:none;margin-top:20px;background:var(--panel);border:1px solid var(--border-2);border-radius:10px;padding:20px">
+        <img id="qs-prev-img" style="width:100%;height:180px;object-fit:cover;border-radius:6px;margin-bottom:14px;display:none">
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:5px">Headline</label>
+          <input type="text" id="qs-prev-headline" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:5px">Summary</label>
+          <textarea id="qs-prev-summary" rows="4" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;resize:vertical"></textarea>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:5px">Image URL</label>
+          <input type="text" id="qs-prev-image" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+        </div>
+        <div style="margin-bottom:14px;font-size:12px;color:var(--text-dim)">Source: <span id="qs-prev-source"></span></div>
+        <div style="display:flex;gap:8px">
+          <button id="qs-publish" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Publish LIVE</button>
+          <button id="qs-draft" style="background:var(--panel-2);color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:10px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Save as Draft</button>
+          <button id="qs-ready" style="display:none;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Send to Pending →</button>
+        </div>
+      </div>
+      <div id="qs-error" style="display:none;color:var(--red);margin-top:12px;font-size:13px"></div>
+    </div>
+  </div>
+
+  <!-- ══ MANUAL SUBMIT PANEL (admin only) — for sites that block auto-fetch (e.g. NDTV) ══ -->
+  <div class="list-wrap" id="manual-panel" style="display:none">
+    <div style="max-width:640px;margin:20px auto">
+      <h2 style="font-family:'Libre Baskerville',serif;font-size:20px;margin-bottom:6px">Manual Submit</h2>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:18px">For stories that Quick Submit can\u2019t fetch (some sites block it). Enter everything by hand, then publish or save as a draft.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Section</label>
+          <select id="ms-section" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer"></select>
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Source</label>
+          <input type="text" id="ms-source" placeholder="e.g. NDTV" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Article URL *</label>
+        <input type="url" id="ms-url" placeholder="https://www.ndtv.com/\u2026" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Headline *</label>
+        <input type="text" id="ms-headline" placeholder="Story headline" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Summary</label>
+        <textarea id="ms-summary" rows="4" placeholder="Write the summary shown on the card\u2026" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical"></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 160px;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Image \u2014 paste a URL, or upload below</label>
+          <input type="text" id="ms-image" placeholder="https://\u2026 (optional if uploading)" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <input type="file" id="ms-image-file" accept="image/jpeg,image/png,image/webp,image/gif">
+            <span id="ms-image-uploading" style="display:none;font-size:11px;color:var(--amber)">Uploading\u2026</span>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">AI score (0\u201310)</label>
+          <input type="number" id="ms-score" min="0" max="10" step="0.1" placeholder="optional" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px">
+        </div>
+      </div>
+      <img id="ms-image-preview" style="display:none;max-width:240px;margin-bottom:12px;border-radius:6px;border:1px solid var(--border)">
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="ms-publish" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Publish LIVE</button>
+        <button id="ms-draft" style="background:var(--panel-2);color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:10px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Save as Draft</button>
+        <span id="ms-msg" style="font-size:13px;margin-left:6px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RSS FEEDS MANAGEMENT PANEL (issue #13) ══ -->
+  <div class="list-wrap" id="rss-panel" style="display:none">
+    <div style="max-width:900px;margin:20px auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="font-family:'Libre Baskerville',serif;font-size:20px">RSS Feed Sources</h2>
+        <button id="rss-add-btn" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">+ Add Feed</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">Manage all RSS feed sources. Toggle feeds on/off, add new ones, or convert web pages to feeds.</p>
+
+      <!-- Add Feed Form -->
+      <div id="rss-add-form" style="display:none;background:var(--panel);border:1px solid var(--border-2);border-radius:8px;padding:16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Feed URL or Web Page URL</label>
+            <input type="url" id="rss-new-url" placeholder="https://..." style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Section</label>
+            <select id="rss-new-section" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer"></select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Source name (attribution shown to readers)</label>
+          <input type="text" id="rss-new-source" placeholder="e.g. NDTV.com — leave blank to auto-detect" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px">
+            <input type="checkbox" id="rss-is-webpage"> This is a web page (not RSS) — auto-scrape
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="rss-save-btn" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Save Feed</button>
+          <button id="rss-cancel-btn" style="background:none;border:1px solid var(--border-2);color:var(--text-dim);border-radius:6px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Feed List -->
+      <div id="rss-list" style="display:flex;flex-direction:column;gap:6px">
+        <div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading feeds…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADS MANAGEMENT PANEL (admin only) ══ -->
+  <div class="list-wrap" id="ads-panel" style="display:none">
+    <div style="max-width:900px;margin:20px auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2 style="font-family:'Libre Baskerville',serif;font-size:20px">Ads</h2>
+        <button id="ad-add-btn" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">+ New Ad</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">Advertiser creatives served to the public app. Upload an image or paste an advertiser-hosted URL. Impressions and clicks update as the app serves them.</p>
+
+      <!-- Add / Edit form -->
+      <div id="ad-form" style="display:none;background:var(--panel);border:1px solid var(--border-2);border-radius:8px;padding:16px;margin-bottom:16px">
+        <input type="hidden" id="ad-id">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Placement</label>
+            <select id="ad-format" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">
+              <option value="interstitial">Full card (interstitial)</option>
+              <option value="banner">Bottom banner</option>
+              <option value="card">End-of-story image</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Section</label>
+            <select id="ad-section" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer"></select>
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Weight</label>
+            <input type="number" id="ad-weight" min="0" value="1" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Brand</label>
+            <input type="text" id="ad-brand" placeholder="Advertiser name" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">CTA label</label>
+            <input type="text" id="ad-cta" placeholder="Learn More" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Headline (interstitial)</label>
+          <input type="text" id="ad-headline" placeholder="Main ad headline" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Copy (interstitial)</label>
+          <input type="text" id="ad-copy" placeholder="One-line body copy" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Click-through URL *</label>
+          <input type="url" id="ad-url" placeholder="https://advertiser.com/landing" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Creative — paste an image URL, or upload below</label>
+          <input type="text" id="ad-image" placeholder="https://… (advertiser-hosted) — optional if uploading" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <input type="file" id="ad-image-file" accept="image/jpeg,image/png,image/webp,image/gif">
+            <span id="ad-image-uploading" style="display:none;font-size:11px;color:var(--amber)">Uploading…</span>
+          </div>
+          <img id="ad-image-preview" style="display:none;max-width:240px;margin-top:8px;border-radius:6px;border:1px solid var(--border)">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Starts (optional)</label>
+            <input type="datetime-local" id="ad-starts" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Ends (optional)</label>
+            <input type="datetime-local" id="ad-ends" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+          <label style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="ad-active" checked> Active</label>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="ad-save-btn" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Save Ad</button>
+          <button id="ad-cancel-btn" style="background:none;border:1px solid var(--border-2);color:var(--text-dim);border-radius:6px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Ad list -->
+      <div id="ad-list" style="display:flex;flex-direction:column;gap:6px">
+        <div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading ads…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEAM PANEL (admin only) ══ -->
+  <div class="list-wrap" id="team-panel" style="display:none">
+    <div style="max-width:900px;margin:20px auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2 style="font-family:'Libre Baskerville',serif;font-size:20px">Team</h2>
+        <button id="staff-add-btn" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">+ Add staff</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">Only people listed here can sign in. Tick the sections each editor owns — changes apply on save (and on their next login if they haven't signed in yet). Toggle <em>Active</em> off to offboard someone without losing their history.</p>
+
+      <!-- Add form -->
+      <div id="staff-form" style="display:none;background:var(--panel);border:1px solid var(--border-2);border-radius:8px;padding:16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end">
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Google email *</label>
+            <input type="email" id="staff-email" placeholder="name@gmail.com" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:4px">Role</label>
+            <select id="staff-role" style="width:100%;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="staff-save-btn" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Add</button>
+            <button id="staff-cancel-btn" style="background:none;border:1px solid var(--border-2);color:var(--text-dim);border-radius:6px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">Cancel</button>
+          </div>
+        </div>
+        <div id="staff-form-err" style="display:none;color:var(--red);font-size:12px;margin-top:8px"></div>
+      </div>
+
+      <!-- Staff list -->
+      <div id="staff-list" style="display:flex;flex-direction:column;gap:8px">
+        <div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading team…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Edit Story</h3>
+    <input type="hidden" id="edit-id">
+    <label>Section</label>
+    <select id="edit-section"></select>
+    <label>Headline</label>
+    <input type="text" id="edit-headline">
+    <label>Summary</label>
+    <textarea id="edit-summary"></textarea>
+    <div style="margin:14px 0;padding:12px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px">
+      <label style="margin:0 0 6px 0;display:flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:14px;height:14px">✦</span> AI Rating
+        <span style="font-weight:400;color:var(--text-faint);font-size:11px;text-transform:none;letter-spacing:0">— editable</span>
+      </label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="number" id="edit-ai-score" min="0" max="10" step="0.1" placeholder="—" style="width:90px;text-align:center">
+        <span style="color:var(--text-dim);font-size:13px">/ 10</span>
+      </div>
+    </div>
+    <label>Image URL</label>
+    <input type="text" id="edit-image" placeholder="Paste image URL or upload below">
+    <img class="edit-img-preview" id="edit-img-preview">
+    <div class="edit-img-upload-zone" id="edit-img-upload-zone">
+      <div>📷 Drop image here or <strong style="color:var(--blue)">click to upload</strong></div>
+      <div style="margin-top:4px;font-size:10px;color:var(--text-faint)">JPG, PNG, WebP · Max 5 MB</div>
+      <input type="file" id="edit-img-file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div id="edit-img-uploading" style="display:none;margin-top:6px;font-size:11px;color:var(--amber)">Uploading image…</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-save" id="modal-save" style="background:var(--panel-2);color:var(--text);border:1px solid var(--border)">Save</button>
+      <button class="modal-save" id="modal-save-publish">Save &amp; Publish</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// CONFIG — these are injected at build or hardcoded (anon key is safe public)
+// ══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://whiohburctxwjdyxhslz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoaW9oYnVyY3R4d2pkeXhoc2x6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODA0MTksImV4cCI6MjA5NTQ1NjQxOX0.0m-orDO-lYQCRPjtwq71AWP8y9Cc3NVnl9v15PpH9Gc'; // ← replace this with your anon/public key from Supabase → Project Settings → API
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let ME = null;             // { id, email, role }
+let MY_SECTIONS = [];      // section ids this user owns (admin = all)
+let SECTIONS = [];         // all sections
+let activeStatus = 'PENDING';
+let activeSection = 'MINE';
+let activeSource = 'ALL';
+let cachedStories = [];   // stories from the last DB fetch — re-rendered when source filter changes
+
+// ── AUTH ──
+document.getElementById('google-login').addEventListener('click', async () => {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+  if (error) showLoginError(error.message);
+});
+
+document.getElementById('logout').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function loadProfileWithRetry(userId, attempts = 4) {
+  for (let i = 0; i < attempts; i++) {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role')
+      .eq('id', userId)
+      .maybeSingle();          // maybeSingle: no throw when 0 rows
+    if (data) return data;
+    if (error) console.warn('profile lookup error (attempt ' + (i+1) + '):', error.message);
+    await new Promise(r => setTimeout(r, 600));   // wait then retry
+  }
+  return null;
+}
+
+let initRunning = false;
+async function init() {
+  if (initRunning) return;     // prevent overlapping runs
+  initRunning = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+
+    // Allowlist gate — only provisioned staff may proceed. This RPC also
+    // creates/syncs the profile, so it must run before we load it.
+    const { data: accessRows, error: accessErr } = await sb.rpc('gridds_my_access');
+    const access = Array.isArray(accessRows) ? accessRows[0] : accessRows;
+    if (accessErr || !access || !access.allowed) {
+      showLoginError('This account isn\u2019t authorised for the GRIDDS console. Ask an admin to add your email to the team.');
+      await sb.auth.signOut();      // clear the session so a stale token can't linger
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+
+    // Clean the #access_token fragment from the URL once logged in
+    if (window.location.hash.includes('access_token')) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+
+    // Load my profile (with retry — the row/trigger may lag a moment)
+    const profile = await loadProfileWithRetry(session.user.id);
+    if (!profile) {
+      showLoginError('Profile not found. Try refreshing in a few seconds, or contact admin.');
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+    ME = profile;
+
+    // Load all sections
+    const { data: secs } = await sb.from('sections').select('*').order('sort_order');
+    SECTIONS = secs || [];
+
+    // Load my owned sections
+    if (ME.role === 'admin') {
+      MY_SECTIONS = SECTIONS.map(s => s.id);   // admin owns all
+    } else {
+      const { data: owned } = await sb
+        .from('section_owners')
+        .select('section_id')
+        .eq('user_id', ME.id);
+      MY_SECTIONS = (owned || []).map(o => o.section_id);
+    }
+
+    // Show app
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-email').textContent = ME.email;
+    const roleEl = document.getElementById('user-role');
+    roleEl.textContent = ME.role;
+    roleEl.className = 'role role-' + ME.role;
+
+    applyRoleUI();
+
+    buildSectionFilters();
+    populateQSSections();
+    loadStories();
+  } finally {
+    initRunning = false;
+  }
+}
+
+function buildSectionFilters() {
+  const wrap = document.getElementById('section-filters');
+  wrap.innerHTML = '';
+  // "Mine" chip (editors) or "All sections" (admin default)
+  const mineChip = document.createElement('button');
+  mineChip.className = 'chip active';
+  mineChip.dataset.section = 'MINE';
+  mineChip.textContent = ME.role === 'admin' ? 'All sections' : 'My sections';
+  wrap.appendChild(mineChip);
+
+  SECTIONS.forEach(s => {
+    const c = document.createElement('button');
+    c.className = 'chip';
+    c.dataset.section = s.id;
+    c.textContent = s.display_name;
+    wrap.appendChild(c);
+  });
+
+  wrap.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      wrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeSection = chip.dataset.section;
+      loadStories();
+    });
+  });
+}
+
+// Status filter chips
+document.querySelectorAll('#status-filters .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#status-filters .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeStatus = chip.dataset.status;
+    loadStories();
+  });
+});
+
+document.getElementById('refresh').addEventListener('click', loadStories);
+
+// Source filter — changing this only re-renders the cached results (no DB hit)
+document.getElementById('source-filter').addEventListener('change', (e) => {
+  activeSource = e.target.value;
+  renderStories();
+});
+
+// ── LOAD + RENDER STORIES ──
+async function loadStories() {
+  const list = document.getElementById('list');
+  list.innerHTML = '<div class="loading">Loading stories…</div>';
+
+  let q = sb.from('stories').select('*');
+
+  if (activeStatus !== 'ALL') q = q.eq('status', activeStatus);
+
+  if (activeSection === 'MINE') {
+    if (ME.role !== 'admin') q = q.in('section_id', MY_SECTIONS.length ? MY_SECTIONS : ['__none__']);
+  } else {
+    q = q.eq('section_id', activeSection);
+  }
+
+  q = q.order('section_id').order('created_at', { ascending: false }).limit(2000);
+
+  const { data: stories, error } = await q;
+  if (error) { cachedStories = []; list.innerHTML = '<div class="empty">Error: ' + error.message + '</div>'; populateSourceDropdown(); return; }
+  cachedStories = stories || [];
+  populateSourceDropdown();
+  renderStories();
+}
+
+// Build the source dropdown options from the sources actually present in the
+// current result set. Preserves the user's current selection if still valid.
+function populateSourceDropdown() {
+  const sel = document.getElementById('source-filter');
+  if (!sel) return;
+  const counts = {};
+  cachedStories.forEach(s => {
+    const src = (s.source || '').trim();
+    if (!src) return;
+    counts[src] = (counts[src] || 0) + 1;
+  });
+  const sources = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+  // If the previously-selected source is no longer present, fall back to ALL
+  if (activeSource !== 'ALL' && !counts[activeSource]) activeSource = 'ALL';
+  const total = cachedStories.length;
+  let html = '<option value="ALL">All sources (' + total + ')</option>';
+  sources.forEach(src => {
+    html += '<option value="' + src.replace(/"/g, '&quot;') + '"' + (src === activeSource ? ' selected' : '') + '>' + escapeHtml(src) + ' (' + counts[src] + ')</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// Render the cached stories, applying the source filter.
+function renderStories() {
+  const list = document.getElementById('list');
+  // Apply source filter to cached stories
+  const stories = activeSource === 'ALL'
+    ? cachedStories
+    : cachedStories.filter(s => (s.source || '').trim() === activeSource);
+
+  if (!stories.length) {
+    list.innerHTML = '<div class="empty">No stories match these filters.</div>';
+    return;
+  }
+
+  // Group by section
+  const grouped = {};
+  stories.forEach(s => { (grouped[s.section_id] = grouped[s.section_id] || []).push(s); });
+
+  list.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    const items = grouped[sec.id];
+    if (!items || !items.length) return;
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<span class="sec-dot" style="background:${sec.color}"></span>${sec.display_name}<span class="count">${items.length}</span>`;
+    list.appendChild(header);
+
+    items.forEach(story => list.appendChild(renderStory(story, sec)));
+  });
+}
+
+function renderStory(story, sec) {
+  const canEdit = ME.role === 'admin' || MY_SECTIONS.includes(story.section_id);
+  const isAdmin = ME.role === 'admin';
+
+  const el = document.createElement('div');
+  el.className = 'story';
+
+  // Thumbnail
+  const thumbHtml = story.image
+    ? `<img class="story-thumb" src="/api/img?url=${encodeURIComponent(story.image)}&section=${story.section_id}" onerror="this.classList.add('noimg');this.removeAttribute('src');this.textContent='no image'">`
+    : `<div class="story-thumb noimg" data-story-id="${story.id}" onclick="openImagePopover(event, '${story.id}')" title="Click to add image">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span style="font-size:8px;letter-spacing:0.5px">ADD IMAGE</span>
+        </span>
+      </div>`;
+
+  // Score badge
+  let scoreBadge = '';
+  if (story.ai_score) {
+    const cls = story.ai_score >= 8 ? 'score-high' : story.ai_score >= 6 ? 'score-mid' : 'score-low';
+    scoreBadge = `<span class="score-badge ${cls}">${story.ai_score}/10</span>`;
+  }
+
+  el.innerHTML = `
+    ${thumbHtml}
+    <div class="story-main">
+      <div class="story-headline">${escapeHtml(story.headline)}</div>
+      <div class="story-summary">${escapeHtml(story.summary || '')}</div>
+      <div class="story-meta">
+        <span class="status-pill st-${story.status}">${story.status}</span>
+        ${scoreBadge}
+        <span>${escapeHtml(story.source || '')}</span>
+        ${(() => { const t = story.source_published_at || story.created_at; if (!t) return ''; const lbl = new Date(t).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); const tag = story.source_published_at ? 'Published by source' : 'Fetched by GRIDDS'; const suffix = story.source_published_at ? '' : ' (fetched)'; return '<span style="color:var(--text-faint)" title="' + tag + '">' + lbl + suffix + '</span>'; })()}
+        <a href="${story.url}" target="_blank" rel="noopener">source ↗</a>
+      </div>
+    </div>
+    <div class="story-actions"></div>
+  `;
+
+  const actions = el.querySelector('.story-actions');
+
+  if (canEdit) {
+    // PUBLISH — admin only, only when not already live
+    if (isAdmin && story.status !== 'LIVE') {
+      const pub = mkBtn('Publish', 'act-publish');
+      pub.addEventListener('click', () => updateStatus(story.id, 'LIVE'));
+      actions.appendChild(pub);
+    }
+    // MARK READY — editors only (DRAFT/REJECTED → PENDING). Admins publish directly.
+    if (!isAdmin && story.status !== 'PENDING' && story.status !== 'LIVE') {
+      const pend = mkBtn('Mark Ready', 'act-pending');
+      pend.addEventListener('click', () => updateStatus(story.id, 'PENDING'));
+      actions.appendChild(pend);
+    }
+    // EDIT — both roles
+    const edit = mkBtn('Edit', 'act-edit');
+    edit.addEventListener('click', () => openEdit(story));
+    actions.appendChild(edit);
+    // REJECT — both roles, unless already rejected
+    if (story.status !== 'REJECTED') {
+      const rej = mkBtn('Reject', 'act-reject');
+      rej.addEventListener('click', () => { if (confirm('Reject this story?')) updateStatus(story.id, 'REJECTED'); });
+      actions.appendChild(rej);
+    }
+    // ARCHIVE — admin only
+    if (isAdmin && story.status !== 'ARCHIVED') {
+      const arch = mkBtn('Archive', 'act-archive');
+      arch.addEventListener('click', () => updateStatus(story.id, 'ARCHIVED'));
+      actions.appendChild(arch);
+    }
+  }
+
+  return el;
+}
+
+function mkBtn(label, cls) {
+  const b = document.createElement('button');
+  b.className = 'act-btn ' + cls;
+  b.textContent = label;
+  return b;
+}
+
+async function updateStatus(id, status) {
+  const patch = { status };
+  if (status === 'LIVE') {
+    patch.published_at = new Date().toISOString();
+    patch.published_by = ME.id;
+    patch.sort_order = 0;   // float newly-published to top
+  }
+  const { data, error } = await sb.from('stories').update(patch).eq('id', id).select();
+  if (error) { toast('Error: ' + error.message); console.error('updateStatus error', error); return; }
+  if (!data || data.length === 0) {
+    toast('No permission to change this story');
+    console.warn('Update returned 0 rows — RLS likely blocked it');
+    return;
+  }
+  toast(status === 'LIVE' ? 'Published ✓' : status.charAt(0) + status.slice(1).toLowerCase() + ' ✓');
+  loadStories();
+}
+
+// ── EDIT MODAL ──
+function openEdit(story) {
+  document.getElementById('edit-id').value = story.id;
+  document.getElementById('edit-headline').value = story.headline || '';
+  document.getElementById('edit-summary').value = story.summary || '';
+  document.getElementById('edit-image').value = story.image || '';
+
+  // Show image preview if image exists
+  const prevEl = document.getElementById('edit-img-preview');
+  if (story.image) {
+    prevEl.src = story.image;
+    prevEl.style.display = 'block';
+    prevEl.onerror = () => { prevEl.style.display = 'none'; };
+  } else {
+    prevEl.style.display = 'none';
+  }
+
+  // Populate section dropdown — admin can move to any section,
+  // editors can only move within sections they own
+  const sel = document.getElementById('edit-section');
+  sel.innerHTML = '';
+  const allowed = ME.role === 'admin' ? SECTIONS : SECTIONS.filter(s => MY_SECTIONS.includes(s.id));
+  allowed.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.display_name;
+    if (s.id === story.section_id) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // If current section isn't in the allowed list (editor viewing all), add it disabled
+  if (!allowed.find(s => s.id === story.section_id)) {
+    const cur = SECTIONS.find(s => s.id === story.section_id);
+    if (cur) {
+      const opt = document.createElement('option');
+      opt.value = cur.id; opt.textContent = cur.display_name + ' (current)';
+      opt.selected = true; sel.appendChild(opt);
+    }
+  }
+
+  // AI rating — editable by both roles
+  document.getElementById('edit-ai-score').value =
+    (story.ai_score === null || story.ai_score === undefined) ? '' : story.ai_score;
+
+  // The combined save+transition button adapts to role
+  const spBtn = document.getElementById('modal-save-publish');
+  spBtn.textContent = ME.role === 'admin' ? 'Save & Publish' : 'Save & Mark Ready';
+
+  document.getElementById('modal').classList.add('open');
+}
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('open');
+});
+
+// Shared save routine. thenStatus = null (just save), 'LIVE' (admin publish),
+// or 'PENDING' (editor mark ready). Status changes are still enforced by RLS.
+async function saveEdit(thenStatus) {
+  const id = document.getElementById('edit-id').value;
+  const aiRaw = document.getElementById('edit-ai-score').value.trim();
+  const patch = {
+    headline:   document.getElementById('edit-headline').value.trim(),
+    summary:    document.getElementById('edit-summary').value.trim(),
+    image:      document.getElementById('edit-image').value.trim(),
+    section_id: document.getElementById('edit-section').value,
+    ai_score:   aiRaw === '' ? null : parseFloat(aiRaw),
+  };
+  if (thenStatus) {
+    patch.status = thenStatus;
+    if (thenStatus === 'LIVE') {
+      patch.published_at = new Date().toISOString();
+      patch.published_by = ME.id;
+      patch.sort_order = 0;
+    }
+  }
+  const { data, error } = await sb.from('stories').update(patch).eq('id', id).select();
+  if (error) { toast('Error: ' + error.message); return; }
+  if (!data || data.length === 0) { toast('No permission to save this story'); return; }
+  document.getElementById('modal').classList.remove('open');
+  toast(thenStatus === 'LIVE' ? 'Published ✓' : thenStatus === 'PENDING' ? 'Marked ready ✓' : 'Saved ✓');
+  loadStories();
+}
+
+document.getElementById('modal-save').addEventListener('click', () => saveEdit(null));
+document.getElementById('modal-save-publish').addEventListener('click', () =>
+  saveEdit(ME.role === 'admin' ? 'LIVE' : 'PENDING'));
+
+// ── HELPERS ──
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── IMAGE POPOVER (inline add-image on story cards) ──
+let activePopover = null;
+
+function closeImagePopover() {
+  if (activePopover) { activePopover.remove(); activePopover = null; }
+}
+
+function openImagePopover(event, storyId) {
+  event.stopPropagation();
+  closeImagePopover();
+
+  const storyEl = event.target.closest('.story');
+  const pop = document.createElement('div');
+  pop.className = 'img-popover';
+  pop.innerHTML = `
+    <div class="img-popover-title">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      Add Image
+    </div>
+    <input type="text" id="pop-img-url" placeholder="Paste image URL…">
+    <img class="img-popover-preview" id="pop-img-preview">
+    <div class="img-upload-zone" id="pop-upload-zone">
+      <div>📷 Drop image or <strong style="color:var(--blue)">click to upload</strong></div>
+      <div style="margin-top:3px;font-size:10px;color:var(--text-faint)">JPG, PNG, WebP · Max 5 MB</div>
+      <input type="file" id="pop-img-file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div class="img-upload-progress" id="pop-upload-progress">Uploading…</div>
+    <div class="img-popover-actions">
+      <button class="img-pop-save" id="pop-save">Save</button>
+      <button class="img-pop-cancel" id="pop-cancel">Cancel</button>
+    </div>
+  `;
+  storyEl.appendChild(pop);
+  activePopover = pop;
+
+  const urlInput = pop.querySelector('#pop-img-url');
+  const preview = pop.querySelector('#pop-img-preview');
+  const uploadZone = pop.querySelector('#pop-upload-zone');
+  const fileInput = pop.querySelector('#pop-img-file');
+  const progressEl = pop.querySelector('#pop-upload-progress');
+
+  // Live preview on URL input
+  urlInput.addEventListener('input', () => {
+    const v = urlInput.value.trim();
+    if (v) { preview.src = v; preview.style.display = 'block'; preview.onerror = () => { preview.style.display = 'none'; }; }
+    else { preview.style.display = 'none'; }
+  });
+
+  // Click-to-upload
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handlePopUpload(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handlePopUpload(fileInput.files[0]); });
+
+  async function handlePopUpload(file) {
+    if (file.size > 5 * 1024 * 1024) { toast('File too large (max 5 MB)'); return; }
+    progressEl.style.display = 'block';
+    const url = await uploadImageToStorage(file, storyId);
+    progressEl.style.display = 'none';
+    if (url) {
+      urlInput.value = url;
+      preview.src = url;
+      preview.style.display = 'block';
+    }
+  }
+
+  // Save
+  pop.querySelector('#pop-save').addEventListener('click', async () => {
+    const imgUrl = urlInput.value.trim();
+    if (!imgUrl) { toast('Please enter or upload an image'); return; }
+    const { error } = await sb.from('stories').update({ image: imgUrl }).eq('id', storyId);
+    if (error) { toast('Error: ' + error.message); return; }
+    toast('Image added ✓');
+    closeImagePopover();
+    loadStories();
+  });
+
+  // Cancel
+  pop.querySelector('#pop-cancel').addEventListener('click', closeImagePopover);
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (activePopover && !activePopover.contains(e.target)) {
+        closeImagePopover();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 50);
+}
+
+// ── UPLOAD IMAGE TO SUPABASE STORAGE ──
+async function uploadImageToStorage(file, storyId) {
+  try {
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const fileName = `story-${storyId}-${Date.now()}.${ext}`;
+    const { data, error } = await sb.storage.from('story-images').upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type,
+    });
+    if (error) {
+      // If bucket doesn't exist, fall back to converting to data URL
+      console.warn('Storage upload failed:', error.message);
+      toast('Storage upload failed — try pasting a URL instead');
+      return null;
+    }
+    // Get public URL
+    const { data: urlData } = sb.storage.from('story-images').getPublicUrl(fileName);
+    return urlData?.publicUrl || null;
+  } catch (e) {
+    console.error('Upload error:', e);
+    toast('Upload error: ' + e.message);
+    return null;
+  }
+}
+
+// ── EDIT MODAL IMAGE PREVIEW + UPLOAD ──
+const editImageInput = document.getElementById('edit-image');
+const editImgPreview = document.getElementById('edit-img-preview');
+const editUploadZone = document.getElementById('edit-img-upload-zone');
+const editFileInput = document.getElementById('edit-img-file');
+const editUploading = document.getElementById('edit-img-uploading');
+
+editImageInput.addEventListener('input', () => {
+  const v = editImageInput.value.trim();
+  if (v) {
+    editImgPreview.src = v;
+    editImgPreview.style.display = 'block';
+    editImgPreview.onerror = () => { editImgPreview.style.display = 'none'; };
+  } else {
+    editImgPreview.style.display = 'none';
+  }
+});
+
+editUploadZone.addEventListener('click', () => editFileInput.click());
+editUploadZone.addEventListener('dragover', e => { e.preventDefault(); editUploadZone.style.borderColor = 'var(--blue)'; editUploadZone.style.background = 'rgba(43,124,211,0.06)'; });
+editUploadZone.addEventListener('dragleave', () => { editUploadZone.style.borderColor = ''; editUploadZone.style.background = ''; });
+editUploadZone.addEventListener('drop', e => { e.preventDefault(); editUploadZone.style.borderColor = ''; editUploadZone.style.background = ''; if (e.dataTransfer.files[0]) handleEditUpload(e.dataTransfer.files[0]); });
+editFileInput.addEventListener('change', () => { if (editFileInput.files[0]) handleEditUpload(editFileInput.files[0]); });
+
+async function handleEditUpload(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('File too large (max 5 MB)'); return; }
+  const storyId = document.getElementById('edit-id').value;
+  editUploading.style.display = 'block';
+  const url = await uploadImageToStorage(file, storyId);
+  editUploading.style.display = 'none';
+  if (url) {
+    editImageInput.value = url;
+    editImgPreview.src = url;
+    editImgPreview.style.display = 'block';
+  }
+}
+
+// ── TEAM / STAFF MANAGEMENT (admin only) ──
+async function loadTeam() {
+  const wrap = document.getElementById('staff-list');
+  wrap.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading team\u2026</div>';
+
+  const [staffRes, profRes, ownRes] = await Promise.all([
+    sb.from('allowed_staff').select('*').order('role').order('email'),
+    sb.from('profiles').select('id,email'),
+    sb.from('section_owners').select('user_id,section_id'),
+  ]);
+  if (staffRes.error) {
+    wrap.innerHTML = '<div style="color:var(--red);font-size:13px;padding:20px;text-align:center">Couldn\u2019t load team: ' + staffRes.error.message + '</div>';
+    return;
+  }
+  const staff = staffRes.data || [];
+  const emailToId = {};
+  (profRes.data || []).forEach(p => { if (p.email) emailToId[p.email.toLowerCase()] = p.id; });
+  const ownerMap = {};
+  (ownRes.data || []).forEach(o => { (ownerMap[o.user_id] = ownerMap[o.user_id] || []).push(o.section_id); });
+
+  if (!staff.length) {
+    wrap.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">No staff yet \u2014 add someone above.</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  staff.forEach(s => {
+    const uid = emailToId[s.email];
+    const owned = new Set((s.sections && s.sections.length) ? s.sections : (uid ? (ownerMap[uid] || []) : []));
+    wrap.appendChild(renderStaffRow(s, uid, owned));
+  });
+}
+
+function renderStaffRow(s, uid, ownedSet) {
+  const isAdminRow = s.role === 'admin';
+  const row = document.createElement('div');
+  row.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;opacity:' + (s.active ? '1' : '0.55');
+
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap';
+
+  const email = document.createElement('div');
+  email.style.cssText = 'font-weight:600;flex:1;min-width:180px;word-break:break-all';
+  email.innerHTML = s.email + (uid ? '' : ' <span style="color:var(--text-faint);font-weight:400">\u00b7 not signed in yet</span>');
+  head.appendChild(email);
+
+  const roleSel = document.createElement('select');
+  roleSel.style.cssText = 'background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:5px 8px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer';
+  roleSel.innerHTML = '<option value="editor">Editor</option><option value="admin">Admin</option>';
+  roleSel.value = s.role;
+  roleSel.addEventListener('change', () => setStaffRole(s.email, uid, roleSel.value));
+  head.appendChild(roleSel);
+
+  const activeLbl = document.createElement('label');
+  activeLbl.style.cssText = 'display:flex;align-items:center;gap:6px;color:var(--text-dim);cursor:pointer';
+  const activeCb = document.createElement('input');
+  activeCb.type = 'checkbox'; activeCb.checked = s.active;
+  activeCb.addEventListener('change', () => toggleStaffActive(s.email, activeCb.checked));
+  activeLbl.appendChild(activeCb);
+  activeLbl.appendChild(document.createTextNode('Active'));
+  head.appendChild(activeLbl);
+  row.appendChild(head);
+
+  const secWrap = document.createElement('div');
+  secWrap.style.cssText = 'margin-top:10px;display:flex;flex-wrap:wrap;gap:6px';
+  if (isAdminRow) {
+    const all = document.createElement('span');
+    all.style.cssText = 'color:var(--text-faint);font-style:italic';
+    all.textContent = 'Owns all sections (admin)';
+    secWrap.appendChild(all);
+  } else {
+    SECTIONS.forEach(sec => {
+      const on = ownedSet.has(sec.id);
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:14px;cursor:pointer;border:1px solid ' + (on ? 'var(--accent)' : 'var(--border)') + ';color:' + (on ? 'var(--text)' : 'var(--text-dim)');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = on; cb.style.display = 'none';
+      cb.addEventListener('change', () => {
+        lbl.style.borderColor = cb.checked ? 'var(--accent)' : 'var(--border)';
+        lbl.style.color = cb.checked ? 'var(--text)' : 'var(--text-dim)';
+        toggleStaffSection(s.email, uid, sec.id, cb.checked);
+      });
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(sec.display_name));
+      secWrap.appendChild(lbl);
+    });
+  }
+  row.appendChild(secWrap);
+  return row;
+}
+
+async function setStaffRole(email, uid, role) {
+  await sb.from('allowed_staff').update({ role }).eq('email', email);
+  if (uid) await sb.from('profiles').update({ role }).eq('id', uid);
+  loadTeam();
+}
+
+async function toggleStaffActive(email, active) {
+  await sb.from('allowed_staff').update({ active }).eq('email', email);
+  loadTeam();
+}
+
+async function toggleStaffSection(email, uid, sectionId, checked) {
+  const { data: cur } = await sb.from('allowed_staff').select('sections').eq('email', email).maybeSingle();
+  const set = new Set((cur && cur.sections) || []);
+  checked ? set.add(sectionId) : set.delete(sectionId);
+  await sb.from('allowed_staff').update({ sections: Array.from(set) }).eq('email', email);
+  if (uid) {
+    if (checked) await sb.from('section_owners').upsert({ user_id: uid, section_id: sectionId }, { onConflict: 'user_id,section_id' });
+    else         await sb.from('section_owners').delete().eq('user_id', uid).eq('section_id', sectionId);
+  }
+}
+
+(function wireStaffForm(){
+  const addBtn = document.getElementById('staff-add-btn');
+  if (!addBtn) return;
+  const form = document.getElementById('staff-form');
+  const emailEl = document.getElementById('staff-email');
+  const roleEl = document.getElementById('staff-role');
+  const errEl = document.getElementById('staff-form-err');
+  const showErr = m => { errEl.textContent = m; errEl.style.display = m ? 'block' : 'none'; };
+  addBtn.addEventListener('click', () => { form.style.display = ''; emailEl.value = ''; roleEl.value = 'editor'; showErr(''); emailEl.focus(); });
+  document.getElementById('staff-cancel-btn').addEventListener('click', () => { form.style.display = 'none'; showErr(''); });
+  document.getElementById('staff-save-btn').addEventListener('click', async () => {
+    const email = (emailEl.value || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Enter a valid email address.'); return; }
+    const { error } = await sb.from('allowed_staff').insert({ email, role: roleEl.value, active: true });
+    if (error) { showErr(error.message); return; }
+    form.style.display = 'none';
+    loadTeam();
+  });
+})();
+
+// ── TAB NAVIGATION ──
+document.querySelectorAll('#tab-nav .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#tab-nav .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const tab = chip.dataset.tab;
+    document.getElementById('list').style.display = tab === 'stories' ? '' : 'none';
+    document.getElementById('stories-filters').style.display = tab === 'stories' ? 'flex' : 'none';
+    document.getElementById('submit-panel').style.display = tab === 'submit' ? '' : 'none';
+    document.getElementById('rss-panel').style.display = tab === 'rss' ? '' : 'none';
+    document.getElementById('ads-panel').style.display = tab === 'ads' ? '' : 'none';
+    document.getElementById('team-panel').style.display = tab === 'team' ? '' : 'none';
+    document.getElementById('manual-panel').style.display = tab === 'manual' ? '' : 'none';
+    if (tab === 'rss') loadRSSFeeds();
+    if (tab === 'ads') loadAds();
+    if (tab === 'team') loadTeam();
+    if (tab === 'manual') populateManualSections();
+  });
+});
+
+// ── QUICK SUBMIT (issue #11b) ──
+function populateQSSections() {
+  const sel = document.getElementById('qs-section');
+  sel.innerHTML = '';
+  // Editors can only submit into sections they own; admins see all.
+  let avail = SECTIONS;
+  if (ME && ME.role !== 'admin') {
+    const owned = SECTIONS.filter(s => MY_SECTIONS.includes(s.id));
+    if (owned.length) avail = owned;
+  }
+  avail.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.display_name;
+    opt.textContent = s.display_name;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById('qs-fetch').addEventListener('click', async () => {
+  const url = document.getElementById('qs-url').value.trim();
+  const section = document.getElementById('qs-section').value;
+  if (!url) { document.getElementById('qs-error').style.display = 'block'; document.getElementById('qs-error').textContent = 'Please enter a URL'; return; }
+  document.getElementById('qs-error').style.display = 'none';
+  document.getElementById('qs-loading').style.display = 'block';
+  document.getElementById('qs-preview').style.display = 'none';
+
+  try {
+    const { data: { session: _qsSess } } = await sb.auth.getSession();
+const res = await fetch('/api/submit', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${_qsSess?.access_token || ''}`,
+  },
+  body: JSON.stringify({ url, section, action: 'preview' }),
+});
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Fetch failed');
+
+    document.getElementById('qs-prev-headline').value = data.headline || '';
+    document.getElementById('qs-prev-summary').value = data.summary || '';
+    document.getElementById('qs-prev-image').value = data.image || '';
+    document.getElementById('qs-prev-source').textContent = data.source || '';
+    if (data.image) {
+      document.getElementById('qs-prev-img').src = data.image;
+      document.getElementById('qs-prev-img').style.display = 'block';
+    } else {
+      document.getElementById('qs-prev-img').style.display = 'none';
+    }
+    document.getElementById('qs-preview').style.display = 'block';
+  } catch (e) {
+    document.getElementById('qs-error').style.display = 'block';
+    document.getElementById('qs-error').textContent = e.message;
+  } finally {
+    document.getElementById('qs-loading').style.display = 'none';
+  }
+});
+
+async function quickSubmitPublish(status) {
+  const url = document.getElementById('qs-url').value.trim();
+  const section = document.getElementById('qs-section').value;
+  try {
+    const sectionId = SECTIONS.find(s => s.display_name === section)?.id || 'headlines';
+    const row = {
+      section_id: sectionId,
+      headline: document.getElementById('qs-prev-headline').value.trim(),
+      summary: document.getElementById('qs-prev-summary').value.trim(),
+      source: document.getElementById('qs-prev-source').textContent,
+      url: url,
+      image: document.getElementById('qs-prev-image').value.trim(),
+      status: status,
+      source_type: 'SUBMIT',
+      sort_order: 0,
+      published_at: status === 'LIVE' ? new Date().toISOString() : null,
+    };
+    const { error } = await sb.from('stories').upsert(row, { onConflict: 'section_id,url' });
+    if (error) throw error;
+    toast(status === 'LIVE' ? 'Published ✓' : 'Saved as draft ✓');
+    document.getElementById('qs-preview').style.display = 'none';
+    document.getElementById('qs-url').value = '';
+  } catch (e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+document.getElementById('qs-publish').addEventListener('click', () => quickSubmitPublish('LIVE'));
+document.getElementById('qs-draft').addEventListener('click', () => quickSubmitPublish('DRAFT'));
+document.getElementById('qs-ready').addEventListener('click', () => quickSubmitPublish('PENDING'));
+
+// ── MANUAL SUBMIT (admin only) — everything entered by hand, no fetch ──
+function populateManualSections() {
+  const sel = document.getElementById('ms-section');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '';
+  SECTIONS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.display_name;
+    opt.textContent = s.display_name;
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+(function wireManualImage(){
+  const fileEl = document.getElementById('ms-image-file');
+  if (!fileEl) return;
+  fileEl.addEventListener('change', async () => {
+    const file = fileEl.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('File too large (max 5 MB)'); return; }
+    const up = document.getElementById('ms-image-uploading');
+    up.style.display = 'inline';
+    const url = await uploadImageToStorage(file, 'manual-' + Date.now());
+    up.style.display = 'none';
+    if (url) {
+      document.getElementById('ms-image').value = url;
+      const pv = document.getElementById('ms-image-preview');
+      pv.src = url; pv.style.display = 'block';
+    }
+  });
+  document.getElementById('ms-image').addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    const pv = document.getElementById('ms-image-preview');
+    if (v) { pv.src = v; pv.style.display = 'block'; pv.onerror = () => { pv.style.display = 'none'; }; }
+    else pv.style.display = 'none';
+  });
+})();
+
+async function manualSubmitPublish(status) {
+  const msg = document.getElementById('ms-msg');
+  const setMsg = (t, c) => { msg.textContent = t; msg.style.color = c || 'var(--text-dim)'; };
+  const url = document.getElementById('ms-url').value.trim();
+  const headline = document.getElementById('ms-headline').value.trim();
+  if (!url) { setMsg('Add the article URL.', 'var(--red)'); return; }
+  if (!headline) { setMsg('Add a headline.', 'var(--red)'); return; }
+  const section = document.getElementById('ms-section').value;
+  const sectionId = SECTIONS.find(s => s.display_name === section)?.id || 'headlines';
+  const scoreRaw = document.getElementById('ms-score').value.trim();
+  const row = {
+    section_id: sectionId,
+    headline: headline,
+    summary: document.getElementById('ms-summary').value.trim(),
+    source: document.getElementById('ms-source').value.trim(),
+    url: url,
+    image: document.getElementById('ms-image').value.trim(),
+    status: status,
+    source_type: 'MANUAL',
+    sort_order: 0,
+    published_at: status === 'LIVE' ? new Date().toISOString() : null,
+    published_by: status === 'LIVE' ? ME.id : null,
+  };
+  if (scoreRaw !== '') { const n = Number(scoreRaw); if (!isNaN(n)) row.ai_score = n; }
+  setMsg('Saving\u2026');
+  const { error } = await sb.from('stories').upsert(row, { onConflict: 'section_id,url' });
+  if (error) { setMsg('Error: ' + error.message, 'var(--red)'); return; }
+  setMsg(status === 'LIVE' ? 'Published \u2713' : 'Saved as draft \u2713', 'var(--green)');
+  ['ms-url','ms-headline','ms-summary','ms-source','ms-image','ms-score'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('ms-image-preview').style.display = 'none';
+}
+
+document.getElementById('ms-publish').addEventListener('click', () => manualSubmitPublish('LIVE'));
+document.getElementById('ms-draft').addEventListener('click', () => manualSubmitPublish('DRAFT'));
+
+// ── ROLE-BASED UI ──
+// Editors: no RSS, no Quick Submit. They get "Quick Ready" (→ admin pending list).
+// NOTE: this only hides controls. The real enforcement is the RLS policies in
+// rls-policies.sql — without those, a determined editor could bypass the UI.
+function applyRoleUI() {
+  const isAdmin = ME.role === 'admin';
+  document.getElementById('tab-submit').style.display = isAdmin ? '' : 'none';
+  document.getElementById('tab-rss').style.display    = isAdmin ? '' : 'none';
+  document.getElementById('tab-ads').style.display    = isAdmin ? '' : 'none';
+  document.getElementById('tab-team').style.display   = isAdmin ? '' : 'none';
+  document.getElementById('tab-manual').style.display = isAdmin ? '' : 'none';
+  document.getElementById('tab-ready').style.display  = isAdmin ? 'none' : '';
+  // Quick panel buttons
+  document.getElementById('qs-publish').style.display = isAdmin ? '' : 'none';
+  document.getElementById('qs-draft').style.display   = isAdmin ? '' : 'none';
+  document.getElementById('qs-ready').style.display   = isAdmin ? 'none' : '';
+  // Quick panel copy
+  document.getElementById('qs-heading').textContent = isAdmin ? 'Quick Submit' : 'Quick Ready';
+  document.getElementById('qs-desc').textContent = isAdmin
+    ? "Paste any article URL. We'll fetch the headline, image and generate an AI summary. You can edit everything before publishing."
+    : "Paste any article URL. We'll fetch the headline, image and generate an AI summary. Review it, then send it to the admin pending list for approval.";
+}
+
+// ── RSS FEED MANAGEMENT (issue #13) ──
+// This uses a Supabase table 'rss_feeds' that you need to create:
+// CREATE TABLE rss_feeds (
+//   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+//   feed_url text NOT NULL,
+//   section_id text NOT NULL,
+//   source_name text,
+//   is_active boolean DEFAULT true,
+//   is_webpage boolean DEFAULT false,
+//   created_at timestamptz DEFAULT now()
+// );
+
+async function loadRSSFeeds() {
+  const list = document.getElementById('rss-list');
+  list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading feeds…</div>';
+
+  // First try to load from Supabase rss_feeds table
+  const { data: feeds, error } = await sb.from('rss_feeds').select('*').order('section_id').order('created_at');
+  if (error) {
+    // Table might not exist yet — show hardcoded feeds instead
+    list.innerHTML = '<div style="color:var(--amber);font-size:13px;padding:20px;text-align:center">RSS feeds table not yet created. Please run the SQL migration first. Showing hardcoded feeds from code.</div>';
+    return;
+  }
+
+  if (!feeds || !feeds.length) {
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">No feeds configured. Click "+ Add Feed" to get started.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  let currentSection = '';
+  feeds.forEach(feed => {
+    if (feed.section_id !== currentSection) {
+      currentSection = feed.section_id;
+      const sec = SECTIONS.find(s => s.id === currentSection);
+      const header = document.createElement('div');
+      header.style.cssText = 'font-family:"Libre Baskerville",serif;font-size:14px;font-weight:700;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)';
+      header.textContent = sec ? sec.display_name : currentSection;
+      list.appendChild(header);
+    }
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--panel);border:1px solid var(--border);border-radius:6px;font-size:12px';
+    row.innerHTML = `
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0">
+        <input type="checkbox" ${feed.is_active ? 'checked' : ''} data-feed-id="${feed.id}" class="rss-toggle">
+      </label>
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${feed.is_active ? 'var(--text)' : 'var(--text-faint)'}">${escapeHtml(feed.feed_url)}</span>
+      ${feed.source_name ? '<span style="color:var(--text-dim);flex-shrink:0">' + escapeHtml(feed.source_name) + '</span>' : ''}
+      ${feed.is_webpage ? '<span style="background:rgba(212,134,10,0.2);color:var(--amber);font-size:9px;padding:2px 6px;border-radius:3px;flex-shrink:0">WEBPAGE</span>' : ''}
+      <button class="rss-delete" data-feed-id="${feed.id}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0" title="Delete">✕</button>
+    `;
+    list.appendChild(row);
+  });
+
+  // Toggle handlers
+  list.querySelectorAll('.rss-toggle').forEach(toggle => {
+    toggle.addEventListener('change', async (e) => {
+      const feedId = e.target.dataset.feedId;
+      const { error } = await sb.from('rss_feeds').update({ is_active: e.target.checked }).eq('id', feedId);
+      if (error) toast('Error: ' + error.message);
+      else toast(e.target.checked ? 'Feed enabled ✓' : 'Feed disabled ✓');
+      loadRSSFeeds();
+    });
+  });
+
+  // Delete handlers
+  list.querySelectorAll('.rss-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this feed?')) return;
+      const feedId = btn.dataset.feedId;
+      const { error } = await sb.from('rss_feeds').delete().eq('id', feedId);
+      if (error) toast('Error: ' + error.message);
+      else { toast('Feed deleted ✓'); loadRSSFeeds(); }
+    });
+  });
+}
+
+// RSS Add Feed form
+document.getElementById('rss-add-btn').addEventListener('click', () => {
+  document.getElementById('rss-add-form').style.display = 'block';
+  const sel = document.getElementById('rss-new-section');
+  sel.innerHTML = '';
+  SECTIONS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.display_name;
+    sel.appendChild(opt);
+  });
+});
+document.getElementById('rss-cancel-btn').addEventListener('click', () => {
+  document.getElementById('rss-add-form').style.display = 'none';
+});
+document.getElementById('rss-save-btn').addEventListener('click', async () => {
+  const url = document.getElementById('rss-new-url').value.trim();
+  const sectionId = document.getElementById('rss-new-section').value;
+  const isWebpage = document.getElementById('rss-is-webpage').checked;
+  const sourceName = document.getElementById('rss-new-source').value.trim();
+  if (!url) { toast('Please enter a URL'); return; }
+
+  const row = {
+    feed_url: url,
+    section_id: sectionId,
+    is_active: true,
+    is_webpage: isWebpage,
+  };
+  if (sourceName) row.source_name = sourceName;
+  const { error } = await sb.from('rss_feeds').insert(row);
+  if (error) { toast('Error: ' + error.message); return; }
+  toast('Feed added ✓');
+  document.getElementById('rss-add-form').style.display = 'none';
+  document.getElementById('rss-new-url').value = '';
+  document.getElementById('rss-new-source').value = '';
+  loadRSSFeeds();
+});
+
+// ── ADS MANAGEMENT (admin only) ──
+function populateAdSections() {
+  const sel = document.getElementById('ad-section');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">All sections</option>';
+  SECTIONS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.display_name;
+    sel.appendChild(opt);
+  });
+}
+
+function isoToLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const AD_FORMAT_LABEL = { interstitial: 'Full card', banner: 'Bottom banner', card: 'End-of-story' };
+
+async function loadAds() {
+  populateAdSections();
+  const list = document.getElementById('ad-list');
+  list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">Loading ads…</div>';
+  const { data: ads, error } = await sb.from('ads').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<div style="color:var(--red);font-size:13px;padding:20px;text-align:center">Error: ' + escapeHtml(error.message) + '. Did you run ads-schema.sql?</div>'; return; }
+  if (!ads || !ads.length) { list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">No ads yet. Click "+ New Ad" to add your first.</div>'; return; }
+
+  list.innerHTML = '';
+  ads.forEach(ad => {
+    const sec = ad.section_id ? (SECTIONS.find(s => s.id === ad.section_id)?.display_name || ad.section_id) : 'All sections';
+    const img = ad.image_url || (ad.image_path ? `${SUPABASE_URL}/storage/v1/object/public/ad-creatives/${ad.image_path}` : '');
+    const ctr = ad.impressions ? ((ad.clicks / ad.impressions) * 100).toFixed(1) + '%' : '—';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;font-size:12px;opacity:' + (ad.active ? '1' : '0.5');
+    row.innerHTML = `
+      <div style="width:64px;height:40px;flex-shrink:0;border-radius:4px;background:var(--bg) center/cover no-repeat${img ? ";background-image:url('" + img.replace(/'/g, "%27") + "')" : ''};border:1px solid var(--border)"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(ad.brand || ad.headline || '(untitled ad)')}</div>
+        <div style="color:var(--text-dim);margin-top:2px">${AD_FORMAT_LABEL[ad.format] || ad.format} · ${escapeHtml(sec)} · weight ${ad.weight}</div>
+      </div>
+      <div style="text-align:right;color:var(--text-dim);flex-shrink:0;line-height:1.5">
+        <div><b style="color:var(--text)">${ad.impressions || 0}</b> impr · <b style="color:var(--text)">${ad.clicks || 0}</b> clk</div>
+        <div style="font-size:11px">CTR ${ctr}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="act-btn act-edit" data-ad-edit="${ad.id}">Edit</button>
+        <button class="act-btn" data-ad-toggle="${ad.id}" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim)">${ad.active ? 'Pause' : 'Activate'}</button>
+        <button class="act-btn act-reject" data-ad-del="${ad.id}">Delete</button>
+      </div>`;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('[data-ad-edit]').forEach(b => b.addEventListener('click', () => {
+    const ad = ads.find(a => a.id === b.dataset.adEdit); if (ad) openAdForm(ad);
+  }));
+  list.querySelectorAll('[data-ad-toggle]').forEach(b => b.addEventListener('click', async () => {
+    const ad = ads.find(a => a.id === b.dataset.adToggle);
+    const { error } = await sb.from('ads').update({ active: !ad.active }).eq('id', ad.id);
+    if (error) toast('Error: ' + error.message); else { toast(ad.active ? 'Paused ✓' : 'Activated ✓'); loadAds(); }
+  }));
+  list.querySelectorAll('[data-ad-del]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Delete this ad permanently?')) return;
+    const { error } = await sb.from('ads').delete().eq('id', b.dataset.adDel);
+    if (error) toast('Error: ' + error.message); else { toast('Ad deleted ✓'); loadAds(); }
+  }));
+}
+
+function openAdForm(ad) {
+  populateAdSections();
+  ad = ad || {};
+  document.getElementById('ad-id').value      = ad.id || '';
+  document.getElementById('ad-format').value  = ad.format || 'interstitial';
+  document.getElementById('ad-section').value = ad.section_id || '';
+  document.getElementById('ad-weight').value  = ad.weight != null ? ad.weight : 1;
+  document.getElementById('ad-brand').value   = ad.brand || '';
+  document.getElementById('ad-cta').value     = ad.cta_label || '';
+  document.getElementById('ad-headline').value= ad.headline || '';
+  document.getElementById('ad-copy').value    = ad.copy || '';
+  document.getElementById('ad-url').value     = ad.click_url || '';
+  document.getElementById('ad-image').value   = ad.image_url || '';
+  document.getElementById('ad-starts').value  = isoToLocalInput(ad.starts_at);
+  document.getElementById('ad-ends').value    = isoToLocalInput(ad.ends_at);
+  document.getElementById('ad-active').checked = ad.active != null ? ad.active : true;
+  // store any existing uploaded path so we don't lose it on edit
+  document.getElementById('ad-form').dataset.imagePath = ad.image_path || '';
+  const prev = document.getElementById('ad-image-preview');
+  const shown = ad.image_url || (ad.image_path ? `${SUPABASE_URL}/storage/v1/object/public/ad-creatives/${ad.image_path}` : '');
+  if (shown) { prev.src = shown; prev.style.display = 'block'; } else { prev.style.display = 'none'; }
+  document.getElementById('ad-form').style.display = 'block';
+}
+
+document.getElementById('ad-add-btn').addEventListener('click', () => openAdForm(null));
+document.getElementById('ad-cancel-btn').addEventListener('click', () => {
+  document.getElementById('ad-form').style.display = 'none';
+});
+
+document.getElementById('ad-image').addEventListener('input', (e) => {
+  const prev = document.getElementById('ad-image-preview');
+  const v = e.target.value.trim();
+  if (v) { prev.src = v; prev.style.display = 'block'; prev.onerror = () => { prev.style.display = 'none'; }; }
+  else { prev.style.display = 'none'; }
+});
+
+document.getElementById('ad-image-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('ad-image-uploading').style.display = 'inline';
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const fileName = `ad-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from('ad-creatives').upload(fileName, file, {
+    cacheControl: '3600', upsert: true, contentType: file.type,
+  });
+  document.getElementById('ad-image-uploading').style.display = 'none';
+  if (error) { toast('Upload failed: ' + error.message); return; }
+  document.getElementById('ad-form').dataset.imagePath = fileName;
+  document.getElementById('ad-image').value = ''; // uploaded creative takes precedence
+  const { data: urlData } = sb.storage.from('ad-creatives').getPublicUrl(fileName);
+  const prev = document.getElementById('ad-image-preview');
+  prev.src = urlData?.publicUrl || ''; prev.style.display = 'block';
+  toast('Uploaded ✓');
+});
+
+document.getElementById('ad-save-btn').addEventListener('click', async () => {
+  const id = document.getElementById('ad-id').value;
+  const clickUrl = document.getElementById('ad-url').value.trim();
+  if (!clickUrl) { toast('Click-through URL is required'); return; }
+  const imageUrl = document.getElementById('ad-image').value.trim();
+  const imagePath = document.getElementById('ad-form').dataset.imagePath || '';
+  const startsV = document.getElementById('ad-starts').value;
+  const endsV   = document.getElementById('ad-ends').value;
+  const row = {
+    format:     document.getElementById('ad-format').value,
+    section_id: document.getElementById('ad-section').value || null,
+    weight:     parseInt(document.getElementById('ad-weight').value) || 1,
+    brand:      document.getElementById('ad-brand').value.trim() || null,
+    cta_label:  document.getElementById('ad-cta').value.trim() || null,
+    headline:   document.getElementById('ad-headline').value.trim() || null,
+    copy:       document.getElementById('ad-copy').value.trim() || null,
+    click_url:  clickUrl,
+    image_url:  imageUrl || null,
+    image_path: imageUrl ? null : (imagePath || null),  // URL wins; else uploaded path
+    active:     document.getElementById('ad-active').checked,
+    starts_at:  startsV ? new Date(startsV).toISOString() : null,
+    ends_at:    endsV ? new Date(endsV).toISOString() : null,
+  };
+  let error;
+  if (id) { ({ error } = await sb.from('ads').update(row).eq('id', id)); }
+  else    { row.created_by = ME.id; ({ error } = await sb.from('ads').insert(row)); }
+  if (error) { toast('Error: ' + error.message); return; }
+  toast('Ad saved ✓');
+  document.getElementById('ad-form').style.display = 'none';
+  loadAds();
+});
+
+
+// Handle OAuth redirect + init.
+sb.auth.onAuthStateChange((event, session) => {
+  init();
+});
+
+// Also run once on load for the already-logged-in case (no redirect token).
+// Small delay lets supabase-js finish parsing any URL hash first.
+setTimeout(init, 300);
+</script>
+</body>
+</html>
