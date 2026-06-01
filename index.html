@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>GRIDDS.NEWS</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="mast">
+  <div style="display:flex;gap:3px;align-items:flex-end">
+    <div style="display:flex;gap:3px;margin-bottom:3px;align-items:flex-start">
+      <div style="width:10px;height:34px;border-radius:2px;background:#E8520A;flex-shrink:0"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+        <div style="width:14px;height:10px;border-radius:2px;background:#2B5BA8"></div>
+        <div style="width:14px;height:10px;border-radius:2px;background:#D4860A"></div>
+        <div style="width:14px;height:10px;border-radius:2px;background:#2B5BA8;opacity:0.5"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;flex-shrink:0">
+        <div style="width:10px;height:15px;border-radius:2px;background:#D4860A;opacity:0.75"></div>
+        <div style="height:6px"></div>
+        <div style="width:10px;height:13px;border-radius:2px;background:#E8520A;opacity:0.4"></div>
+      </div>
+    </div>
+    <div style="position:relative;display:inline-block;line-height:1">
+      <span id="mast-gridds" style="font-family:'Libre Baskerville',Georgia,serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:1.5px;line-height:1">GRIDDS</span><span style="font-family:'Libre Baskerville',Georgia,serif;font-size:17px;font-weight:700;color:#E8520A;line-height:1;vertical-align:baseline">.</span><span style="font-family:'Libre Baskerville',Georgia,serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:1px;line-height:1;vertical-align:baseline">NEWS</span>
+      <div id="mast-bar" style="position:absolute;height:3px;background:#E8520A;border-radius:2px;top:-6px;left:0;width:8px"></div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+<div class="row r1"><div class="tile-wrap sh" id="TW-headlines"><div class="tile-flipper"><div class="tile-card" id="TC-headlines"><div class="tile-face" id="face-headlines-f"><div class="f-photo" id="photo-headlines-f"></div><div class="f-color" id="color-headlines-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-headlines-f">Headlines</div><div class="f-hl" id="hl-headlines-f"></div><div class="f-foot"><div class="f-src" id="src-headlines-f"></div><div class="f-ctr" id="ctr-headlines-f"></div></div></div></div><div class="tile-face back" id="face-headlines-b"><div class="f-photo" id="photo-headlines-b"></div><div class="f-color" id="color-headlines-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-headlines-b">Headlines</div><div class="f-hl" id="hl-headlines-b"></div><div class="f-foot"><div class="f-src" id="src-headlines-b"></div><div class="f-ctr" id="ctr-headlines-b"></div></div></div></div></div></div></div></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-finance"><div class="tile-flipper"><div class="tile-card" id="TC-finance"><div class="tile-face" id="face-finance-f"><div class="f-photo" id="photo-finance-f"></div><div class="f-color" id="color-finance-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-finance-f">Finance</div><div class="f-hl" id="hl-finance-f"></div><div class="f-foot"><div class="f-src" id="src-finance-f"></div><div class="f-ctr" id="ctr-finance-f"></div></div></div></div><div class="tile-face back" id="face-finance-b"><div class="f-photo" id="photo-finance-b"></div><div class="f-color" id="color-finance-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-finance-b">Finance</div><div class="f-hl" id="hl-finance-b"></div><div class="f-foot"><div class="f-src" id="src-finance-b"></div><div class="f-ctr" id="ctr-finance-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-wellness"><div class="tile-flipper"><div class="tile-card" id="TC-wellness"><div class="tile-face" id="face-wellness-f"><div class="f-photo" id="photo-wellness-f"></div><div class="f-color" id="color-wellness-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-wellness-f">Wellness</div><div class="f-hl" id="hl-wellness-f"></div><div class="f-foot"><div class="f-src" id="src-wellness-f"></div><div class="f-ctr" id="ctr-wellness-f"></div></div></div></div><div class="tile-face back" id="face-wellness-b"><div class="f-photo" id="photo-wellness-b"></div><div class="f-color" id="color-wellness-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-wellness-b">Wellness</div><div class="f-hl" id="hl-wellness-b"></div><div class="f-foot"><div class="f-src" id="src-wellness-b"></div><div class="f-ctr" id="ctr-wellness-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-opinions"><div class="tile-flipper"><div class="tile-card" id="TC-opinions"><div class="tile-face" id="face-opinions-f"><div class="f-photo" id="photo-opinions-f"></div><div class="f-color" id="color-opinions-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-opinions-f">Opinions</div><div class="f-hl" id="hl-opinions-f"></div><div class="f-foot"><div class="f-src" id="src-opinions-f"></div><div class="f-ctr" id="ctr-opinions-f"></div></div></div></div><div class="tile-face back" id="face-opinions-b"><div class="f-photo" id="photo-opinions-b"></div><div class="f-color" id="color-opinions-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-opinions-b">Opinions</div><div class="f-hl" id="hl-opinions-b"></div><div class="f-foot"><div class="f-src" id="src-opinions-b"></div><div class="f-ctr" id="ctr-opinions-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-worldNews"><div class="tile-flipper"><div class="tile-card" id="TC-worldNews"><div class="tile-face" id="face-worldNews-f"><div class="f-photo" id="photo-worldNews-f"></div><div class="f-color" id="color-worldNews-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-worldNews-f">World News</div><div class="f-hl" id="hl-worldNews-f"></div><div class="f-foot"><div class="f-src" id="src-worldNews-f"></div><div class="f-ctr" id="ctr-worldNews-f"></div></div></div></div><div class="tile-face back" id="face-worldNews-b"><div class="f-photo" id="photo-worldNews-b"></div><div class="f-color" id="color-worldNews-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-worldNews-b">World News</div><div class="f-hl" id="hl-worldNews-b"></div><div class="f-foot"><div class="f-src" id="src-worldNews-b"></div><div class="f-ctr" id="ctr-worldNews-b"></div></div></div></div></div></div></div></div>
+<div class="row r1"><div class="tile-wrap sh" id="TW-loves"><div class="tile-flipper"><div class="tile-card" id="TC-loves"><div class="tile-face" id="face-loves-f"><div class="f-photo" id="photo-loves-f"></div><div class="f-color" id="color-loves-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-loves-f">&#10022; GRIDD Loves</div><div class="f-hl" id="hl-loves-f"></div><div class="f-foot"><div class="f-src" id="src-loves-f"></div><div class="f-ctr" id="ctr-loves-f"></div></div></div></div><div class="tile-face back" id="face-loves-b"><div class="f-photo" id="photo-loves-b"></div><div class="f-color" id="color-loves-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-loves-b">&#10022; GRIDD Loves</div><div class="f-hl" id="hl-loves-b"></div><div class="f-foot"><div class="f-src" id="src-loves-b"></div><div class="f-ctr" id="ctr-loves-b"></div></div></div></div></div></div></div></div>
+  <!-- âââ ADDITIONAL TILES (scroll down) âââ -->
+  <div style="border-top:1px solid rgba(255,255,255,0.05);margin:10px 0 6px;padding-top:6px"></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-politics"><div class="tile-flipper"><div class="tile-card" id="TC-politics"><div class="tile-face" id="face-politics-f"><div class="f-photo" id="photo-politics-f"></div><div class="f-color" id="color-politics-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-politics-f">Nation</div><div class="f-hl" id="hl-politics-f"></div><div class="f-foot"><div class="f-src" id="src-politics-f"></div><div class="f-ctr" id="ctr-politics-f"></div></div></div></div><div class="tile-face back" id="face-politics-b"><div class="f-photo" id="photo-politics-b"></div><div class="f-color" id="color-politics-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-politics-b">Nation</div><div class="f-hl" id="hl-politics-b"></div><div class="f-foot"><div class="f-src" id="src-politics-b"></div><div class="f-ctr" id="ctr-politics-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-thisAndThat"><div class="tile-flipper"><div class="tile-card" id="TC-thisAndThat"><div class="tile-face" id="face-thisAndThat-f"><div class="f-photo" id="photo-thisAndThat-f"></div><div class="f-color" id="color-thisAndThat-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-thisAndThat-f">This & That</div><div class="f-hl" id="hl-thisAndThat-f"></div><div class="f-foot"><div class="f-src" id="src-thisAndThat-f"></div><div class="f-ctr" id="ctr-thisAndThat-f"></div></div></div></div><div class="tile-face back" id="face-thisAndThat-b"><div class="f-photo" id="photo-thisAndThat-b"></div><div class="f-color" id="color-thisAndThat-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-thisAndThat-b">This & That</div><div class="f-hl" id="hl-thisAndThat-b"></div><div class="f-foot"><div class="f-src" id="src-thisAndThat-b"></div><div class="f-ctr" id="ctr-thisAndThat-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-tech"><div class="tile-flipper"><div class="tile-card" id="TC-tech"><div class="tile-face" id="face-tech-f"><div class="f-photo" id="photo-tech-f"></div><div class="f-color" id="color-tech-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-tech-f">Tech</div><div class="f-hl" id="hl-tech-f"></div><div class="f-foot"><div class="f-src" id="src-tech-f"></div><div class="f-ctr" id="ctr-tech-f"></div></div></div></div><div class="tile-face back" id="face-tech-b"><div class="f-photo" id="photo-tech-b"></div><div class="f-color" id="color-tech-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-tech-b">Tech</div><div class="f-hl" id="hl-tech-b"></div><div class="f-foot"><div class="f-src" id="src-tech-b"></div><div class="f-ctr" id="ctr-tech-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-ipl"><div class="tile-flipper"><div class="tile-card" id="TC-ipl"><div class="tile-face" id="face-ipl-f"><div class="f-photo" id="photo-ipl-f"></div><div class="f-color" id="color-ipl-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-ipl-f">Sports</div><div class="f-hl" id="hl-ipl-f"></div><div class="f-foot"><div class="f-src" id="src-ipl-f"></div><div class="f-ctr" id="ctr-ipl-f"></div></div></div></div><div class="tile-face back" id="face-ipl-b"><div class="f-photo" id="photo-ipl-b"></div><div class="f-color" id="color-ipl-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-ipl-b">Sports</div><div class="f-hl" id="hl-ipl-b"></div><div class="f-foot"><div class="f-src" id="src-ipl-b"></div><div class="f-ctr" id="ctr-ipl-b"></div></div></div></div></div></div></div></div>
+<div class="row r2a"><div class="tile-wrap tl" id="TW-longreads"><div class="tile-flipper"><div class="tile-card" id="TC-longreads"><div class="tile-face" id="face-longreads-f"><div class="f-photo" id="photo-longreads-f"></div><div class="f-color" id="color-longreads-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-longreads-f">Long Reads</div><div class="f-hl" id="hl-longreads-f"></div><div class="f-foot"><div class="f-src" id="src-longreads-f"></div><div class="f-ctr" id="ctr-longreads-f"></div></div></div></div><div class="tile-face back" id="face-longreads-b"><div class="f-photo" id="photo-longreads-b"></div><div class="f-color" id="color-longreads-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-longreads-b">Long Reads</div><div class="f-hl" id="hl-longreads-b"></div><div class="f-foot"><div class="f-src" id="src-longreads-b"></div><div class="f-ctr" id="ctr-longreads-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-cityNews"><div class="tile-flipper"><div class="tile-card" id="TC-cityNews"><div class="tile-face" id="face-cityNews-f"><div class="f-photo" id="photo-cityNews-f"></div><div class="f-color" id="color-cityNews-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-cityNews-f">City News</div><div class="f-hl" id="hl-cityNews-f"></div><div class="f-foot"><div class="f-src" id="src-cityNews-f"></div><div class="f-ctr" id="ctr-cityNews-f"></div></div></div></div><div class="tile-face back" id="face-cityNews-b"><div class="f-photo" id="photo-cityNews-b"></div><div class="f-color" id="color-cityNews-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-cityNews-b">City News</div><div class="f-hl" id="hl-cityNews-b"></div><div class="f-foot"><div class="f-src" id="src-cityNews-b"></div><div class="f-ctr" id="ctr-cityNews-b"></div></div></div></div></div></div></div></div>
+<div class="row r2b"><div class="tile-wrap tl" id="TW-lifestyle"><div class="tile-flipper"><div class="tile-card" id="TC-lifestyle"><div class="tile-face" id="face-lifestyle-f"><div class="f-photo" id="photo-lifestyle-f"></div><div class="f-color" id="color-lifestyle-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-lifestyle-f">Lifestyle</div><div class="f-hl" id="hl-lifestyle-f"></div><div class="f-foot"><div class="f-src" id="src-lifestyle-f"></div><div class="f-ctr" id="ctr-lifestyle-f"></div></div></div></div><div class="tile-face back" id="face-lifestyle-b"><div class="f-photo" id="photo-lifestyle-b"></div><div class="f-color" id="color-lifestyle-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-lifestyle-b">Lifestyle</div><div class="f-hl" id="hl-lifestyle-b"></div><div class="f-foot"><div class="f-src" id="src-lifestyle-b"></div><div class="f-ctr" id="ctr-lifestyle-b"></div></div></div></div></div></div></div><div class="tile-wrap tl" id="TW-entertainment"><div class="tile-flipper"><div class="tile-card" id="TC-entertainment"><div class="tile-face" id="face-entertainment-f"><div class="f-photo" id="photo-entertainment-f"></div><div class="f-color" id="color-entertainment-f"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-entertainment-f">Entertainment</div><div class="f-hl" id="hl-entertainment-f"></div><div class="f-foot"><div class="f-src" id="src-entertainment-f"></div><div class="f-ctr" id="ctr-entertainment-f"></div></div></div></div><div class="tile-face back" id="face-entertainment-b"><div class="f-photo" id="photo-entertainment-b"></div><div class="f-color" id="color-entertainment-b"></div><div class="f-vign"></div><div class="f-body"><div class="f-lbl" id="lbl-entertainment-b">Entertainment</div><div class="f-hl" id="hl-entertainment-b"></div><div class="f-foot"><div class="f-src" id="src-entertainment-b"></div><div class="f-ctr" id="ctr-entertainment-b"></div></div></div></div></div></div></div></div>
+<div class="card" id="card"><img class="c-img" id="c-img" src="" alt="" style="display:none"><div class="c-body"><div class="c-lbl" id="c-lbl"></div><div class="c-hl" id="c-hl"></div><div class="c-sum" id="c-sum"></div><div class="c-foot"><div><div class="c-src" id="c-src"></div><div class="c-hint" id="c-hint"></div></div><div style="display:flex;gap:8px"><button id="btn-viewall" class="c-viewall">&#9776; All Stories</button><button class="c-close" id="c-close">&#10005; Close</button></div></div></div></div>
+</div>
+
+<div class="va-panel" id="va-panel">
+  <div class="va-header">
+    <button class="va-back" id="va-back">&#8592; Back</button>
+    <div class="va-title" id="va-title"></div>
+  </div>
+  <div class="va-list" id="va-list"></div>
+  <div class="va-card" id="va-card" style="display:none">
+    <img id="va-c-img" style="width:100%;height:200px;object-fit:cover;display:none;border-radius:6px 6px 0 0">
+    <div class="va-card-body">
+      <div class="va-c-hl" id="va-c-hl"></div>
+      <div class="va-c-sum" id="va-c-sum"></div>
+      <div class="va-c-foot">
+        <div>
+          <div class="va-c-src" id="va-c-src"></div>
+          <div class="va-c-hint" id="va-c-hint"></div>
+        </div>
+        <button class="c-close" id="va-c-close">&#10005; Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="se-close" id="se-close">&#10005;</button>
+<div class="story-expand" id="story-expand">
+
+  <!-- ── AD INTERSTITIAL — shown every 7 swipes ── -->
+  <div class="se-ad-interstitial" id="se-ad-interstitial">
+    <div class="se-ad-top-bar">
+      <span class="se-ad-label-pill">Advertisement</span>
+      <button class="se-ad-skip" id="se-ad-skip">Skip ›</button>
+    </div>
+    <!-- Ad image (swapped by JS from AD_CARDS array) -->
+    <img class="se-ad-image" id="se-ad-img" src="" alt="" style="display:none">
+    <div class="se-ad-image-placeholder" id="se-ad-placeholder">
+      <!-- placeholder shown when no image — replaced by JS -->
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <div class="se-ad-body">
+      <div class="se-ad-brand" id="se-ad-brand">Sponsored</div>
+      <div class="se-ad-headline" id="se-ad-headline">Advertisement</div>
+      <div class="se-ad-copy" id="se-ad-copy"></div>
+      <a class="se-ad-cta" id="se-ad-cta" href="#" target="_blank" rel="noopener">Learn More</a>
+    </div>
+  </div>
+
+  <img class="se-hero" id="se-hero" src="" alt="" style="display:none">
+  <!-- Logo watermark below image, right-aligned — mirrors the masthead style -->
+  <div class="se-card-logo">
+    <div style="display:flex;gap:3px;margin-bottom:2px;align-items:flex-start;flex-shrink:0">
+      <div style="width:7px;height:22px;border-radius:1px;background:#E8520A;flex-shrink:0"></div>
+      <div style="display:flex;flex-direction:column;gap:1.5px;flex-shrink:0">
+        <div style="width:9px;height:6px;border-radius:1px;background:#2B5BA8"></div>
+        <div style="width:9px;height:6px;border-radius:1px;background:#D4860A"></div>
+        <div style="width:9px;height:6px;border-radius:1px;background:#2B5BA8;opacity:0.5"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;flex-shrink:0">
+        <div style="width:7px;height:10px;border-radius:1px;background:#D4860A;opacity:0.75"></div>
+        <div style="height:4px"></div>
+        <div style="width:7px;height:8px;border-radius:1px;background:#E8520A;opacity:0.4"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;line-height:1;margin-left:1px">
+      <span style="font-family:'Libre Baskerville',Georgia,serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:1px;line-height:1">GRIDDS<span style="color:#E8520A">.</span><span style="font-size:8px;color:rgba(255,255,255,0.5);letter-spacing:1px">NEWS</span></span>
+    </div>
+  </div>
+  <div class="se-body">
+    <div class="se-section-badge" id="se-section"></div>
+    <div class="se-headline" id="se-headline"></div>
+    <div class="se-summary" id="se-summary"></div>
+    <div class="se-footer">
+      <div class="se-source" id="se-source"></div><div id="se-readtime" style="font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px"></div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:nowrap">
+        <button class="se-icon-btn" id="se-btn-save" title="Save">
+          <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="se-icon-btn" id="se-btn-share" title="Share">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <button class="se-btn-all" id="se-btn-all" title="All Stories">&#9776; ALL STORIES</button>
+        <button class="se-btn-read" id="se-btn-read">FULL STORY &#8599;</button>
+      </div>
+    </div>
+
+    <!-- Ad space at end of card — populated from /api/ads by renderCardAd() -->
+    <div class="se-ad-slot" id="se-card-ad" style="display:none;padding:0;background:none;border:none;overflow:hidden;border-radius:8px">
+      <div class="se-ad-label" style="text-align:left;padding:0 4px 8px;color:rgba(255,255,255,0.35)">Advertisement</div>
+      <a id="se-card-ad-link" href="#" target="_blank" rel="noopener" style="display:block;cursor:pointer">
+        <img id="se-card-ad-img" src="" alt="" style="width:100%;display:block;border-radius:6px">
+      </a>
+    </div>
+
+    <div style="text-align:center;margin-top:20px;color:rgba(255,255,255,.2);font-size:11px;font-family:'DM Sans',sans-serif;letter-spacing:1px">
+      Swipe up for next story &nbsp;&middot;&nbsp; Swipe down for previous
+    </div>
+  </div>
+</div>
+
+<!-- articles open in same tab -->
+
+<div class="pull-indicator" id="pull-indicator"><div class="spinner"></div>Refreshing edition</div>
+
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#8B1538;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;text-align:center;padding:8px 12px;z-index:300;letter-spacing:1px">You're offline — showing cached edition. We'll refresh when you're back online.</div>
+
+<div class="edit-mode-banner" id="edit-mode-banner">Done customising</div>
+
+<!-- READER OVERLAY — Web / Reader toggle (opened from "Full Story") -->
+<div id="rdr-overlay">
+  <div id="rdr-bar">
+    <button id="rdr-back" aria-label="Back">&#8249;</button>
+    <div id="rdr-toggle"><div class="seg-wrap">
+      <button class="rdr-seg active" data-mode="web">Web</button>
+      <button class="rdr-seg" data-mode="reader">Reader</button>
+    </div></div>
+    <a id="rdr-open" href="#" target="_blank" rel="noopener" aria-label="Open original">&#8599;</a>
+  </div>
+  <div id="rdr-stage">
+    <div id="rdr-reader" class="rdr-pane">
+      <div id="rdr-loading" class="rdr-loading"><div class="rdr-spin"></div>Building reader view</div>
+      <article id="rdr-article" style="display:none">
+        <div id="rdr-eyebrow"></div>
+        <h1 id="rdr-title"></h1>
+        <div id="rdr-meta"></div>
+        <img id="rdr-hero" alt="" style="display:none">
+        <div id="rdr-body"></div>
+        <a id="rdr-orig" class="rdr-orig" href="#" target="_blank" rel="noopener">Read the original &#8599;</a>
+      </article>
+      <div id="rdr-error" style="display:none"></div>
+    </div>
+    <div id="rdr-web" class="rdr-pane" style="display:none">
+      <iframe id="rdr-iframe" referrerpolicy="no-referrer" title="Original article"></iframe>
+      <div id="rdr-web-fallback">
+        <div>This site doesn&#8217;t allow embedding.</div>
+        <a id="rdr-web-open" class="rdr-orig" href="#" target="_blank" rel="noopener">Open the original page &#8599;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BANNER AD — slim, pinned above the nav, populated from /api/ads -->
+<div id="bottom-ad-banner" style="display:none">
+  <span class="bottom-ad-tag">Ad</span>
+  <a id="bottom-ad-link" href="#" target="_blank" rel="noopener"><img id="bottom-ad-img" src="" alt=""></a>
+  <button id="bottom-ad-close" aria-label="Close ad">&#10005;</button>
+</div>
+
+<!-- BOTTOM NAVIGATION — Search left, Home center, Profile right -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-btn" id="nav-search" title="Search" aria-label="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </button>
+  <button class="bottom-nav-btn nav-home-btn" id="nav-home" title="Home" aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>
+  </button>
+  <button class="bottom-nav-btn" id="nav-profile" title="Profile" aria-label="Profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
+  </button>
+</nav>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-logo">
+    <span class="gridds">GRIDDS</span><span class="dot">.</span><span class="news">NEWS</span>
+    <div class="tagline">Your daily feed for trusted news and stories</div>
+  </div>
+
+  <!-- Step 1: concept intro -->
+  <div id="welcome-step-1">
+    <h1 class="welcome-h1">Welcome</h1>
+    <div class="welcome-sub" style="line-height:1.6">
+      GRIDDS gives you a single page of the day&apos;s essential news, lifestyle, and culture &mdash; hand-curated by humans. No algorithm. No infinite scroll. No noise.
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0">
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#E8520A;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700;font-family:&apos;Libre Baskerville&apos;,serif">14</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Fourteen tiles</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Each tile covers one section &mdash; headlines, finance, lifestyle, tech, and more.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#1976D2;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:700">&#10231;</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Swipe a tile</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Swipe left or right on a tile to flip to the next story.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px">
+        <div style="background:#FFA000;width:44px;height:44px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700">&#9737;</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#F5F0E8;margin-bottom:4px;letter-spacing:0.5px">Tap to read</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">Tap any tile to open the full summary. Swipe up or down for the next story, or jump to the original source.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="welcome-btn" id="w-next-1">Next &#8594;</button>
+  </div>
+
+  <!-- Step 2: choose tiles -->
+  <div id="welcome-step-2" style="display:none">
+    <h1 class="welcome-h1">Your tiles</h1>
+    <div class="welcome-sub">All sections are on by default. Toggle off any you don&apos;t want.</div>
+    <div id="welcome-tile-toggles" style="display:flex;flex-direction:column;gap:8px;margin:18px 0"></div>
+    <button class="welcome-btn" id="w-next-2">Next &#8594;</button>
+  </div>
+
+  <!-- Step 3: profile -->
+  <div id="welcome-step-3" style="display:none">
+    <h1 class="welcome-h1">About you</h1>
+    <div class="welcome-sub">Helps us tailor GRIDDS to you.</div>
+    <div style="background:rgba(232,82,10,0.08);border:1px solid rgba(232,82,10,0.25);border-radius:6px;padding:10px 12px;margin:0 0 18px;font-family:&apos;DM Sans&apos;,sans-serif;font-size:11px;color:rgba(255,255,255,0.65);line-height:1.5">
+      <strong style="color:#E8520A">Your details, your experience.</strong> We store this securely to personalise GRIDDS and never sell it to third parties.
+    </div>
+    <form class="welcome-form" id="welcome-form" onsubmit="return false;">
+      <div class="welcome-field">
+        <label class="welcome-label">Name</label>
+        <input class="welcome-input" id="w-name" type="text" placeholder="Your full name" required>
+      </div>
+      <div class="welcome-field">
+        <label class="welcome-label">Email or Phone (optional)</label>
+        <input class="welcome-input" id="w-contact" type="text" placeholder="For future sync features">
+      </div>
+      <div class="welcome-row">
+        <div class="welcome-field">
+          <label class="welcome-label">Date of Birth</label>
+          <input class="welcome-input" id="w-dob" type="date">
+        </div>
+        <div class="welcome-field">
+          <label class="welcome-label">Sex</label>
+          <select class="welcome-select" id="w-sex">
+            <option value="">Select</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="welcome-field">
+        <label class="welcome-label">Location (City)</label>
+        <input class="welcome-input" id="w-location" type="text" placeholder="e.g. Delhi">
+      </div>
+      <button class="welcome-btn" id="w-submit">Start Reading &#8594;</button>
+      <button class="welcome-skip" id="w-skip" type="button">Skip for now</button>
+    </form>
+  </div>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="profile-panel" id="profile-panel">
+  <div class="profile-header">
+    <button class="profile-back" id="profile-back">&#8592; Back</button>
+    <div class="profile-title">Profile</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="profile-content">
+    <div class="profile-avatar" id="profile-avatar">A</div>
+    <div class="profile-name" id="profile-name">Reader</div>
+    <div class="profile-section">
+      <div class="profile-section-title">Settings</div>
+      <div class="theme-toggle"><span class="theme-toggle-label">Light Mode</span><div class="theme-switch" id="theme-switch"></div></div>
+      <button class="profile-action-btn" id="customise-tiles" style="margin-top:10px;display:none">Customise My Tiles</button>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">About You</div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Date of Birth</span><span class="profile-detail-value" id="pd-dob">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Age</span><span class="profile-detail-value" id="pd-age">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Sex</span><span class="profile-detail-value" id="pd-sex">—</span></div>
+      <div class="profile-detail-row"><span class="profile-detail-label">Location</span><span class="profile-detail-value" id="pd-loc">—</span></div>
+      <button class="profile-action-btn" id="profile-edit">Edit Profile</button>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">My Saved Stories</div>
+      <div id="saved-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH PANEL -->
+<div class="search-panel" id="search-panel">
+  <div class="search-header">
+    <button class="profile-back" id="search-back">&#8592; Back</button>
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.5);fill:none;stroke-width:2;margin-right:8px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="search-input" placeholder="Search stories in today's edition" autocomplete="off">
+    </div>
+  </div>
+  <div class="search-results" id="search-results">
+    <div class="search-result-count" id="search-count">Type to start searching</div>
+    <div id="search-list"></div>
+  </div>
+</div>
+
+<!-- ─── SNAKE BREAK OVERLAY ─── -->
+<div id="snake-overlay">
+  <div id="snake-inner">
+    <div id="snake-head">
+      <div>
+        <div id="snake-title">GRIDDS BREAK</div>
+        <div id="snake-sub">Swipe to steer the snake</div>
+      </div>
+      <button id="snake-close" aria-label="Back to news">Back to news ✕</button>
+    </div>
+    <div id="snake-scorebar">
+      <span>SCORE <b id="snake-score">0</b></span>
+      <span>BEST <b id="snake-best">0</b></span>
+    </div>
+    <div id="snake-stage">
+      <canvas id="snake-canvas" width="300" height="300"></canvas>
+      <div id="snake-gameover">
+        <div id="snake-go-title">Game Over</div>
+        <div id="snake-go-score"></div>
+        <button id="snake-restart">Play Again</button>
+        <button id="snake-resume">Back to news</button>
+      </div>
+      <div id="snake-start">
+        <div id="snake-start-icon">🐍</div>
+        <div id="snake-start-txt">Swipe any direction to begin</div>
+      </div>
+    </div>
+    <div id="snake-hint">Eat the green dots · don't hit the walls or yourself</div>
+    <div id="snake-joystick">
+      <div id="snake-joy-base">
+        <div id="snake-joy-thumb"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
