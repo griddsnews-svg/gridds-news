@@ -1,0 +1,18 @@
+{
+  "name": "gridds-news",
+  "version": "1.0.0",
+  "description": "GRIDDS.NEWS — all the world, distilled daily",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "dompurify": "^3.4.7",
+    "jsdom": "^24.1.3",
+    "satori": "^0.26.0",
+    "sharp": "^0.33.5"
+  }
+}
