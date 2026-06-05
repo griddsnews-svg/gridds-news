@@ -1286,6 +1286,8 @@ function flipBack(key){
   document.getElementById('nav-home').addEventListener('click', function(){
     if (typeof closeExpand === 'function') closeExpand();
     closeProfile(); closeSearch();
+    var _va = document.getElementById('va-panel'); if (_va) _va.classList.remove('open');
+    document.body.style.overflow = '';
     window.scrollTo({top:0, behavior:'smooth'});
   });
   document.getElementById('nav-search').addEventListener('click', openSearch);
@@ -1419,6 +1421,8 @@ function flipBack(key){
       var v = locked() ? 'contain' : 'auto';
       document.documentElement.style.overscrollBehaviorY = v;
       document.body.style.overscrollBehaviorY = v;
+      var focusOpen = !!document.querySelector('.story-expand.open, .story-expand.visible, #rdr-overlay.show, .welcome-overlay.show, #snake-overlay.show') || document.body.classList.contains('editing-tiles');
+      document.body.classList.toggle('nav-hidden', focusOpen);
     }
     var mo = new MutationObserver(sync);
     // Watch the class attribute on body + each overlay container only — cheap and
@@ -1692,8 +1696,40 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
      card unfurl via og:image, and it's instant — no wait on /api/share-card. */
   if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()
       && Capacitor.Plugins && Capacitor.Plugins.Share) {
-    Capacitor.Plugins.Share.share({ title: headline, text: caption, url: shareUrl, dialogTitle: 'Share story' })
-      .catch(function(){});
+    var P = Capacitor.Plugins;
+    /* Share the rendered card IMAGE through the OS share sheet (Inshorts-style).
+       The Share plugin takes file URIs, not blobs, so the PNG is written to the
+       cache dir first via @capacitor/filesystem. Any failure -> share the /s/<id>
+       link instead (its og:image unfurls the same card). */
+    (function(){
+      function linkShare(){
+        P.Share.share({ title: headline, text: caption, url: shareUrl, dialogTitle: 'Share story' }).catch(function(){});
+      }
+      if (!storyId || !P.Filesystem) { linkShare(); return; }
+      var theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+      var blobP = btn._cardFile
+        ? Promise.resolve(btn._cardFile)
+        : fetch(origin + '/api/share-card?id=' + encodeURIComponent(storyId) + '&theme=' + theme + '&v=2')
+            .then(function(r){ if (!r.ok) throw new Error('card ' + r.status); return r.blob(); });
+      var old = btn.innerHTML; btn.innerHTML = '\u2026';
+      blobP
+        .then(function(blob){
+          return new Promise(function(res, rej){
+            var fr = new FileReader();
+            fr.onload = function(){ res(String(fr.result).split(',')[1]); };
+            fr.onerror = rej;
+            fr.readAsDataURL(blob);
+          });
+        })
+        .then(function(b64){
+          return P.Filesystem.writeFile({ path: 'gridds-' + storyId + '.png', data: b64, directory: 'CACHE' });
+        })
+        .then(function(w){
+          btn.innerHTML = old;
+          return P.Share.share({ title: headline, text: caption, files: [w.uri], dialogTitle: 'Share story' });
+        })
+        .catch(function(){ btn.innerHTML = old; linkShare(); });
+    })();
     return;
   }
 
