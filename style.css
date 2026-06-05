@@ -1106,31 +1106,30 @@ body.light-mode #snake-stage{ background:#fff; border-color:rgba(0,0,0,0.1); }
 body.light-mode #snake-close{ color:#444; border-color:rgba(0,0,0,0.2); }
 
 /* ── SNAKE D-PAD ── */
-#snake-joystick{
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-  margin-top:10px; user-select:none; -webkit-user-select:none;
+#snake-dpad{
+  display:grid; grid-template-columns:repeat(3,46px); grid-template-rows:repeat(3,46px);
+  gap:4px; margin:10px auto 0; touch-action:none; user-select:none; -webkit-user-select:none;
 }
-#snake-joy-base{
-  position:relative; width:128px; height:128px; border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, rgba(245,240,232,0.05), rgba(245,240,232,0.02));
-  border:1px solid rgba(245,240,232,0.16);
-  box-shadow:inset 0 1px 10px rgba(0,0,0,0.35);
-  touch-action:none; -webkit-tap-highlight-color:transparent; cursor:grab;
+.snk-dpad-btn{
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(245,240,232,0.06); color:rgba(245,240,232,0.85);
+  border:1px solid rgba(245,240,232,0.16); border-radius:10px;
+  font-size:16px; line-height:1; padding:0; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:inset 0 1px 6px rgba(0,0,0,0.3); transition:background 0.1s, transform 0.06s;
 }
-#snake-joy-base:active{ cursor:grabbing; }
-#snake-joy-thumb{
-  position:absolute; top:50%; left:50%; width:54px; height:54px; margin:-27px 0 0 -27px;
-  border-radius:50%;
-  background:radial-gradient(circle at 38% 32%, #F2762F, #E8520A 60%, #C2430A);
-  border:1px solid rgba(255,255,255,0.18);
-  box-shadow:0 3px 10px rgba(0,0,0,0.45);
-  transition:transform 0.12s cubic-bezier(.2,.7,.2,1);
-  will-change:transform;
+.snk-dpad-btn:active, .snk-dpad-btn.snk-active{
+  background:radial-gradient(circle at 40% 35%, #F2762F, #E8520A 70%);
+  color:#fff; border-color:rgba(255,255,255,0.25); transform:scale(0.94);
 }
-body.light-mode #snake-joy-base{
-  background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0.05), rgba(0,0,0,0.02));
-  border-color:rgba(0,0,0,0.14);
-}
+.snk-up{ grid-column:2; grid-row:1; }
+.snk-left{ grid-column:1; grid-row:2; }
+.snk-dpad-hub{ grid-column:2; grid-row:2; border-radius:8px;
+  background:rgba(245,240,232,0.04); border:1px solid rgba(245,240,232,0.10); }
+.snk-right{ grid-column:3; grid-row:2; }
+.snk-down{ grid-column:2; grid-row:3; }
+body.light-mode .snk-dpad-btn{ background:rgba(0,0,0,0.05); color:rgba(0,0,0,0.72); border-color:rgba(0,0,0,0.14); }
+body.light-mode .snk-dpad-hub{ background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.10); }
 
 /* ── BOTTOM BANNER AD — slim, pinned above the floating nav ── */
 #bottom-ad-banner{

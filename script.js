@@ -554,8 +554,7 @@ function advanceStory(){
   _adSwipeCount++; _snakeSwipeCount++;
   var sec = SECS[expandKey];
   var atEnd = !sec || !sec.stories || expandIdx >= (sec.stories.length - 1);
-  if (atEnd){ showSnakeBreak(); }
-  else if (_snakeSwipeCount >= SNAKE_EVERY){ showSnakeBreak(); }
+  if (atEnd){ showSnakeBreak(); }                 /* snake break ONLY at end of a section */
   else if (_adSwipeCount >= AD_EVERY){ showAdInterstitial(); }
   else { expandGoTo(expandIdx + 1, 1); }
 }
@@ -1896,40 +1895,22 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   }
   document.addEventListener('keydown', onKey);
 
-  // ── Joystick (primary mobile control) ──
-  (function initJoystick(){
-    var base  = document.getElementById('snake-joy-base');
-    var thumb = document.getElementById('snake-joy-thumb');
-    if(!base || !thumb) return;
-    var active=false, cx=0, cy=0, R=64;
-    function recenter(){
-      var r = base.getBoundingClientRect();
-      cx = r.left + r.width/2; cy = r.top + r.height/2; R = r.width/2 || 64;
+  // ── D-pad (primary mobile control) ──
+  (function initDpad(){
+    var pad = document.getElementById('snake-dpad');
+    if(!pad) return;
+    function press(btn){
+      var dx = parseInt(btn.getAttribute('data-dx'),10) || 0;
+      var dy = parseInt(btn.getAttribute('data-dy'),10) || 0;
+      if(!running) start();
+      setDir(dx,dy);
+      btn.classList.add('snk-active');
+      setTimeout(function(){ btn.classList.remove('snk-active'); }, 120);
     }
-    function point(e){ var t = (e.touches && e.touches[0]) ? e.touches[0] : e; return {x:t.clientX, y:t.clientY}; }
-    function place(dx,dy){
-      var d = Math.hypot(dx,dy), max = R*0.55;
-      if(d>max && d>0){ dx = dx/d*max; dy = dy/d*max; }
-      thumb.style.transition = 'none';
-      thumb.style.transform = 'translate(' + dx.toFixed(0) + 'px,' + dy.toFixed(0) + 'px)';
-    }
-    function steer(dx,dy){
-      if(Math.hypot(dx,dy) < R*0.30) return;        // deadzone — ignore tiny nudges
-      if(Math.abs(dx) > Math.abs(dy)) setDir(dx>0?1:-1, 0);
-      else setDir(0, dy>0?1:-1);
-    }
-    function begin(e){ active=true; recenter(); if(!running) start(); move(e); }
-    function move(e){ if(!active) return; if(e.cancelable) e.preventDefault(); var p=point(e); var dx=p.x-cx, dy=p.y-cy; place(dx,dy); steer(dx,dy); }
-    function end(){ active=false; thumb.style.transition=''; thumb.style.transform='translate(0,0)'; }
-    base.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); begin(e); }, {passive:false});
-    base.addEventListener('touchmove',  move, {passive:false});
-    base.addEventListener('touchend',   end,  {passive:true});
-    base.addEventListener('mousedown', function(e){
-      begin(e);
-      function mm(ev){ move(ev); }
-      function mu(){ end(); document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); }
-      document.addEventListener('mousemove', mm);
-      document.addEventListener('mouseup', mu);
+    Array.prototype.forEach.call(pad.querySelectorAll('.snk-dpad-btn'), function(btn){
+      // touchstart + preventDefault: fires instantly and blocks the synthetic click (no double-step)
+      btn.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); press(btn); }, {passive:false});
+      btn.addEventListener('click', function(e){ e.preventDefault(); press(btn); });   // desktop / mouse
     });
   })();
 

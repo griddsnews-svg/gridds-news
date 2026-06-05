@@ -387,10 +387,12 @@
       </div>
     </div>
     <div id="snake-hint">Eat the green dots · don't hit the walls or yourself</div>
-    <div id="snake-joystick">
-      <div id="snake-joy-base">
-        <div id="snake-joy-thumb"></div>
-      </div>
+    <div id="snake-dpad" role="group" aria-label="Direction pad">
+      <button type="button" class="snk-dpad-btn snk-up"    data-dx="0"  data-dy="-1" aria-label="Up">▲</button>
+      <button type="button" class="snk-dpad-btn snk-left"  data-dx="-1" data-dy="0"  aria-label="Left">◀</button>
+      <span class="snk-dpad-hub"></span>
+      <button type="button" class="snk-dpad-btn snk-right" data-dx="1"  data-dy="0"  aria-label="Right">▶</button>
+      <button type="button" class="snk-dpad-btn snk-down"  data-dx="0"  data-dy="1"  aria-label="Down">▼</button>
     </div>
   </div>
 </div>
