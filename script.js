@@ -1,3 +1,27 @@
+/* ── GRIDDS: app vs web API base ───────────────────────────────────────────
+   On the website GRIDDS_BASE is '' so every relative "/api/…" call behaves
+   exactly as today. Inside the native app the page loads from https://localhost,
+   so we transparently rewrite root-relative requests to the live backend
+   (CORS is already open). Must be the FIRST code in the file. */
+var GRIDDS_BASE =
+  (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
+    ? 'https://gridds.news'
+    : '';
+(function () {
+  if (!GRIDDS_BASE) return;                 // website → leave everything untouched
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    if (typeof input === 'string' && input.charAt(0) === '/') input = GRIDDS_BASE + input;
+    return _fetch(input, init);
+  };
+  if (navigator.sendBeacon) {
+    var _beacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = function (url, data) {
+      if (typeof url === 'string' && url.charAt(0) === '/') url = GRIDDS_BASE + url;
+      return _beacon(url, data);
+    };
+  }
+})();
 /* ──────────────────────────────────────────────────
    GRIDDS.NEWS — Live edition fetcher
    Fetches /api/edition (5 min cached) and replaces hardcoded SECS
@@ -251,19 +275,26 @@ tick();setInterval(tick,1000);
 function proxyImg(url, section) {
   if (!url) return '';
   if (url.startsWith('/') || url.startsWith('data:')) return url;
+  // Native Android WebView fetches HTTPS images directly — skip /api/img to avoid Vercel cold-start lag on swipe.
+  if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android') {
+    return url;
+  }
   var s = section ? '&section=' + encodeURIComponent(section) : '';
-  return '/api/img?url=' + encodeURIComponent(url) + s;
+  return GRIDDS_BASE + '/api/img?url=' + encodeURIComponent(url) + s;
 }
 
 /* imgWithFallback: sets src via proxy; if proxy fails, tries original URL */
 function imgWithFallback(imgEl, url, proxiedUrl, onBothFail) {
-  /* Support old 3-arg call: imgWithFallback(el, url, callback) */
   if (typeof proxiedUrl === 'function') { onBothFail = proxiedUrl; proxiedUrl = null; }
   if (!url) { if(onBothFail) onBothFail(); return; }
   var pUrl = proxiedUrl || proxyImg(url);
+  // Per-call token so a stale onerror from a previous swipe can't overwrite the current image
+  var token = (imgEl._imgToken || 0) + 1;
+  imgEl._imgToken = token;
   imgEl.onerror = function() {
-    /* Proxy failed — try original URL directly as last resort */
+    if (imgEl._imgToken !== token) return;
     imgEl.onerror = function() {
+      if (imgEl._imgToken !== token) return;
       imgEl.onerror = null;
       imgEl.style.display = 'none';
       imgEl.classList.add('img-error');
@@ -553,7 +584,7 @@ function openExpand(key,st,sec){
     document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-headline').textContent=st.h;
-    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>60?w.slice(0,60).join(' ')+'…':t;})(st.summary||st.s);
     document.getElementById('se-source').textContent=st.source||'';
     if(st.image){
     var _ph=document.getElementById('se-hero-placeholder');
@@ -594,7 +625,7 @@ function expandGoTo(idx){
     document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-headline').textContent=st.h;
-    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+    document.getElementById('se-summary').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>60?w.slice(0,60).join(' ')+'…':t;})(st.summary||st.s);
     document.getElementById('se-source').textContent=st.source||'';
     if(st.image){
     var _ph=document.getElementById('se-hero-placeholder');
@@ -626,6 +657,8 @@ function expandGoTo(idx){
   var sy=null, didVSwipe=false;
 
   el.addEventListener('touchstart', function(e){
+    /* A tap on the close button must never be read as a swipe gesture */
+    if (e.target.closest && e.target.closest('#se-close')) { sy = null; return; }
     sy = e.touches[0].clientY;
     didVSwipe = false;
   }, {passive:true});
@@ -773,7 +806,7 @@ document.getElementById('se-btn-all').addEventListener('click',function(e){
       e.stopPropagation();
       var mc=document.getElementById('va-card');
       document.getElementById('va-c-hl').textContent=st.h;
-      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>60?w.slice(0,60).join(' ')+'…':t;})(st.summary||st.s);
       document.getElementById('va-c-src').textContent=st.source||'';
       document.getElementById('va-c-hint').textContent=st.url?'Click to open full story ↗':'';
       var vimg=document.getElementById('va-c-img');
@@ -792,20 +825,29 @@ document.getElementById('se-btn-all').addEventListener('click',function(e){
 
 function closeExpand(){
   var expand=document.getElementById('story-expand');
-  expand.classList.remove('visible');
+  if(expand) expand.classList.remove('visible');
+  /* Restore EVERY tile. Null-guard each so one missing node can't abort the
+     loop and leave the rest of the grid hidden. */
   KEYS.forEach(function(k){
     var tw=document.getElementById('TW-'+k);
+    if(!tw) return;
     tw.style.transition='transform 0.4s cubic-bezier(0,0,0.2,1),opacity 0.4s ease';
     tw.classList.remove('fly-left','fly-right','fly-up','fly-down');
   });
   setTimeout(function(){
-    expand.classList.remove('open');
-    document.getElementById('se-close').style.display='none';
-    KEYS.forEach(function(k){document.getElementById('TW-'+k).style.transition='';});
+    if(expand) expand.classList.remove('open');
+    var x=document.getElementById('se-close'); if(x) x.style.display='none';
+    KEYS.forEach(function(k){var tw=document.getElementById('TW-'+k); if(tw) tw.style.transition='';});
   },420);
 }
 
-document.getElementById('se-close').addEventListener('click',function(e){e.stopPropagation();closeExpand();});
+(function(){
+  var seClose = document.getElementById('se-close');
+  /* touchend fires reliably on tap in the WebView; preventDefault stops the
+     delayed synthetic click from calling closeExpand a second time. */
+  seClose.addEventListener('touchend', function(e){ e.preventDefault(); e.stopPropagation(); closeExpand(); }, {passive:false});
+  seClose.addEventListener('click', function(e){ e.stopPropagation(); closeExpand(); }); // desktop/mouse
+})();
 document.getElementById('se-btn-read').addEventListener('click',function(e){
   e.stopPropagation();
   /* ANALYTICS: outbound full-story click */
@@ -859,7 +901,7 @@ document.getElementById('btn-viewall').addEventListener('click',function(e){
       /* show mini-card inside view-all */
       var mc=document.getElementById('va-card');
       document.getElementById('va-c-hl').textContent=st.h;
-      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>65?w.slice(0,65).join(' ')+'…':t;})(st.summary||st.s);
+      document.getElementById('va-c-sum').textContent=(function(t){var w=(t||'').split(/\s+/);return w.length>60?w.slice(0,60).join(' ')+'…':t;})(st.summary||st.s);
       document.getElementById('va-c-src').textContent=st.source||'';
       document.getElementById('va-c-hint').textContent=st.url?'Click to open full story ↗':'';
       var vimg=document.getElementById('va-c-img');
@@ -1379,9 +1421,16 @@ function flipBack(key){
     if (!el || !el.classList.contains('open')) return;
     var sum = document.getElementById('se-summary');
     if (!sum) return;
+    var body = document.querySelector('.story-expand .se-body');
     var scale = 1, guard = 0;
     el.style.setProperty('--se-scale', '1');
-    while (sum.scrollHeight > sum.clientHeight + 1 && scale > 0.55 && guard < 24) {
+    /* Shrink until the summary fits AND the bottom cluster (footer + banner +
+       swipe hint) isn't clipped — so nothing ends up hidden behind the nav bar. */
+    var overflowing = function(){
+      return (sum.scrollHeight > sum.clientHeight + 1) ||
+             (body && body.scrollHeight > body.clientHeight + 1);
+    };
+    while (overflowing() && scale > 0.5 && guard < 30) {
       scale -= 0.03;
       el.style.setProperty('--se-scale', scale.toFixed(3));
       guard++;
@@ -1612,7 +1661,7 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   var headline = document.getElementById('se-headline').textContent;
   var storyId  = btn._storyId || null;
 
-  var origin   = location.origin || 'https://gridds.news';
+  var origin   = GRIDDS_BASE || location.origin || 'https://gridds.news';
   var shareUrl = storyId ? (origin + '/s/' + storyId) : (document.getElementById('se-btn-read')._url || origin);
   var caption  = headline + '\n\nGet the app → ' + origin + '/app';
 
@@ -1872,3 +1921,78 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   });
 })();
 });
+/* ── ANDROID HARDWARE BACK BUTTON ──────────────────────────────────────── */
+(function () {
+  var Cap = window.Capacitor;
+  if (!Cap || !Cap.isNativePlatform || !Cap.isNativePlatform()) return;
+  var AppPlugin = Cap.Plugins && Cap.Plugins.App;
+  if (!AppPlugin) return;
+
+  function closeByClass(id, cls) {
+    var el = document.getElementById(id);
+    if (!el) return false;
+    var c = cls || 'show';
+    if (el.classList.contains(c)) { el.classList.remove(c); return true; }
+    return false;
+  }
+
+  AppPlugin.addListener('backButton', function () {
+    var ex = document.getElementById('story-expand');
+    var cardEl = document.getElementById('card');
+
+
+    if (closeByClass('welcome-overlay')) return;
+    if (closeByClass('se-ad-interstitial')) return;
+    if (closeByClass('rdr-overlay')) return;
+    if (closeByClass('profile-panel')) return;
+    if (closeByClass('search-panel')) return;
+
+    var va = document.querySelector('.va-panel.open');
+    if (va) { va.classList.remove('open'); return; }
+
+    // Story-expand summary card: close it, then FORCE the home grid back.
+    if (ex && (ex.classList.contains('open') || ex.classList.contains('visible'))) {
+      if (typeof closeExpand === 'function') closeExpand();
+      else { ex.classList.remove('open'); ex.classList.remove('visible'); }
+
+      /* closeExpand() already removes the fly-* classes, but on the back-button
+         path that removal doesn't stick (it does on a tap). Re-assert it across a
+         few frames so the grid can never be left showing only the opened section. */
+      var KS = window.KEYS || [];
+      var flyList = function(){
+        return KS.filter(function(k){
+          var t = document.getElementById('TW-'+k);
+          return t && /fly-(left|right|up|down)/.test(t.className);
+        });
+      };
+      var restore = function(){
+        KS.forEach(function(k){
+          var t = document.getElementById('TW-'+k);
+          if (t) t.classList.remove('fly-left','fly-right','fly-up','fly-down');
+        });
+      };
+      var afterClose = flyList();          // fly state immediately after closeExpand()
+      restore();
+      if (window.requestAnimationFrame) requestAnimationFrame(restore);
+      setTimeout(restore, 80);
+      setTimeout(function(){
+        restore();
+        var stuck = flyList();
+        if (stuck.length) {                // only nags if the fix genuinely failed
+          alert('DIAG back-restore failed\nafterClose=' + (afterClose.join(',') || '(none)') +
+                '\nstillStuck=' + stuck.join(',') + '\nKEYS=' + KS.length);
+        }
+      }, 460);
+      return;
+    }
+
+    if (cardEl && cardEl.classList.contains('open')) {
+      var btn = document.getElementById('c-close');
+      if (btn) { btn.click(); return; }
+      cardEl.classList.remove('open');
+      return;
+    }
+
+    AppPlugin.exitApp();
+  });
+})();

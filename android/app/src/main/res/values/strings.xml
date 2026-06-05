@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GRIDDS.NEWS</string>
+    <string name="title_activity_main">GRIDDS.NEWS</string>
+    <string name="package_name">news.gridds.app</string>
+    <string name="custom_url_scheme">news.gridds.app</string>
+</resources>

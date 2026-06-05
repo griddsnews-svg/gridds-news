@@ -181,14 +181,14 @@ body{background:#111;font-family:'DM Sans',sans-serif;min-height:100vh}
 .se-btn-read:hover { background: rgba(255,255,255,.18); }
 .se-close {
   position: fixed;
-  top: 16px;
+  top: calc(16px + env(safe-area-inset-top, 0px));
   left: 16px;
   z-index: 400;
   background: rgba(0,0,0,0.55);
   border: 1px solid rgba(255,255,255,0.2);
   color: #fff;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1329,7 +1329,7 @@ body.light-mode .se-ad-label { color:rgba(0,0,0,0.4); }
    proportionally until it fits. All sizes are scale-aware via calc().
    ════════════════════════════════════════════════════════════════ */
 .story-expand { --se-scale:1; overflow:hidden; }            /* inset:0 from base already = full viewport */
-.story-expand.open { display:flex; flex-direction:column; }  /* was display:block + scroll */
+.story-expand.open { display:flex; flex-direction:column; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 6px); }  /* bottom inset keeps the swipe hint above the system nav bar */
 
 /* Hero: proportional to viewport height, scaled by the fit factor */
 .se-hero,
@@ -1359,3 +1359,12 @@ body.light-mode .se-ad-label { color:rgba(0,0,0,0.4); }
   font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase;
   color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.03); }
 body.light-mode .se-ad-comingsoon { border-color:rgba(0,0,0,0.18); color:rgba(0,0,0,0.4); background:rgba(0,0,0,0.03); }
+
+
+/* ─── Light-mode: All Stories panel — full coverage ─── */
+body.light-mode .va-header   { background:#F5F0E8 !important; border-bottom:1px solid rgba(0,0,0,0.08) !important; }
+body.light-mode .va-item     { background:#fff !important; border:1px solid rgba(0,0,0,0.06) !important; }
+body.light-mode .va-source   { color:rgba(0,0,0,0.55) !important; }
+body.light-mode .va-hl       { color:#0E0E12 !important; }
+body.light-mode .va-sub      { color:rgba(0,0,0,0.65) !important; }
+body.light-mode .va-c-foot   { color:rgba(0,0,0,0.45) !important; }
