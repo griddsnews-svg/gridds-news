@@ -1687,6 +1687,17 @@ document.getElementById('se-btn-share').addEventListener('click', function(e) {
   var shareUrl = storyId ? (origin + '/s/' + storyId) : (document.getElementById('se-btn-read')._url || origin);
   var caption  = headline + '\n\nGet the app → ' + origin + '/app';
 
+  /* Native (Capacitor): use the OS share sheet. The Web Share API is unreliable
+     inside the Android WebView, so it was silently falling back to a clipboard
+     copy (the "pasted from clipboard" toast). Sharing the /s/<id> link lets the
+     card unfurl via og:image, and it's instant — no wait on /api/share-card. */
+  if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()
+      && Capacitor.Plugins && Capacitor.Plugins.Share) {
+    Capacitor.Plugins.Share.share({ title: headline, text: caption, url: shareUrl, dialogTitle: 'Share story' })
+      .catch(function(){});
+    return;
+  }
+
   function flash(msg) {
     var old = btn.innerHTML;
     btn.innerHTML = msg; btn.classList.add('copied');
