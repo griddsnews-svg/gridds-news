@@ -1329,7 +1329,7 @@ body.light-mode .se-ad-label { color:rgba(0,0,0,0.4); }
    proportionally until it fits. All sizes are scale-aware via calc().
    ════════════════════════════════════════════════════════════════ */
 .story-expand { --se-scale:1; overflow:hidden; }            /* inset:0 from base already = full viewport */
-.story-expand.open { display:flex; flex-direction:column; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 6px); }  /* bottom inset keeps the swipe hint above the system nav bar */
+.story-expand.open { display:flex; flex-direction:column; padding-bottom:max(env(safe-area-inset-bottom, 0px), 64px); }  /* fixed clearance for the Android nav bar (its WebView reports env() as 0); env() still covers iOS */
 
 /* Hero: proportional to viewport height, scaled by the fit factor */
 .se-hero,
