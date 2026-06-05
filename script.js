@@ -557,7 +557,7 @@ function advanceStory(){
   if (atEnd){ showSnakeBreak(); }
   else if (_snakeSwipeCount >= SNAKE_EVERY){ showSnakeBreak(); }
   else if (_adSwipeCount >= AD_EVERY){ showAdInterstitial(); }
-  else { expandGoTo(expandIdx + 1); }
+  else { expandGoTo(expandIdx + 1, 1); }
 }
 window.advanceStory = advanceStory;
 
@@ -581,6 +581,8 @@ function openExpand(key,st,sec){
   setTimeout(function(){
     var expand=document.getElementById('story-expand');
     var hero=document.getElementById('se-hero');
+    /* clear any leftover slide transform from a previous swipe so a fresh open starts at rest */
+    [hero, document.querySelector('.story-expand .se-body'), document.querySelector('.story-expand .se-card-logo')].forEach(function(elm){ if(elm){ elm.style.transition='none'; elm.style.transform='none'; elm.style.opacity='1'; } });
     document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-headline').textContent=st.h;
@@ -611,16 +613,25 @@ function openExpand(key,st,sec){
 }
 
 /* Navigate to adjacent story in expand view */
-function expandGoTo(idx){
+function expandGoTo(idx, dir){
+  dir = (dir < 0) ? -1 : 1;            /* 1 = next (swipe up), -1 = prev (swipe down) */
   var sec=SECS[expandKey];
   var n=sec.stories.length;
   expandIdx=((idx%n)+n)%n;
   var st=sec.stories[expandIdx];
   var hero=document.getElementById('se-hero');
-  /* Animate: slide current content out, new content in */
   var body=document.querySelector('.story-expand .se-body');
-  body.style.transition='opacity 0.2s ease';
-  body.style.opacity='0';
+  var logo=document.querySelector('.story-expand .se-card-logo');
+  var group=[hero, logo, body].filter(Boolean);
+  var EASE='cubic-bezier(0.22,0.61,0.36,1)';
+  var OUT=(dir===1)?-36:36;            /* current card exits in the swipe direction */
+  var IN =(dir===1)? 36:-36;           /* next card enters from the opposite edge */
+  /* slide the current card content out */
+  group.forEach(function(elm){
+    elm.style.transition='transform 0.18s '+EASE+', opacity 0.18s ease';
+    elm.style.transform='translateY('+OUT+'px)';
+    elm.style.opacity='0';
+  });
   setTimeout(function(){
     document.getElementById('se-section').textContent=sec.label; document.getElementById('se-section').style.background=sec.color;
     document.getElementById('se-section').style.background=sec.color;
@@ -642,12 +653,23 @@ function expandGoTo(idx){
     document.getElementById('se-btn-read')._url=st.url||null;
     var _sb2=document.getElementById('se-btn-share'); _sb2._storyId=st.id||null; _sb2._image=st.image||null;
     if(window._griddsPrefetchCard) window._griddsPrefetchCard(_sb2);
-    body.style.opacity='1';
-    /* scroll back to top */
     document.getElementById('story-expand').scrollTop=0;
     renderCardAd();
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ if (window.fitStoryCard) window.fitStoryCard(); }); });
-  },200);
+    /* drop the new content at the entry edge (no transition), fit it, then slide it in */
+    group.forEach(function(elm){
+      elm.style.transition='none';
+      elm.style.transform='translateY('+IN+'px)';
+      elm.style.opacity='0';
+    });
+    if (window.fitStoryCard) window.fitStoryCard();
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      group.forEach(function(elm){
+        elm.style.transition='transform 0.24s '+EASE+', opacity 0.24s ease';
+        elm.style.transform='translateY(0)';
+        elm.style.opacity='1';
+      });
+    }); });
+  },180);
 }
 
 /* Swipe up/down on expand panel — also dismisses ad interstitial */
@@ -676,13 +698,13 @@ function expandGoTo(idx){
       /* If ad is showing, ANY swipe dismisses it and continues navigation */
       if(adPanel.classList.contains('show')){
         hideAdInterstitial();
-        if(dy < 0) expandGoTo(expandIdx+1);
+        if(dy < 0) expandGoTo(expandIdx+1, 1);
         /* swipe down while ad showing just dismisses ad, stays on same story */
         didVSwipe = false;
         return;
       }
       if(dy < 0){ advanceStory(); }
-      else { expandGoTo(expandIdx-1); }
+      else { expandGoTo(expandIdx-1, -1); }
     }
     didVSwipe = false;
   }, {passive:true});
@@ -692,11 +714,11 @@ function expandGoTo(idx){
     if(Math.abs(e.deltaY) > 30){
       if(adPanel.classList.contains('show')){
         hideAdInterstitial();
-        if(e.deltaY > 0) expandGoTo(expandIdx+1);
+        if(e.deltaY > 0) expandGoTo(expandIdx+1, 1);
         return;
       }
       if(e.deltaY > 0){ advanceStory(); }
-      else { expandGoTo(expandIdx-1); }
+      else { expandGoTo(expandIdx-1, -1); }
     }
   }, {passive:true});
 })();
@@ -734,7 +756,7 @@ var AD_CARDS = [
 
 function showAdInterstitial() {
   var ad = nextAd('interstitial', expandKey);
-  if (!ad) { _adSwipeCount = 0; expandGoTo(expandIdx + 1); return; }  /* no ad → just advance */
+  if (!ad) { _adSwipeCount = 0; expandGoTo(expandIdx + 1, 1); return; }  /* no ad → just advance */
 
   var panel = document.getElementById('se-ad-interstitial');
   var body  = panel.querySelector('.se-ad-body');
